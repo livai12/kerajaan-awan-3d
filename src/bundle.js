@@ -1793,6 +1793,7 @@
       }
       if (this.btnStoryNext) {
         this.btnStoryNext.addEventListener('click', () => {
+          this.clearAutoNext();
           if (this.storyIndex < this.storyChapters.length - 1) {
             this.playStoryChapter(this.storyIndex + 1);
           } else {
@@ -1802,6 +1803,7 @@
       }
       if (this.btnStoryPrev) {
         this.btnStoryPrev.addEventListener('click', () => {
+          this.clearAutoNext();
           if (this.storyIndex > 0) {
             this.playStoryChapter(this.storyIndex - 1);
           }
@@ -2028,6 +2030,7 @@
     }
 
     stopStoryTour() {
+      this.clearAutoNext();
       if (this.storyOverlay) this.storyOverlay.classList.remove('open');
       if (this.currentAudioSource) {
         try { this.currentAudioSource.stop(); } catch(e) {}
@@ -2039,7 +2042,50 @@
       }
     }
 
+    clearAutoNext() {
+      if (this.autoNextInterval) {
+        clearInterval(this.autoNextInterval);
+        this.autoNextInterval = null;
+      }
+      if (this.autoNextTimer) {
+        clearTimeout(this.autoNextTimer);
+        this.autoNextTimer = null;
+      }
+      if (this.btnStoryNext) {
+        const isLast = (this.storyIndex === this.storyChapters.length - 1);
+        this.btnStoryNext.textContent = isLast ? "Selesai 🏁" : "Lanjut ❯";
+      }
+    }
+
+    startAutoNextCountdown(seconds = 5) {
+      this.clearAutoNext();
+      let remaining = seconds;
+
+      const updateBtn = () => {
+        if (!this.btnStoryNext) return;
+        const isLast = (this.storyIndex === this.storyChapters.length - 1);
+        this.btnStoryNext.textContent = isLast 
+          ? `Selesai (${remaining}s) 🏁` 
+          : `Lanjut (${remaining}s) ❯`;
+      };
+
+      updateBtn();
+      this.autoNextInterval = setInterval(() => {
+        remaining--;
+        updateBtn();
+        if (remaining <= 0) {
+          this.clearAutoNext();
+          if (this.storyIndex < this.storyChapters.length - 1) {
+            this.playStoryChapter(this.storyIndex + 1);
+          } else {
+            this.stopStoryTour();
+          }
+        }
+      }, 1000);
+    }
+
     playStoryChapter(idx) {
+      this.clearAutoNext();
       this.storyIndex = idx;
       const chap = this.storyChapters[idx];
       if (!chap) return;
@@ -2086,7 +2132,7 @@
         }
       }
 
-      // Play Child Voice Audio Narration with Music Ducking
+      // Play Child Voice Audio Narration with Music Ducking and 5s Auto-Next
       this.playNaturalNarration(idx, chap.text);
     }
 
@@ -2104,10 +2150,12 @@
         this.soundtrack.masterGain.gain.setValueAtTime(0.012, this.soundtrack.ctx.currentTime);
       }
 
-      const restoreMusic = () => {
+      const restoreMusicAndAutoNext = () => {
         if (this.soundtrack && this.soundtrack.masterGain) {
           this.soundtrack.masterGain.gain.setValueAtTime(0.06, this.soundtrack.ctx.currentTime);
         }
+        // Auto-next timer after narration completes: 5s!
+        this.startAutoNextCountdown(5);
       };
 
       const audioSrc = `./assets/audio/chapter${idx + 1}.mp3`;
@@ -2124,32 +2172,51 @@
             // Elevates the pitch and tempo into an energetic, cheerful child voice!
             src.playbackRate.value = 1.24;
             src.connect(ctx.destination);
-            src.onended = restoreMusic;
+            src.onended = restoreMusicAndAutoNext;
             this.currentAudioSource = src;
             src.start();
           })
           .catch(() => {
-            this.speakWithBestIndonesianVoice(fallbackText, restoreMusic);
+            this.speakWithBestIndonesianVoice(fallbackText, restoreMusicAndAutoNext);
           });
       } else {
-        this.speakWithBestIndonesianVoice(fallbackText, restoreMusic);
+        this.speakWithBestIndonesianVoice(fallbackText, restoreMusicAndAutoNext);
       }
     }
 
     speakWithBestIndonesianVoice(text, onEnd = null) {
-      if (!('speechSynthesis' in window)) return;
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = 'id-ID';
-      u.pitch = 1.55; // Suara anak kecil
-      u.rate = 1.12;
+      if (!('speechSynthesis' in window)) {
+        if (onEnd) onEnd();
+        return;
+      }
+      try {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'id-ID';
+        u.pitch = 1.55; // Suara anak kecil
+        u.rate = 1.12;
 
-      const voices = window.speechSynthesis.getVoices();
-      const naturalVoice = voices.find(v => v.lang.startsWith('id') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Ardi')));
-      if (naturalVoice) u.voice = naturalVoice;
+        const voices = window.speechSynthesis.getVoices();
+        const naturalVoice = voices.find(v => v.lang.startsWith('id') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Ardi')));
+        if (naturalVoice) u.voice = naturalVoice;
 
-      u.onend = () => { if (onEnd) onEnd(); };
-      window.speechSynthesis.speak(u);
+        let called = false;
+        const finish = () => {
+          if (!called) {
+            called = true;
+            if (onEnd) onEnd();
+          }
+        };
+
+        u.onend = finish;
+        u.onerror = finish;
+        window.speechSynthesis.speak(u);
+
+        // Safety fallback timer in case speech synthesis hangs on certain browsers
+        setTimeout(finish, 8000);
+      } catch (err) {
+        if (onEnd) onEnd();
+      }
     }
 
     render2D() {

@@ -38,8 +38,10 @@ Sistem presentasi visualisasi interaktif modern berbasis WebGL Three.js, Glassmo
    - Laser pemandu bercahaya hijau horizontal yang ketinggiannya bergerak dinamis mengikuti batas matematis ideal $L_{\max}^* \ge \lceil \frac{\sum t_j}{\sum s_i} \rceil$.
 
 6. **📊 Modul Presentasi & Rigor Akademik**:
+   - **Halaman Slide Presentasi Terpisah (`presentasi.html`)**: Slide deck 8 halaman berstandar akademik tinggi untuk ujian/sidang skripsi, dilengkapi latar Three.js 3D interaktif, formulasi matematis formal (ETC Matrix, Makespan, DI, Lower Bound), pseudocode algoritma, live simulator komparasi 30x run, dan FAQ antisipasi pertanyaan dosen penguji.
+   - **Auto-Next 5 Detik Mode Kisah Awan**: Apabila tidak ada aksi tombol 'Lanjut' setelah narasi karakter selesai, sistem otomatis berpindah ke bab berikutnya setelah hitung mundur 5 detik secara mulus.
    - **Kurva Konvergensi Live**: Sparkline chart real-time di sudut kiri bawah.
-   - **Drawer Slide Presentasi**: 7 slide materi lengkap (Konsep, Formulasi Matematis, Algoritma VNS, Algoritma BFO, Rigor Benchmark 30x Run dengan evaluasi setara, Sitasi Ilmiah, & Kuis Checkpoint).
+   - **Drawer Slide Ringkas**: 7 slide materi ringkas di dalam halaman utama.
    - **2D Ground Truth Pane**: Panel visualisasi pemetaan beban kristal per VM dengan Degree of Imbalance (DI).
 
 ---

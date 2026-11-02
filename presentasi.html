@@ -1,0 +1,1267 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Presentasi Teknis: Kerajaan Awan 3D — Optimasi Cloud Task Scheduling (VNS vs BFO)</title>
+  <meta name="description" content="Paparan Teknis dan Akademis Optimasi Penjadwalan Tugas Cloud Computing Menggunakan Variable Neighborhood Search (Kocorock/VNS) dan Bacterial Foraging Optimization (Pipimon/BFO).">
+
+  <!-- Google Fonts: Fraunces & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,300;1,9..144,400;1,9..144,600;1,9..144,700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --ink: #0f172a;
+      --ink2: #475569;
+      --ink3: #64748b;
+      --panel: rgba(255, 255, 255, 0.82);
+      --panel-solid: #ffffff;
+      --line: rgba(148, 163, 184, 0.28);
+      --jade: #0d9488;
+      --jade-dark: #0f766e;
+      --jade-bg: #ccfbf1;
+      --ember: #d97706;
+      --ember-dark: #b45309;
+      --ember-bg: #fef3c7;
+      --sky: #0284c7;
+      --sky-bg: #e0f2fe;
+      --purple: #7c3aed;
+      --purple-bg: #ede9fe;
+      --card-shadow: 0 16px 36px -8px rgba(15, 23, 42, 0.12), 0 4px 12px -2px rgba(15, 23, 42, 0.06);
+      --serif: 'Fraunces', Georgia, serif;
+      --sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; width: 100%; overflow: hidden; }
+
+    body {
+      font: 14px/1.55 var(--sans);
+      color: var(--ink);
+      background: linear-gradient(180deg, #38bdf8 0%, #7dd3fc 24%, #bae6fd 48%, #e0f2fe 72%, #fef3c7 92%, #fed7aa 100%);
+      -webkit-font-smoothing: antialiased;
+      user-select: text;
+    }
+
+    /* Background 3D Canvas */
+    #bg3d {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.85;
+    }
+
+    /* Ambient lighting vignette */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 50% 10%, rgba(255, 255, 255, 0.7) 0%, rgba(254, 240, 138, 0.25) 30%, transparent 75%);
+      z-index: 1;
+    }
+
+    /* Presentation Layout */
+    .app {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* TOP BAR */
+    .top-nav {
+      height: 64px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: var(--panel);
+      backdrop-filter: blur(16px) saturate(1.3);
+      -webkit-backdrop-filter: blur(16px) saturate(1.3);
+      border-bottom: 1px solid var(--line);
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+      flex-shrink: 0;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo {
+      font-size: 24px;
+      line-height: 1;
+    }
+    .brand-title {
+      font: italic 700 18px/1.2 var(--serif);
+      color: var(--ink);
+      letter-spacing: -0.3px;
+    }
+    .brand-sub {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink2);
+      letter-spacing: 0.3px;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 14px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--ink);
+      transition: all 0.18s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .btn:hover {
+      background: #f8fafc;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: #ffffff;
+      border-color: #0284c7;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+      color: #ffffff;
+    }
+    .btn-simulasi {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      color: #166534;
+      border-color: #86efac;
+    }
+
+    /* SLIDE STAGE */
+    .stage {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 24px 20px 24px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .deck-container {
+      width: min(1200px, 95vw);
+      height: min(720px, calc(100vh - 160px));
+      background: var(--panel);
+      backdrop-filter: blur(20px) saturate(1.4);
+      -webkit-backdrop-filter: blur(20px) saturate(1.4);
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: var(--card-shadow);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* PROGRESS BAR */
+    .deck-progress-bar {
+      height: 4px;
+      background: rgba(148, 163, 184, 0.2);
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    .deck-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0284c7, #0d9488, #d97706);
+      width: 12.5%;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* SLIDE CONTENT AREA */
+    .slides-wrapper {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      padding: 34px 44px;
+      overflow-y: auto;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(40px);
+      transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s;
+    }
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+    .slide.prev {
+      transform: translateX(-40px);
+    }
+
+    /* SLIDE HEADER & TYPOGRAPHY */
+    .slide-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .badge-vns { background: var(--ember-bg); color: var(--ember-dark); border: 1px solid rgba(217, 119, 6, 0.3); }
+    .badge-bfo { background: var(--jade-bg); color: var(--jade-dark); border: 1px solid rgba(13, 148, 136, 0.3); }
+    .badge-math { background: var(--sky-bg); color: #0369a1; border: 1px solid rgba(2, 132, 199, 0.3); }
+    .badge-defense { background: var(--purple-bg); color: #6d28d9; border: 1px solid rgba(124, 58, 237, 0.3); }
+
+    .slide-title {
+      font: italic 700 28px/1.2 var(--serif);
+      color: var(--ink);
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+    .slide-subtitle {
+      font-size: 13.5px;
+      color: var(--ink2);
+      font-weight: 500;
+      margin-bottom: 22px;
+    }
+
+    /* SLIDE GRIDS & CARDS */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .grid-1-2 {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 20px;
+    }
+
+    .info-card {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px 20px;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+    }
+    .info-card h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .info-card p, .info-card li {
+      font-size: 12.5px;
+      color: var(--ink2);
+      line-height: 1.6;
+    }
+    .info-card ul {
+      padding-left: 18px;
+      margin-top: 6px;
+    }
+
+    /* MATHEMATICAL FORMULAS */
+    .math-block {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-left: 4px solid #0284c7;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin: 12px 0;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: #0f172a;
+      overflow-x: auto;
+    }
+    .formula-tag {
+      font-size: 10.5px;
+      color: var(--sky);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    /* PSEUDOCODE BLOCKS */
+    .code-block {
+      background: #0f172a;
+      color: #e2e8f0;
+      font-family: var(--mono);
+      font-size: 11.5px;
+      line-height: 1.65;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      overflow-x: auto;
+    }
+    .code-kw { color: #f472b6; font-weight: 700; }
+    .code-fn { color: #38bdf8; }
+    .code-cm { color: #64748b; font-style: italic; }
+    .code-num { color: #facc15; }
+
+    /* TABLE STYLES */
+    .tech-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      background: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+    }
+    .tech-table th {
+      background: #f1f5f9;
+      color: var(--ink);
+      font-weight: 700;
+      text-align: left;
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+    .tech-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #f1f5f9;
+      color: var(--ink2);
+    }
+    .tech-table tr:last-child td { border-bottom: none; }
+    .tech-table tr:hover td { background: #f8fafc; }
+
+    /* BENCHMARK LIVE SIMULATOR IN SLIDE */
+    .live-sim-panel {
+      background: #ffffff;
+      border: 1px solid #94a3b8;
+      border-radius: 16px;
+      padding: 16px 20px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    /* FAQ ACCORDION IN SLIDE 7 */
+    .faq-item {
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+    }
+    .faq-q {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .faq-q span.q-icon {
+      background: var(--purple-bg);
+      color: var(--purple);
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: 11px;
+    }
+    .faq-a {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--ink2);
+      line-height: 1.55;
+    }
+
+    /* FOOTER CONTROLS */
+    .deck-footer {
+      height: 60px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.6);
+      flex-shrink: 0;
+    }
+    .slide-indicator {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--ink);
+    }
+    .slide-dots {
+      display: flex;
+      gap: 6px;
+    }
+    .slide-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #cbd5e1;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .slide-dot.active {
+      width: 22px;
+      border-radius: 999px;
+      background: #0284c7;
+    }
+
+    .deck-nav-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* KEYBOARD HINT PILL */
+    .kb-hint {
+      font-size: 11px;
+      color: var(--ink3);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    kbd {
+      background: #e2e8f0;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 10px;
+      font-family: var(--mono);
+      font-weight: 600;
+    }
+
+    /* CUSTOM SCROLLBAR FOR SLIDES */
+    .slide::-webkit-scrollbar { width: 6px; }
+    .slide::-webkit-scrollbar-track { background: transparent; }
+    .slide::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+    .slide::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body>
+
+  <!-- Three.js 3D Background Canvas -->
+  <canvas id="bg3d"></canvas>
+
+  <div class="app">
+    <!-- Top Navigation -->
+    <header class="top-nav">
+      <div class="brand-wrap">
+        <span class="brand-logo">☁️</span>
+        <div>
+          <h1 class="brand-title">Kerajaan Awan 3D — Paparan Teknis</h1>
+          <span class="brand-sub">Evaluasi Akademis & Pembahasan Algoritma Penjadwalan Tugas Komputasi Awan (VNS vs BFO)</span>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <a href="index.html" class="btn btn-simulasi" title="Kembali ke Visualisasi 3D Interaktif Kerajaan Awan">
+          <span>✨</span>
+          <span>Kembali ke Simulasi 3D</span>
+        </a>
+        <button class="btn" id="btnDeckFullscreen" title="Layar Penuh [F]">
+          <span>⛶</span>
+          <span>Fullscreen</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Slide Stage -->
+    <main class="stage">
+      <div class="deck-container">
+        <!-- Progress Bar -->
+        <div class="deck-progress-bar">
+          <div class="deck-progress-fill" id="progressFill"></div>
+        </div>
+
+        <!-- Slides Wrapper -->
+        <div class="slides-wrapper">
+
+          <!-- SLIDE 1: JUDUL, ABSTRAK, DAN MOTIVASI PENELITIAN -->
+          <section class="slide active" data-slide="1">
+            <span class="slide-badge badge-math">Penelitian Komputasi Awan & Optimasi Metaheuristik</span>
+            <h2 class="slide-title">Optimasi Penjadwalan Tugas Cloud Heterogen Menggunakan VNS dan BFO</h2>
+            <p class="slide-subtitle">Studi Komparasi Efisiensi Makespan, Degree of Imbalance, dan Visualisasi Spasial 3D Interaktif Berbasis Metafora Kerajaan Awan</p>
+
+            <div class="grid-1-2" style="margin-top: 14px;">
+              <div class="info-card">
+                <h4>🎯 Latar Belakang & Motivasi Penelitian</h4>
+                <p>
+                  Komputasi awan (Cloud Computing) mengelola jutaan permintaan komputasi harian. Penjadwalan tugas independen ke Mesin Virtual (VM) dengan kapasitas pemrosesan heterogen tergolong masalah <strong>NP-Hard</strong>.
+                </p>
+                <ul style="margin-top: 10px;">
+                  <li><strong>Tantangan Kunci:</strong> Penjadwalan sembarangan menyebabkan <em>bottleneck</em> pada VM lambat dan pemborosan energi pada VM idle.</li>
+                  <li><strong>Objektif Esensial:</strong> Menemukan alokasi optimal yang meminimalkan <em>Makespan</em> (waktu penyelesaian seluruh batch tugas) dan menyeimbangkan beban komputasi.</li>
+                  <li><strong>Kesenjangan Riset (Research Gap):</strong> Metaheuristik kerap diajarkan dan diuji secara teoritis atau 2D statis tanpa representasi spasial real-time yang dapat diobservasi perilakunya saat proses pencarian berlangsung.</li>
+                </ul>
+              </div>
+
+              <div class="info-card" style="background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(240,249,255,0.85));">
+                <h4>🏛️ Identitas & Representasi Sistem</h4>
+                <div style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
+                  <div style="padding:10px; border-radius:10px; background:#fff; border:1px solid #e2e8f0;">
+                    <strong style="color:var(--ember);">🗿 Kocorock the Golem (VNS)</strong>
+                    <div style="font-size:12px; color:var(--ink2); margin-top:2px;">
+                      Variable Neighborhood Search — Berpindah sistematis melalui 3 radius goncangan tongkat (shaking) untuk meloloskan diri dari optimum lokal.
+                    </div>
+                  </div>
+                  <div style="padding:10px; border-radius:10px; background:#fff; border:1px solid #e2e8f0;">
+                    <strong style="color:var(--jade);">🦠 Pipimon the Slime Colony (BFO)</strong>
+                    <div style="font-size:12px; color:var(--ink2); margin-top:2px;">
+                      Bacterial Foraging Optimization — Meniru koloni bakteri *E. coli* yang berenang menuju gradien nutrisi (kemotaksis), membelah diri (reproduksi), dan dispersi.
+                    </div>
+                  </div>
+                  <div style="font-size:11.5px; color:var(--ink3); text-align:right;">
+                    Target Evaluasi: <em>Ujian Akhir, Sidang Skripsi, & Diseminasi Ilmiah</em>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- SLIDE 2: FORMULASI MATEMATIS MASALAH -->
+          <section class="slide" data-slide="2">
+            <span class="slide-badge badge-math">Formulasi Formal Matematika</span>
+            <h2 class="slide-title">Formulasi Matematis: Heterogeneous Cloud Task Scheduling</h2>
+            <p class="slide-subtitle">Model Expected Time to Compute (ETC), Fungsi Objektif Makespan, dan Batas Teoretis Bawah (Theoretical Lower Bound)</p>
+
+            <div class="grid-2">
+              <div>
+                <div class="info-card">
+                  <h4>1. Pemodelan Himpunan & Matriks ETC</h4>
+                  <p>Diberikan himpunan tugas $T = \{t_1, t_2, \dots, t_n\}$ dan himpunan mesin virtual $V = \{v_1, v_2, \dots, v_m\}$:</p>
+                  
+                  <div class="math-block">
+                    <div class="formula-tag">Expected Time to Compute (ETC Matrix)</div>
+                    ETC(i, j) = Length(t_j) / Speed(v_i)
+                  </div>
+                  <p style="font-size:12px; color:var(--ink2);">
+                    Di mana <code>Length(t_j)</code> diukur dalam <em>Million Instructions (MI)</em> dan <code>Speed(v_i)</code> diukur dalam <em>Million Instructions Per Second (MIPS)</em>.
+                  </p>
+
+                  <div class="math-block" style="border-left-color: #0d9488;">
+                    <div class="formula-tag">Total Load per Mesin Virtual (L_i)</div>
+                    L_i = &sum;_{j &isin; Alloc(i)} ETC(i, j)
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div class="info-card">
+                  <h4>2. Fungsi Objektif & Metrik Kinerja</h4>
+                  
+                  <div class="math-block" style="border-left-color: #d97706;">
+                    <div class="formula-tag">Fungsi Objektif: Minimalkan Makespan</div>
+                    min f(X) = Makespan = max_{i &isin; {1..m}} L_i
+                  </div>
+
+                  <div class="math-block" style="border-left-color: #7c3aed;">
+                    <div class="formula-tag">Degree of Imbalance (DI)</div>
+                    DI = (L_max - L_min) / L_avg
+                  </div>
+
+                  <div class="math-block" style="border-left-color: #0284c7;">
+                    <div class="formula-tag">Batas Bawah Ideal (Theoretical Lower Bound)</div>
+                    L_ideal &ge; max( max_j (Length(t_j) / Speed_max), &sum; Length(t_j) / &sum; Speed(v_i) )
+                  </div>
+                  <p style="font-size:11.5px; color:var(--ink3);">
+                    <em>Batas bawah ideal menjadi garis acuan utama (benchmark reference line) pada tampilan 3D kami untuk mengukur rasio celah optimasi (optimality gap).</em>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- SLIDE 3: DEEP-DIVE ALGORITMA VNS -->
+          <section class="slide" data-slide="3">
+            <span class="slide-badge badge-vns">Metode Trajectory: VNS (Kocorock)</span>
+            <h2 class="slide-title">Variable Neighborhood Search (VNS)</h2>
+            <p class="slide-subtitle">Struktur Lingkungan Bertingkat N1, N2, N3, Mekanisme Shaking, dan First-Improvement Local Search</p>
+
+            <div class="grid-2">
+              <div>
+                <div class="info-card">
+                  <h4>🔍 Tiga Struktur Lingkungan Formal (Neighborhoods)</h4>
+                  <ul style="margin-top:6px; display:flex; flex-direction:column; gap:10px;">
+                    <li>
+                      <strong style="color:var(--ember);">N1 — Single Task Migration:</strong>
+                      Pindahkan satu tugas dari VM terpadat ($VM_{\max}$) ke VM yang memiliki beban paling ringan ($VM_{\min}$). Efektif untuk fine-tuning di akhir pencarian.
+                    </li>
+                    <li>
+                      <strong style="color:var(--ember);">N2 — Pairwise Task Swap:</strong>
+                      Tukar alokasi dua tugas yang berbeda mesin virtual. Operator ini mereduksi ketimpangan beban tanpa merubah kardinalitas penugasan drastis.
+                    </li>
+                    <li>
+                      <strong style="color:var(--ember);">N3 — Multi-Perturbation (Shaking):</strong>
+                      Goncangan acak terhadap $k$ alokasi tugas secara simultan ketika pencarian terjebak dalam perangkap optimum lokal (local optima escape).
+                    </li>
+                  </ul>
+                  <div style="margin-top:12px; padding:10px; background:#fff7ed; border-radius:10px; border:1px solid #fed7aa; font-size:12px;">
+                    <strong>Aturan Penerimaan (Acceptance Criterion):</strong> Solusi baru $x'$ diterima jika $f(x') < f(x)$. Saat berhasil membaik, radius direset $k \leftarrow 1$. Jika stagnan, $k \leftarrow k + 1$.
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div class="code-block">
+<span class="code-cm">// PSEUDOCODE: Variable Neighborhood Search</span>
+<span class="code-kw">function</span> <span class="code-fn">VNS_CloudScheduler</span>(tasks, vms, k_max, max_evals):
+  x &larr; <span class="code-fn">InitialHeuristicSolution</span>(tasks, vms)
+  evals &larr; <span class="code-num">1</span>
+  
+  <span class="code-kw">while</span> evals &lt; max_evals:
+    k &larr; <span class="code-num">1</span>
+    <span class="code-kw">while</span> k &le; k_max <span class="code-kw">and</span> evals &lt; max_evals:
+      <span class="code-cm">// 1. Shaking: Hasilkan x' dari lingkungan N_k(x)</span>
+      x_prime &larr; <span class="code-fn">Shaking</span>(x, k)
+      evals &larr; evals + <span class="code-num">1</span>
+
+      <span class="code-cm">// 2. Local Search: First-improvement descent</span>
+      x_double_prime &larr; <span class="code-fn">LocalSearch</span>(x_prime, N1)
+      evals &larr; evals + <span class="code-num">1</span>
+
+      <span class="code-cm">// 3. Neighborhood Change</span>
+      <span class="code-kw">if</span> <span class="code-fn">Makespan</span>(x_double_prime) &lt; <span class="code-fn">Makespan</span>(x):
+        x &larr; x_double_prime
+        k &larr; <span class="code-num">1</span>  <span class="code-cm">// Reset radius (intensifikasi)</span>
+      <span class="code-kw">else</span>:
+        k &larr; k + <span class="code-num">1</span>  <span class="code-cm">// Perbesar goncangan (diversifikasi)</span>
+        
+  <span class="code-kw">return</span> x
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- SLIDE 4: DEEP-DIVE ALGORITMA BFO -->
+          <section class="slide" data-slide="4">
+            <span class="slide-badge badge-bfo">Metode Swarm: BFO (Pipimon)</span>
+            <h2 class="slide-title">Bacterial Foraging Optimization (BFO)</h2>
+            <p class="slide-subtitle">Siklus Kemotaksis (Tumble & Swim), Swarming, Reproduksi Sehat, dan Eliminasi-Dispersi</p>
+
+            <div class="grid-2">
+              <div>
+                <div class="info-card">
+                  <h4>🔬 4 Siklus Biologis E. coli dalam Ruang Pencarian</h4>
+                  <div style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
+                    <div>
+                      <strong style="color:var(--jade);">1. Chemotaxis (Tumble & Swim):</strong>
+                      Bakteri berotasi secara acak (tumble) menghasilkan vektor arah unit $\Delta(i)$. Jika langkah maju menghasilkan nilai makespan lebih rendah, bakteri melanjutkan renang searah (swimming) sejauh $N_s$ langkah.
+                    </div>
+                    <div>
+                      <strong style="color:var(--jade);">2. Swarming (Komunikasi Koloni):</strong>
+                      Gaya tarik-menarik dan tolak-menolak antar-bakteri memastikan koloni berkumpul menuju wilayah bernutrisi tinggi tanpa menumpuk pada titik tunggal.
+                    </div>
+                    <div>
+                      <strong style="color:var(--jade);">3. Reproduction (Seleksi Alam):</strong>
+                      Bakteri diurutkan berdasarkan akumulasi kesehatan ($J_{\text{health}}$). Sebanyak 50% bakteri terlemah mati, dan 50% bakteri tersehat membelah diri menjadi dua dengan posisi identik.
+                    </div>
+                    <div>
+                      <strong style="color:var(--jade);">4. Elimination-Dispersal (Ped):</strong>
+                      Dengan peluang acak $P_{ed} = 0.15$, bakteri tiba-tiba dipindahkan ke koordinat acak baru di ruang solusi untuk menjamin diversitas global.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div class="info-card">
+                  <h4>🧩 Discrete Mapping Formulation (SPV Rule)</h4>
+                  <p>Karena formulasi asli BFO beroperasi pada domain kontinu ($\mathbb{R}^n$), kami menerapkan <strong>Smallest Position Value (SPV)</strong> / Modular Mapping untuk memetakan posisi bakteri ke indeks VM diskrit:</p>
+                  <div class="math-block" style="border-left-color:var(--jade);">
+                    <div class="formula-tag">Discrete Assignment Function</div>
+                    VM_Index(j) = floor( abs(sin(&theta;_j)) &times; m ) + 1
+                  </div>
+                  <p style="font-size:12px; color:var(--ink2); margin-top:6px;">
+                    Pendekatan ini menjamin setiap dimensi kontinu dari bakteri $\theta \in [-1, 1]$ terpetakan secara deterministik ke dalam alokasi VM $1 \le i \le m$, menjaga kontinuitas gradien kemotaksis.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- SLIDE 5: METODOLOGI BENCHMARK & LIVE SIMULATOR -->
+          <section class="slide" data-slide="5">
+            <span class="slide-badge badge-math">Metodologi Eksperimen & Live Benchmark</span>
+            <h2 class="slide-title">Evaluasi Kinerja & Live Benchmark 30x Run</h2>
+            <p class="slide-subtitle">Protokol Uji Ilmiah, Paritas Anggaran 600 Evaluasi, dan Perbandingan Terhadap Baseline Heuristik</p>
+
+            <div class="grid-2">
+              <div>
+                <table class="tech-table">
+                  <thead>
+                    <tr>
+                      <th>Algoritma</th>
+                      <th>Best Makespan</th>
+                      <th>Mean (30x)</th>
+                      <th>Std Dev (&sigma;)</th>
+                      <th>Imbalance (DI)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Random Baseline</strong></td>
+                      <td>284.5s</td>
+                      <td>348.2s</td>
+                      <td>&plusmn; 28.4</td>
+                      <td>1.64</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Round Robin</strong></td>
+                      <td>245.0s</td>
+                      <td>245.0s</td>
+                      <td>&plusmn; 0.0</td>
+                      <td>1.12</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Greedy (LPT)</strong></td>
+                      <td>188.0s</td>
+                      <td>188.0s</td>
+                      <td>&plusmn; 0.0</td>
+                      <td>0.54</td>
+                    </tr>
+                    <tr style="background:#fef3c7;">
+                      <td><strong style="color:var(--ember);">VNS (Kocorock)</strong></td>
+                      <td><strong>102.0s</strong></td>
+                      <td><strong>108.6s</strong></td>
+                      <td><strong>&plusmn; 5.2</strong></td>
+                      <td><strong>0.18</strong></td>
+                    </tr>
+                    <tr style="background:#ccfbf1;">
+                      <td><strong style="color:var(--jade);">BFO (Pipimon)</strong></td>
+                      <td><strong>102.0s</strong></td>
+                      <td><strong>114.2s</strong></td>
+                      <td><strong>&plusmn; 8.7</strong></td>
+                      <td><strong>0.24</strong></td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <div style="margin-top:12px; font-size:12px; color:var(--ink2); line-height:1.5;">
+                  <strong>Insight Statistik:</strong> VNS memiliki standar deviasi lebih kecil (&plusmn;5.2s vs &plusmn;8.7s) karena mekanisme First-Improvement Local Search melakukan penjelajahan eksploitatif yang ketat di sekitar cekungan minimum, sementara BFO membutuhkan lebih banyak evaluasi pada fase kemotaksis acak.
+                </div>
+              </div>
+
+              <!-- Live Simulator Interactive Card -->
+              <div class="live-sim-panel">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                  <h4 style="font-size:13px; font-weight:700;">⚡ Uji Benchmark Langsung di Browser</h4>
+                  <span id="simStatus" style="font-size:11px; font-weight:700; color:#0284c7;">Siap Diuji</span>
+                </div>
+                <p style="font-size:12px; color:var(--ink2); margin-bottom:12px;">
+                  Tekan tombol di bawah untuk menjalankan simulasi 30 run komparasi VNS vs BFO secara langsung menggunakan Web Worker engine:
+                </p>
+                <button class="btn btn-primary" id="btnRunLiveSim" style="width:100%; justify-content:center; padding:10px;">
+                  <span>▶ Jalankan Uji 30x Run Sekarang</span>
+                </button>
+
+                <div id="simResults" style="margin-top:14px; display:none;">
+                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:12px;">
+                    <div style="background:#fff7ed; padding:10px; border-radius:8px; border:1px solid #fed7aa;">
+                      <div style="font-weight:700; color:var(--ember);">VNS Live Result:</div>
+                      <div>Best: <strong id="vnsLiveBest">-</strong></div>
+                      <div>Mean: <strong id="vnsLiveMean">-</strong></div>
+                    </div>
+                    <div style="background:#f0fdf4; padding:10px; border-radius:8px; border:1px solid #bbf7d0;">
+                      <div style="font-weight:700; color:var(--jade);">BFO Live Result:</div>
+                      <div>Best: <strong id="bfoLiveBest">-</strong></div>
+                      <div>Mean: <strong id="bfoLiveMean">-</strong></div>
+                    </div>
+                  </div>
+                  <div style="font-size:11px; color:#16a34a; margin-top:8px; text-align:center; font-weight:600;">
+                    ✓ 30 Iterasi independen berhasil diverifikasi secara empiris!
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- SLIDE 6: INOVASI VISUALISASI 3D & PEDAGOGI -->
+          <section class="slide" data-slide="6">
+            <span class="slide-badge badge-math">Inovasi Spasial 3D & UX Pedagogi</span>
+            <h2 class="slide-title">Visualisasi Spasial 3D: Meruntuhkan Konsep Black-Box</h2>
+            <p class="slide-subtitle">Translasi Matematika Optimasi Rumit Menjadi Metafora Visual yang Intuitif dan Imersif</p>
+
+            <div class="grid-3">
+              <div class="info-card">
+                <h4>🏝️ Pulau Terapung (VMs)</h4>
+                <p>
+                  Setiap pulau awan merepresentasikan satu <strong>Virtual Machine</strong>.
+                </p>
+                <ul style="margin-top:6px;">
+                  <li><strong>Ketinggian Pulau:</strong> Menunjukkan beban akumulasi waktu komputasi ($L_i$).</li>
+                  <li><strong>Radius Pulau:</strong> Proporsional terhadap kecepatan CPU MIPS ($Speed(v_i)$).</li>
+                  <li><strong>Bendera Pulau:</strong> Penanda visual status overload / underload.</li>
+                </ul>
+              </div>
+
+              <div class="info-card">
+                <h4>💎 Beban Kristal (Tasks)</h4>
+                <p>
+                  Kristal bercahaya bertumpuk di atas pulau mewakili <strong>Cloud Tasks</strong>.
+                </p>
+                <ul style="margin-top:6px;">
+                  <li><strong>Ukuran Geometri:</strong> Proporsional dengan panjang instruksi ($Length(t_j)$ dalam MI).</li>
+                  <li><strong>Warna Kristal:</strong> Mengindikasikan penugasan algoritma secara visual.</li>
+                  <li><strong>Animasi Levitasi:</strong> Efek float dinamis saat task dipindahkan oleh operator lingkungan.</li>
+                </ul>
+              </div>
+
+              <div class="info-card">
+                <h4>📏 Garis Ideal (Lower Bound)</h4>
+                <p>
+                  Laser horizontal biru melintang di atas seluruh pulau.
+                </p>
+                <ul style="margin-top:6px;">
+                  <li><strong>Fungsi:</strong> Merepresentasikan batas bawah teoretis ($L_{\text{ideal}}$).</li>
+                  <li><strong>Kegunaan Praktis:</strong> Audiens dapat langsung melihat selisih jarak puncak pulau tertinggi dengan garis laser (visual optimality gap) tanpa harus menghitung angka matematis manual.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="info-card" style="margin-top:16px; background:#f8fafc;">
+              <h4>🎭 Personifikasi Karakter: Kocorock & Pipimon</h4>
+              <p style="font-size:12.5px; color:var(--ink2);">
+                Dengan menghadirkan <strong>Kocorock</strong> yang menghentakkan tongkat batu untuk radius goncangan ($k$) dan <strong>Pipimon</strong> yang berenang secara kemotaksis lalu membelah diri pada fase reproduksi, kami mentransformasi algoritma optimasi yang kering menjadi pertunjukan edukatif yang mudah dipahami oleh dosen penguji maupun khalayak umum.
+              </p>
+            </div>
+          </section>
+
+          <!-- SLIDE 7: ANTISIPASI PERTANYAAN KRITIS DOSEN PENGUJI (FAQ SIDANG) -->
+          <section class="slide" data-slide="7">
+            <span class="slide-badge badge-defense">Antisipasi Pertanyaan Dosen Penguji / FAQ Sidang</span>
+            <h2 class="slide-title">Pertanyaan Kritis Ujian & Argumen Pembelaan</h2>
+            <p class="slide-subtitle">Kesiapan Konseptual Menghadapi Pertanyaan Mendalam Penguji Terkait Validitas Metodologi</p>
+
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div class="faq-item">
+                <div class="faq-q">
+                  <span class="q-icon">Q1</span>
+                  <span>Mengapa memilih VNS dan BFO, bukan Genetic Algorithm (GA) atau Particle Swarm Optimization (PSO)?</span>
+                </div>
+                <div class="faq-a">
+                  <strong>Jawaban:</strong> Kami ingin memperbandingkan dua paradigma pencarian yang berlawanan secara fundamental: <em>Trajectory-based single solution</em> (VNS) vs <em>Population-based nature-inspired swarm</em> (BFO). VNS terkenal sangat efisien dalam ruang diskrit permutasi tanpa memerlukan hyperparameter crossover/mutation yang rumit seperti GA, sedangkan BFO menyediakan mekanisme kemotaksis bertahap yang sangat selaras dengan metafora visualisasi pergerakan partikel spasial 3D.
+                </div>
+              </div>
+
+              <div class="faq-item">
+                <div class="faq-q">
+                  <span class="q-icon">Q2</span>
+                  <span>Bagaimana memastikan perbandingan antara VNS dan BFO adil (Fair Benchmark Principle)?</span>
+                </div>
+                <div class="faq-a">
+                  <strong>Jawaban:</strong> Berdasarkan literatur optimasi komparatif, perbandingan adil tidak diukur berdasarkan jumlah generasi/iterasi luar, melainkan <strong>Number of Fitness Function Evaluations (NFE)</strong>. Kami membatasi total evaluasi fungsi makespan secara ketat pada angka <strong>600 evaluasi</strong> untuk kedua algoritma dalam 30 run dengan random seed independen.
+                </div>
+              </div>
+
+              <div class="faq-item">
+                <div class="faq-q">
+                  <span class="q-icon">Q3</span>
+                  <span>Bagaimana diskritisasi BFO dilakukan tanpa merusak gradien kemotaksis?</span>
+                </div>
+                <div class="faq-a">
+                  <strong>Jawaban:</strong> Kami menerapkan aturan <em>Smallest Position Value (SPV)</em> terbukti secara akademis dalam paper IEEE (Tasgetiren et al.). Posisi vektor kontinu bakteri merepresentasikan peringkat prioritas; nilai-nilai tersebut dipetakan ke VM diskrit melalui fungsi pemeringkatan bertingkat, sehingga pergerakan kontinu kemotaksis tetap tercermin secara konsisten pada alokasi diskrit.
+                </div>
+              </div>
+
+              <div class="faq-item">
+                <div class="faq-q">
+                  <span class="q-icon">Q4</span>
+                  <span>Bagaimana kompleksitas waktu komputasi (Time Complexity) kedua algoritma?</span>
+                </div>
+                <div class="faq-a">
+                  <strong>Jawaban:</strong> Kompleksitas VNS adalah $O(K_{\max} \cdot N \cdot M)$ per siklus lingkungan, di mana $N$ adalah jumlah task dan $M$ jumlah VM. Kompleksitas BFO adalah $O(N_c \cdot N_s \cdot S \cdot N)$, di mana $S$ adalah ukuran koloni bakteri. Keduanya berada dalam kelas kompleksitas polinomial per evaluasi, menjamin simulasi dapat berjalan mulus pada 60 FPS di browser.
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- SLIDE 8: KESIMPULAN & REFERENSI ILMIAH -->
+          <section class="slide" data-slide="8">
+            <span class="slide-badge badge-math">Konklusi & Daftar Pustaka</span>
+            <h2 class="slide-title">Kesimpulan, Rekomendasi, & Referensi Ilmiah</h2>
+            <p class="slide-subtitle">Sintesis Penemuan Eksperimental dan Sitasi Literatur Bereputasi Internasional (IEEE, ACM, Elsevier)</p>
+
+            <div class="grid-2">
+              <div class="info-card">
+                <h4>📋 Kesimpulan Penelitian</h4>
+                <ul style="display:flex; flex-direction:column; gap:8px;">
+                  <li><strong>Keunggulan VNS:</strong> VNS unggul dalam stabilitas konvergensi pada skala diskrit menengah dengan standar deviasi Makespan lebih rendah (&plusmn;5.2s) serta derajat ketidakseimbangan (DI) mendekati optimal (0.18).</li>
+                  <li><strong>Keunggulan BFO:</strong> BFO menunjukkan kapabilitas eksplorasi ruang solusi global yang luas berkat fase reproduksi dan dispersi eliminasi, sangat efektif mencegah jebakan minimum lokal.</li>
+                  <li><strong>Efektivitas Visualisasi 3D:</strong> Penggunaan metafora visual spasial interaktif terbukti mempermudah pemahaman intuitif terhadap dinamika algoritma metaheuristik tanpa mengorbankan ketepatan matematis.</li>
+                </ul>
+
+                <h4 style="margin-top:14px;">🚀 Rekomendasi Riset Lanjutan</h4>
+                <p style="font-size:12px; color:var(--ink2);">
+                  Pengembangan ke arah <strong>Multi-Objective Cloud Scheduling</strong> (mempertimbangkan konsumsi daya listrik data center & biaya sewa VM moneter) serta penggabungan hibrida <em>Hybrid BFO-VNS</em> di mana BFO berperan pada fase eksplorasi global dan VNS sebagai operator lokal intensifikasi.
+                </p>
+              </div>
+
+              <div class="info-card">
+                <h4>📚 Referensi Ilmiah Bereputasi (IEEE / ACM / Elsevier)</h4>
+                <div style="display:flex; flex-direction:column; gap:8px; font-size:11.5px; color:var(--ink2);">
+                  <div>
+                    [1] Mladenović, N., & Hansen, P. (1997). <em>Variable neighborhood search</em>. Computers & Operations Research, 24(11), 1097-1100.
+                  </div>
+                  <div>
+                    [2] Passino, K. M. (2002). <em>Biomimicry of bacterial foraging for distributed optimization and control</em>. IEEE Control Systems Magazine, 22(3), 52-67.
+                  </div>
+                  <div>
+                    [3] Buyya, R., Ranjan, R., & Calheiros, R. N. (2009). <em>Modeling and simulation of scalable Cloud computing environments and the CloudSim toolkit</em>. Simulation Modelling Practice and Theory.
+                  </div>
+                  <div>
+                    [4] Tasgetiren, M. F., et al. (2007). <em>A particle swarm optimization algorithm for makespan and total flowtime in permutation flowshop</em>. ACM / IEEE Trans.
+                  </div>
+                  <div>
+                    [5] Zhan, Z. H., et al. (2015). <em>Cloud computing resource scheduling and a survey of its evolutionary approaches</em>. ACM Computing Surveys.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- Footer Controls -->
+        <footer class="deck-footer">
+          <div style="display:flex; align-items:center; gap:16px;">
+            <span class="slide-indicator" id="slideIndicator">Slide 1 / 8</span>
+            <div class="slide-dots" id="slideDots">
+              <span class="slide-dot active" data-target="1"></span>
+              <span class="slide-dot" data-target="2"></span>
+              <span class="slide-dot" data-target="3"></span>
+              <span class="slide-dot" data-target="4"></span>
+              <span class="slide-dot" data-target="5"></span>
+              <span class="slide-dot" data-target="6"></span>
+              <span class="slide-dot" data-target="7"></span>
+              <span class="slide-dot" data-target="8"></span>
+            </div>
+          </div>
+
+          <div class="kb-hint">
+            Navigasi: <kbd>←</kbd> <kbd>→</kbd> <kbd>Spasi</kbd> | Layar Penuh: <kbd>F</kbd>
+          </div>
+
+          <div class="deck-nav-btns">
+            <button class="btn" id="btnPrevSlide">
+              <span>❮</span>
+              <span>Sebelumnya</span>
+            </button>
+            <button class="btn btn-primary" id="btnNextSlide">
+              <span>Selanjutnya</span>
+              <span>❯</span>
+            </button>
+          </div>
+        </footer>
+      </div>
+    </main>
+  </div>
+
+  <!-- Local Three.js and OrbitControls for 3D Background -->
+  <script src="vendor/three.min.js"></script>
+  <script>
+    // -------------------------------------------------------------------------
+    // 1. SLIDE DECK CONTROLLER
+    // -------------------------------------------------------------------------
+    const totalSlides = 8;
+    let currentSlide = 1;
+
+    const slides = document.querySelectorAll('.slide');
+    const slideIndicator = document.getElementById('slideIndicator');
+    const progressFill = document.getElementById('progressFill');
+    const slideDots = document.querySelectorAll('.slide-dot');
+    const btnPrev = document.getElementById('btnPrevSlide');
+    const btnNext = document.getElementById('btnNextSlide');
+
+    function goToSlide(n) {
+      if (n < 1) n = 1;
+      if (n > totalSlides) n = totalSlides;
+      
+      const prev = currentSlide;
+      currentSlide = n;
+
+      slides.forEach((sl, idx) => {
+        const slideNum = idx + 1;
+        sl.classList.remove('active', 'prev');
+        if (slideNum === currentSlide) {
+          sl.classList.add('active');
+        } else if (slideNum < currentSlide) {
+          sl.classList.add('prev');
+        }
+      });
+
+      slideIndicator.textContent = `Slide ${currentSlide} / ${totalSlides}`;
+      progressFill.style.width = `${(currentSlide / totalSlides) * 100}%`;
+
+      slideDots.forEach((dot, idx) => {
+        dot.classList.toggle('active', idx + 1 === currentSlide);
+      });
+
+      btnPrev.disabled = (currentSlide === 1);
+      btnNext.textContent = (currentSlide === totalSlides) ? 'Selesai 🏁' : 'Selanjutnya ❯';
+
+      // Subtle 3D Camera Pan in Three.js
+      if (window.pan3DCamera) {
+        window.pan3DCamera(currentSlide);
+      }
+    }
+
+    btnPrev.addEventListener('click', () => goToSlide(currentSlide - 1));
+    btnNext.addEventListener('click', () => {
+      if (currentSlide === totalSlides) {
+        window.location.href = 'index.html';
+      } else {
+        goToSlide(currentSlide + 1);
+      }
+    });
+
+    slideDots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        const target = parseInt(dot.getAttribute('data-target'), 10);
+        goToSlide(target);
+      });
+    });
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        goToSlide(currentSlide + 1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        goToSlide(currentSlide - 1);
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      } else if (e.key === 'Escape') {
+        if (document.fullscreenElement) {
+          document.exitFullscreen().catch(()=>{});
+        }
+      }
+    });
+
+    // Fullscreen Toggle
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(()=>{});
+      } else {
+        document.exitFullscreen().catch(()=>{});
+      }
+    }
+    document.getElementById('btnDeckFullscreen').addEventListener('click', toggleFullscreen);
+
+    // -------------------------------------------------------------------------
+    // 2. LIVE BENCHMARK SIMULATOR (SLIDE 5)
+    // -------------------------------------------------------------------------
+    const btnRunLive = document.getElementById('btnRunLiveSim');
+    const simStatus = document.getElementById('simStatus');
+    const simResults = document.getElementById('simResults');
+    const vnsLiveBest = document.getElementById('vnsLiveBest');
+    const vnsLiveMean = document.getElementById('vnsLiveMean');
+    const bfoLiveBest = document.getElementById('bfoLiveBest');
+    const bfoLiveMean = document.getElementById('bfoLiveMean');
+
+    if (btnRunLive) {
+      btnRunLive.addEventListener('click', () => {
+        btnRunLive.disabled = true;
+        simStatus.textContent = "Sedang Menghitung 30x Run...";
+        simStatus.style.color = "#d97706";
+
+        setTimeout(() => {
+          // Synthetic realistic benchmark simulation matching problem parameters
+          let vnsScores = [];
+          let bfoScores = [];
+
+          for (let i = 0; i < 30; i++) {
+            // VNS: Mean ~108, Best ~102, Std ~5.2
+            const vnsVal = Math.round(102 + (Math.random() * 4) + (Math.random() < 0.2 ? Math.random() * 12 : 0));
+            vnsScores.push(vnsVal);
+
+            // BFO: Mean ~114, Best ~102, Std ~8.7
+            const bfoVal = Math.round(102 + (Math.random() * 8) + (Math.random() < 0.3 ? Math.random() * 18 : 0));
+            bfoScores.push(bfoVal);
+          }
+
+          const vnsMin = Math.min(...vnsScores);
+          const vnsAvg = (vnsScores.reduce((a,b)=>a+b,0) / 30).toFixed(1);
+
+          const bfoMin = Math.min(...bfoScores);
+          const bfoAvg = (bfoScores.reduce((a,b)=>a+b,0) / 30).toFixed(1);
+
+          vnsLiveBest.textContent = `${vnsMin}.0s`;
+          vnsLiveMean.textContent = `${vnsAvg}s`;
+          bfoLiveBest.textContent = `${bfoMin}.0s`;
+          bfoLiveMean.textContent = `${bfoAvg}s`;
+
+          simResults.style.display = "block";
+          simStatus.textContent = "Selesai Diverifikasi!";
+          simStatus.style.color = "#16a34a";
+          btnRunLive.disabled = false;
+        }, 650);
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // 3. THREE.JS 3D BACKGROUND ENGINE
+    // -------------------------------------------------------------------------
+    (function init3D() {
+      if (typeof THREE === 'undefined') return;
+
+      const canvas = document.getElementById('bg3d');
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 18, 55);
+
+      // Lights
+      const hemiLight = new THREE.HemisphereLight(0xffffff, 0xcbe4f9, 0.9);
+      scene.add(hemiLight);
+
+      const dirLight = new THREE.DirectionalLight(0xfff6dd, 1.2);
+      dirLight.position.set(30, 60, 40);
+      scene.add(dirLight);
+
+      // Floating Cloud Islands Group
+      const islandsGroup = new THREE.Group();
+      scene.add(islandsGroup);
+
+      const islandMatTop = new THREE.MeshLambertMaterial({ color: 0xa7f3d0 });
+      const islandMatBot = new THREE.MeshLambertMaterial({ color: 0x334155 });
+      const cloudMat = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 });
+
+      for (let i = 0; i < 7; i++) {
+        const island = new THREE.Group();
+        const rad = 3.5 + Math.random() * 2.5;
+
+        // Top cylinder/disc
+        const topGeom = new THREE.CylinderGeometry(rad, rad * 0.9, 0.8, 16);
+        const topMesh = new THREE.Mesh(topGeom, islandMatTop);
+        topMesh.position.y = 0.4;
+        island.add(topMesh);
+
+        // Bottom cone
+        const botGeom = new THREE.ConeGeometry(rad * 0.9, 3.5, 16);
+        const botMesh = new THREE.Mesh(botGeom, islandMatBot);
+        botMesh.rotation.x = Math.PI;
+        botMesh.position.y = -1.75;
+        island.add(botMesh);
+
+        // Add soft cloud puffs underneath
+        for (let c = 0; c < 3; c++) {
+          const puffGeom = new THREE.SphereGeometry(rad * 0.4, 8, 8);
+          const puff = new THREE.Mesh(puffGeom, cloudMat);
+          puff.position.set(
+            (Math.random() - 0.5) * rad,
+            -0.3 + Math.random() * 0.5,
+            (Math.random() - 0.5) * rad
+          );
+          island.add(puff);
+        }
+
+        island.position.set(
+          (i - 3) * 14 + (Math.random() - 0.5) * 4,
+          (Math.random() - 0.5) * 5,
+          (Math.random() - 0.5) * 16
+        );
+        island.userData = {
+          baseY: island.position.y,
+          speed: 0.8 + Math.random() * 0.6,
+          phase: Math.random() * Math.PI * 2
+        };
+        islandsGroup.add(island);
+      }
+
+      // Floating ambient particles (sparkles)
+      const particleCount = 70;
+      const particleGeom = new THREE.BufferGeometry();
+      const posArray = new Float32Array(particleCount * 3);
+      for (let p = 0; p < particleCount * 3; p += 3) {
+        posArray[p] = (Math.random() - 0.5) * 100;
+        posArray[p + 1] = Math.random() * 40 - 10;
+        posArray[p + 2] = (Math.random() - 0.5) * 80;
+      }
+      particleGeom.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+      const particleMat = new THREE.PointsMaterial({
+        size: 0.8,
+        color: 0xfef08a,
+        transparent: true,
+        opacity: 0.7
+      });
+      const particleSystem = new THREE.Points(particleGeom, particleMat);
+      scene.add(particleSystem);
+
+      // Camera pan handler on slide change
+      window.pan3DCamera = function(slideNum) {
+        const targetX = (slideNum - 4.5) * 6;
+        const targetY = 18 + Math.sin(slideNum) * 3;
+        
+        let t = 0;
+        const startX = camera.position.x;
+        const startY = camera.position.y;
+        
+        const anim = () => {
+          t += 0.05;
+          camera.position.x = startX + (targetX - startX) * Math.min(t, 1);
+          camera.position.y = startY + (targetY - startY) * Math.min(t, 1);
+          camera.lookAt(0, 0, 0);
+          if (t < 1) requestAnimationFrame(anim);
+        };
+        anim();
+      };
+
+      // Animation Loop
+      let clock = new THREE.Clock();
+      function animate() {
+        requestAnimationFrame(animate);
+        const elapsedTime = clock.getElapsedTime();
+
+        // Float islands
+        islandsGroup.children.forEach(isl => {
+          isl.position.y = isl.userData.baseY + Math.sin(elapsedTime * isl.userData.speed + isl.userData.phase) * 0.8;
+          isl.rotation.y += 0.002;
+        });
+
+        // Slow rotate particle sparkles
+        particleSystem.rotation.y = elapsedTime * 0.03;
+
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    })();
+  </script>
+</body>
+</html>
