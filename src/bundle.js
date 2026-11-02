@@ -1590,12 +1590,12 @@
           cam: "both"
         },
         {
-          header: "Bab 2: Peringatan Kocorock Terkait Makespan",
+          header: "Bab 2: Kocorock Mengidentifikasi Bottleneck",
           speaker: "Kocorock (VNS)",
           speakerType: "kocorock",
           bubbleText: "Perhatian! Kristal tugas menumpuk di pulau itu, Makespan melonjak!",
-          text: "Perhatikan pulau di sana! Kristal tugas menumpuk sehingga beban mesin virtual melonjak drastis! Jika satu mesin virtual terlalu terbebani, waktu Makespan total sistem akan membengkak dan utilisasi menjadi tidak seimbang!",
-          cam: "both"
+          text: "Perhatikan pulau di hadapanku ini! Tugas-tugas komputasi menumpuk terlalu banyak, sehingga beban Makespan melonjak drastis! Jika satu mesin virtual terlalu terbebani, waktu Makespan total sistem akan membengkak dan utilisasi menjadi tidak seimbang!",
+          cam: "vns"
         },
         {
           header: "Bab 3: Mekanisme Shaking Kocorock (VNS)",
@@ -2117,18 +2117,32 @@
         document.body.setAttribute('data-view', chap.cam);
       }
 
-      // Trigger 3D Character Speech Bubbles & Jumps!
+      // Trigger 3D Character Speech Bubbles & Algorithmic Actions!
       if (this.world) {
         if (chap.speakerType === 'kocorock') {
-          this.world.pokemonHopKocorock();
-          this.world.showBubble('kocorock', chap.bubbleText, 6500);
+          // Focus tightly on Kocorock and his shaking algorithm
+          const loads = calculateVmLoads(this.vns.bestSolution, this.problem.tasks, this.problem.vms);
+          const maxIdx = loads.indexOf(Math.max(...loads));
+          
+          if (idx === 1) {
+            // Bab 2: Kocorock hops directly to the bottleneck island, points staff and alerts!
+            this.world.pokemonHopKocorock(maxIdx);
+            this.world.showBubble('kocorock', chap.bubbleText, 7500);
+          } else if (idx === 2) {
+            // Bab 3: Jurus Shaking k=1 / VNS
+            this.world.animateKocokShake(1, maxIdx, chap.bubbleText);
+          } else {
+            this.world.pokemonHopKocorock();
+            this.world.showBubble('kocorock', chap.bubbleText, 7500);
+          }
         } else if (chap.speakerType === 'pipimon') {
-          this.world.pokemonHopPipimon();
-          this.world.showBubble('pipimon', chap.bubbleText, 6500);
+          // Bab 4: Pipimon colony Chemotaxis swim and split
+          this.world.animatePipBest(0, 1, chap.bubbleText);
         } else {
+          // Bab 1 & Bab 5: Both characters celebrate together
           this.world.pokemonCelebrateAll();
-          this.world.showBubble('kocorock', chap.bubbleText, 6500);
-          this.world.showBubble('pipimon', chap.bubbleText, 6500);
+          this.world.showBubble('kocorock', chap.bubbleText, 7500);
+          this.world.showBubble('pipimon', chap.bubbleText, 7500);
         }
       }
 
@@ -2171,20 +2185,20 @@
             src.buffer = buffer;
 
             // Character-specific acoustic tuning:
-            // Golem (Kocorock) gets a deep, heavy, resonant voice; Pipimon gets a bright, cute voice!
+            // Golem (Kocorock) gets a deep, heavy stone rumble; Pipimon gets a bright, cute voice!
             if (speakerType === 'kocorock') {
-              src.playbackRate.value = 0.86; // Deeper, heavier stone golem tempo & pitch
+              src.playbackRate.value = 0.82; // Deeper, heavier stone golem tempo & pitch
               const bassFilter = ctx.createBiquadFilter();
               bassFilter.type = 'lowshelf';
-              bassFilter.frequency.value = 380;
-              bassFilter.gain.value = 7.0; // Resonant stone rumble
+              bassFilter.frequency.value = 350;
+              bassFilter.gain.value = 8.5; // Heavy resonant stone rumble
               src.connect(bassFilter);
               bassFilter.connect(ctx.destination);
             } else if (speakerType === 'pipimon') {
               src.playbackRate.value = 1.25; // Energetic, cute, agile child slime
               src.connect(ctx.destination);
             } else {
-              src.playbackRate.value = 0.96; // Balanced duo narration
+              src.playbackRate.value = 0.92; // Balanced duo narration
               src.connect(ctx.destination);
             }
 
@@ -2212,14 +2226,14 @@
 
         // Golem heavy voice vs Pipimon light voice
         if (speakerType === 'kocorock') {
-          u.pitch = 0.72; // Suara golem batu berat & berwibawa
-          u.rate = 0.94;
+          u.pitch = 0.65; // Suara golem batu berat & berwibawa
+          u.rate = 0.90;
         } else if (speakerType === 'pipimon') {
           u.pitch = 1.55; // Suara anak kecil / slime ceria
           u.rate = 1.15;
         } else {
-          u.pitch = 1.0;
-          u.rate = 1.02;
+          u.pitch = 0.95;
+          u.rate = 1.0;
         }
 
         const voices = window.speechSynthesis.getVoices();

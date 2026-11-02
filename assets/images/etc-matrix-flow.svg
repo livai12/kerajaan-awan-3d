@@ -1,71 +1,148 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 280" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 500" width="100%" height="100%">
   <defs>
-    <filter id="etcShad" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.12"/>
+    <!-- Eraser.io markers & filters -->
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#334155" />
+    </marker>
+    <filter id="eraserShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.06"/>
     </filter>
   </defs>
 
-  <rect x="5" y="5" width="450" height="270" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" filter="url(#etcShad)"/>
+  <style>
+    .node-title { font-family: 'Inter', system-ui, sans-serif; font-size: 13px; font-weight: 700; fill: #0f172a; }
+    .node-desc  { font-family: 'Inter', system-ui, sans-serif; font-size: 11px; fill: #475569; }
+    .node-math  { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 600; fill: #0369a1; }
+    .badge-text { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; }
+    .edge-label { font-family: 'Inter', system-ui, sans-serif; font-size: 10.5px; font-weight: 600; fill: #475569; }
+  </style>
 
-  <!-- Left: Task Set -->
-  <g transform="translate(20, 25)">
-    <rect width="105" height="230" rx="10" fill="#f8fafc" stroke="#cbd5e1"/>
-    <text x="12" y="24" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#0f172a">Tasks (T_j)</text>
-    <text x="12" y="38" font-family="'Inter', sans-serif" font-size="9" fill="#64748b">Length (MI)</text>
+  <!-- Background Canvas -->
+  <rect width="880" height="500" rx="16" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
 
-    <!-- Task Items -->
-    <rect x="10" y="50" width="85" height="28" rx="6" fill="#dbeafe" stroke="#93c5fd"/>
-    <text x="16" y="68" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#1e40af">t_1: 4500 MI</text>
-
-    <rect x="10" y="86" width="85" height="28" rx="6" fill="#dcfce7" stroke="#86efac"/>
-    <text x="16" y="104" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#166534">t_2: 1200 MI</text>
-
-    <rect x="10" y="122" width="85" height="28" rx="6" fill="#fef3c7" stroke="#fde68a"/>
-    <text x="16" y="140" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#92400e">t_3: 3100 MI</text>
-
-    <text x="45" y="172" font-family="'JetBrains Mono', monospace" font-size="14" fill="#94a3b8">...</text>
-
-    <rect x="10" y="185" width="85" height="28" rx="6" fill="#ede9fe" stroke="#c4b5fd"/>
-    <text x="16" y="203" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#5b21b6">t_n: 2000 MI</text>
+  <!-- Top Flow Header Badge -->
+  <g transform="translate(24, 20)">
+    <rect width="360" height="26" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.2"/>
+    <text x="12" y="17" class="badge-text" fill="#334155">ARCHITECTURE: CLOUD TASK SCHEDULING (ETC)</text>
   </g>
 
-  <!-- Middle: Formula Mapping Card -->
-  <g transform="translate(140, 50)">
-    <!-- Mapping Arrow -->
-    <path d="M 0 60 L 30 60" stroke="#0284c7" stroke-width="3" marker-end="url(#arr)"/>
-    <rect x="35" y="20" width="130" height="90" rx="10" fill="#f0f9ff" stroke="#7dd3fc"/>
-    <text x="45" y="42" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#0369a1">Matriks ETC</text>
-    <rect x="45" y="52" width="110" height="42" rx="6" fill="#ffffff" stroke="#bae6fd"/>
-    <text x="52" y="70" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#0f172a">ETC(i,j) =</text>
-    <text x="52" y="84" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" fill="#0284c7">Length / Speed</text>
+  <!-- CONTAINER 1: TASK INGESTION (LIGHT BLUE) -->
+  <g transform="translate(24, 60)">
+    <rect width="210" height="410" rx="14" fill="#f0f9ff" stroke="#7dd3fc" stroke-width="1.6" filter="url(#eraserShadow)"/>
+    <!-- Pill Badge -->
+    <rect x="14" y="-10" width="130" height="20" rx="5" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1"/>
+    <text x="24" y="4" class="badge-text" fill="#0369a1">TASK SET (T)</text>
 
-    <path d="M 170 60 L 200 60" stroke="#0284c7" stroke-width="3"/>
+    <!-- Task Cards -->
+    <g transform="translate(14, 26)">
+      <rect width="182" height="65" rx="10" fill="#ffffff" stroke="#bae6fd" stroke-width="1.2"/>
+      <text x="12" y="24" class="node-title">Task t_1 (MI)</text>
+      <text x="12" y="42" class="node-desc">Length: 4500 Million Inst.</text>
+      <text x="12" y="56" class="node-desc">Tipe: High CPU Compute</text>
+    </g>
+
+    <g transform="translate(14, 105)">
+      <rect width="182" height="65" rx="10" fill="#ffffff" stroke="#bae6fd" stroke-width="1.2"/>
+      <text x="12" y="24" class="node-title">Task t_2 (MI)</text>
+      <text x="12" y="42" class="node-desc">Length: 1200 Million Inst.</text>
+      <text x="12" y="56" class="node-desc">Tipe: Fast I/O Bound</text>
+    </g>
+
+    <g transform="translate(14, 184)">
+      <rect width="182" height="65" rx="10" fill="#ffffff" stroke="#bae6fd" stroke-width="1.2"/>
+      <text x="12" y="24" class="node-title">Task t_3 (MI)</text>
+      <text x="12" y="42" class="node-desc">Length: 3100 Million Inst.</text>
+      <text x="12" y="56" class="node-desc">Tipe: Database Query</text>
+    </g>
+
+    <g transform="translate(14, 263)">
+      <rect width="182" height="65" rx="10" fill="#ffffff" stroke="#bae6fd" stroke-width="1.2"/>
+      <text x="12" y="24" class="node-title">Task t_n (MI)</text>
+      <text x="12" y="42" class="node-desc">Length: 2000 Million Inst.</text>
+      <text x="12" y="56" class="node-desc">Workload Total: &sum; Length(t_j)</text>
+    </g>
+
+    <rect x="14" y="342" width="182" height="52" rx="8" fill="#e0f2fe" stroke="#38bdf8"/>
+    <text x="22" y="362" class="badge-text" fill="#0369a1">PROPERTIES</text>
+    <text x="22" y="380" class="node-desc">Independen, Non-preemptive</text>
   </g>
 
-  <!-- Right: VM Islands Load & Makespan -->
-  <g transform="translate(345, 25)">
-    <rect width="95" height="230" rx="10" fill="#f8fafc" stroke="#cbd5e1"/>
-    <text x="10" y="24" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#0f172a">VM Islands</text>
-    <text x="10" y="38" font-family="'Inter', sans-serif" font-size="9" fill="#64748b">Speed (MIPS)</text>
+  <!-- ARROW 1: Tasks to ETC Matrix -->
+  <path d="M 234 265 L 290 265" fill="none" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="238" y="255" class="edge-label">Length(t_j)</text>
 
-    <!-- VM 1 Bar -->
-    <text x="10" y="60" font-family="'Inter', sans-serif" font-size="9" font-weight="600" fill="#334155">VM 1 (300 MIPS)</text>
-    <rect x="10" y="66" width="60" height="12" rx="3" fill="#38bdf8"/>
-    <text x="74" y="76" font-family="'JetBrains Mono', monospace" font-size="8.5" fill="#0369a1">95s</text>
+  <!-- CONTAINER 2: ETC CALCULATION ENGINE (PURPLE ACCENT) -->
+  <g transform="translate(296, 120)">
+    <rect width="250" height="290" rx="14" fill="#faf5ff" stroke="#c084fc" stroke-width="1.6" filter="url(#eraserShadow)"/>
+    <rect x="14" y="-10" width="180" height="20" rx="5" fill="#f3e8ff" stroke="#a855f7" stroke-width="1"/>
+    <text x="24" y="4" class="badge-text" fill="#7e22ce">ETC MAPPING ENGINE</text>
 
-    <!-- VM 2 Bar (Peak = Makespan!) -->
-    <text x="10" y="98" font-family="'Inter', sans-serif" font-size="9" font-weight="700" fill="#dc2626">VM 2 (100 MIPS)</text>
-    <rect x="10" y="104" width="75" height="14" rx="3" fill="#ef4444"/>
-    <text x="10" y="130" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" fill="#dc2626">Makespan: 102s</text>
+    <!-- Formula Box -->
+    <rect x="16" y="28" width="218" height="68" rx="10" fill="#ffffff" stroke="#e9d5ff" stroke-width="1.2"/>
+    <text x="12" y="24" transform="translate(16,28)" class="node-title">ETC Calculation</text>
+    <text x="12" y="46" transform="translate(16,28)" class="node-math">ETC[i,j] = Length / Speed</text>
 
-    <!-- VM 3 Bar -->
-    <text x="10" y="152" font-family="'Inter', sans-serif" font-size="9" font-weight="600" fill="#334155">VM 3 (200 MIPS)</text>
-    <rect x="10" y="158" width="52" height="12" rx="3" fill="#38bdf8"/>
-    <text x="66" y="168" font-family="'JetBrains Mono', monospace" font-size="8.5" fill="#0369a1">78s</text>
+    <g transform="translate(16, 110)">
+      <rect width="218" height="155" rx="10" fill="#ffffff" stroke="#e9d5ff" stroke-width="1.2"/>
+      <text x="12" y="22" class="node-title">Akumulasi Beban VM (L_i)</text>
+      <text x="12" y="42" class="node-math">L_i = &sum;_{j &isin; Alloc(i)} ETC[i,j]</text>
+      
+      <line x1="12" y1="56" x2="206" y2="56" stroke="#f3e8ff" stroke-width="1"/>
 
-    <!-- Lower Bound Line indicator -->
-    <line x1="0" y1="185" x2="95" y2="185" stroke="#10b981" stroke-width="2" stroke-dasharray="3,3"/>
-    <text x="10" y="200" font-family="'Inter', sans-serif" font-size="8.5" font-weight="700" fill="#059669">Lower Bound: 70s</text>
-    <text x="10" y="215" font-family="'Inter', sans-serif" font-size="8" fill="#64748b">Optimality Gap: 32s</text>
+      <text x="12" y="76" class="node-title" fill="#dc2626">Makespan Objective:</text>
+      <text x="12" y="96" class="node-math" fill="#b91c1c">min f(X) = max_{i} L_i</text>
+
+      <text x="12" y="122" class="node-title" fill="#0d9488">Degree of Imbalance:</text>
+      <text x="12" y="140" class="node-math" fill="#0f766e">DI = (L_max - L_min)/L_avg</text>
+    </g>
+  </g>
+
+  <!-- ARROW 2: ETC to VMs -->
+  <path d="M 546 265 L 602 265" fill="none" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="552" y="255" class="edge-label">Alokasi X</text>
+
+  <!-- CONTAINER 3: VM ISLAND TOPOLOGY & METRICS (LIGHT GREEN) -->
+  <g transform="translate(608, 60)">
+    <rect width="248" height="410" rx="14" fill="#f0fdf4" stroke="#86efac" stroke-width="1.6" filter="url(#eraserShadow)"/>
+    <rect x="14" y="-10" width="165" height="20" rx="5" fill="#dcfce7" stroke="#22c55e" stroke-width="1"/>
+    <text x="24" y="4" class="badge-text" fill="#15803d">VM ISLAND CLUSTER (V)</text>
+
+    <!-- VM 1 -->
+    <g transform="translate(14, 26)">
+      <rect width="220" height="70" rx="10" fill="#ffffff" stroke="#bbf7d0" stroke-width="1.2"/>
+      <text x="12" y="22" class="node-title">VM Island #1 (Fast)</text>
+      <text x="12" y="40" class="node-desc">Kapasitas: 300 MIPS</text>
+      <!-- Progress Bar -->
+      <rect x="12" y="48" width="120" height="12" rx="3" fill="#38bdf8"/>
+      <text x="140" y="58" class="badge-text" fill="#0369a1">95.0s</text>
+    </g>
+
+    <!-- VM 2 (Bottleneck Peak) -->
+    <g transform="translate(14, 108)">
+      <rect width="220" height="78" rx="10" fill="#fff1f2" stroke="#fecdd3" stroke-width="1.4"/>
+      <text x="12" y="22" class="node-title" fill="#be123c">VM Island #2 (Bottleneck)</text>
+      <text x="12" y="40" class="node-desc">Kapasitas: 100 MIPS (Slow)</text>
+      <rect x="12" y="48" width="160" height="14" rx="3" fill="#ef4444"/>
+      <text x="12" y="72" class="badge-text" fill="#b91c1c">MAKESPAN: 102.0s (Peak)</text>
+    </g>
+
+    <!-- VM 3 -->
+    <g transform="translate(14, 198)">
+      <rect width="220" height="70" rx="10" fill="#ffffff" stroke="#bbf7d0" stroke-width="1.2"/>
+      <text x="12" y="22" class="node-title">VM Island #3 (Medium)</text>
+      <text x="12" y="40" class="node-desc">Kapasitas: 200 MIPS</text>
+      <rect x="12" y="48" width="98" height="12" rx="3" fill="#38bdf8"/>
+      <text x="120" y="58" class="badge-text" fill="#0369a1">78.0s</text>
+    </g>
+
+    <!-- Lower Bound Reference Card -->
+    <g transform="translate(14, 280)">
+      <rect width="220" height="114" rx="10" fill="#f0fdf4" stroke="#4ade80" stroke-width="1.4"/>
+      <text x="12" y="22" class="node-title" fill="#15803d">Lower Bound Reference</text>
+      <text x="12" y="40" class="node-desc">Batas Bawah Ideal Matematis:</text>
+      <text x="12" y="58" class="node-math" fill="#15803d">L_ideal = 70.0s (Laser Line)</text>
+      <text x="12" y="80" class="node-desc">Optimality Gap: 102s - 70s = 32s</text>
+      <text x="12" y="98" class="node-desc">Target VNS &amp; BFO: Gap &rarr; 0</text>
+    </g>
   </g>
 </svg>
