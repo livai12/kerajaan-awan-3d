@@ -35,10 +35,10 @@
     <g transform="translate(12, 25)">
       <rect width="171" height="95" rx="10" fill="#ffffff" stroke="#cffafe" stroke-width="1.2"/>
       <text x="10" y="22" class="bfo-title" fill="#0891b2">Tumble Phase</text>
-      <text x="10" y="40" class="bfo-desc">Rotasi acak arah unit &Delta;(i).</text>
+      <text x="10" y="40" class="bfo-desc">Rotasi acak arah unit Δ(i).</text>
       <text x="10" y="58" class="bfo-desc">Menentukan vektor gerak</text>
       <text x="10" y="74" class="bfo-desc">di ruang pencarian solusi.</text>
-      <text x="10" y="90" class="bfo-math">&phi; = &Delta;(i) / sqrt(&Delta;^T &Delta;)</text>
+      <text x="10" y="90" class="bfo-math">φ = Δ(i) / sqrt(Δ^T Δ)</text>
     </g>
 
     <!-- Swim -->
@@ -48,7 +48,7 @@
       <text x="10" y="40" class="bfo-desc">Renang maju sejauh C(i)</text>
       <text x="10" y="58" class="bfo-desc">selama nilai makespan</text>
       <text x="10" y="74" class="bfo-desc">menunjukkan perbaikan.</text>
-      <text x="10" y="90" class="bfo-math">&theta;^(i+1) = &theta;^i + C(i)&phi;</text>
+      <text x="10" y="90" class="bfo-math">θ^(i+1) = θ^i + C(i)φ</text>
     </g>
 
     <g transform="translate(12, 235)">
@@ -86,8 +86,8 @@
     <g transform="translate(12, 145)">
       <rect width="171" height="240" rx="10" fill="#ffffff" stroke="#99f6e4" stroke-width="1.2"/>
       <text x="10" y="22" class="bfo-title" fill="#0f766e">Fungsi Sel-ke-Sel:</text>
-      <text x="10" y="44" class="bfo-math">J_cc(&theta;) = &sum; J_attract</text>
-      <text x="10" y="60" class="bfo-math">         + &sum; J_repel</text>
+      <text x="10" y="44" class="bfo-math">J_cc(θ) = ∑ J_attract</text>
+      <text x="10" y="60" class="bfo-math">         + ∑ J_repel</text>
       
       <line x1="10" y1="75" x2="161" y2="75" stroke="#ccfbf1" stroke-width="1"/>
 
@@ -118,7 +118,7 @@
       <text x="10" y="22" class="bfo-title" fill="#a21caf">Perhitungan Health</text>
       <text x="10" y="40" class="bfo-desc">Akumulasi fitness sepanjang</text>
       <text x="10" y="56" class="bfo-desc">siklus kemotaksis:</text>
-      <text x="10" y="78" class="bfo-math">J_health = &sum; Makespan</text>
+      <text x="10" y="78" class="bfo-math">J_health = ∑ Makespan</text>
     </g>
 
     <!-- Split 1 -> 2 -->
@@ -128,7 +128,7 @@
       <text x="10" y="40" class="bfo-desc">50% Bakteri Tersehat</text>
       <text x="10" y="56" class="bfo-desc">membelah diri menjadi 2</text>
       <text x="10" y="72" class="bfo-desc">pada koordinat yang sama.</text>
-      <text x="10" y="92" class="bfo-math" fill="#a21caf">1 Sehat &rarr; 2 Keturunan</text>
+      <text x="10" y="92" class="bfo-math" fill="#a21caf">1 Sehat → 2 Keturunan</text>
     </g>
 
     <!-- Elimination -->
@@ -170,7 +170,7 @@
       <text x="10" y="22" class="bfo-title" fill="#15803d">SPV Discrete Rule</text>
       <text x="10" y="42" class="bfo-desc">Pemetaan Kontinu ke</text>
       <text x="10" y="58" class="bfo-desc">Indeks Diskrit VM:</text>
-      <text x="10" y="80" class="bfo-math" font-size="9.5">VM = floor(|sin(&theta;)|*m)</text>
+      <text x="10" y="80" class="bfo-math" font-size="9.5">VM = floor(|sin(θ)|*m)</text>
       <text x="10" y="96" class="bfo-math" font-size="9.5">     + 1</text>
       
       <line x1="10" y1="110" x2="135" y2="110" stroke="#86efac" stroke-width="1"/>

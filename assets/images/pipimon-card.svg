@@ -44,7 +44,7 @@
     <text x="8" y="46" font-family="'Inter', sans-serif" font-size="10.5" font-weight="600" fill="#334155">Aksi: Tumble &amp; Swim</text>
 
     <rect y="60" width="145" height="24" rx="6" fill="#ffffff" stroke="#cbd5e1"/>
-    <text x="8" y="76" font-family="'Inter', sans-serif" font-size="10.5" font-weight="600" fill="#334155">Sifat: Membelah (1 &rarr; 2)</text>
+    <text x="8" y="76" font-family="'Inter', sans-serif" font-size="10.5" font-weight="600" fill="#334155">Sifat: Membelah (1 → 2)</text>
 
     <rect y="90" width="145" height="24" rx="6" fill="#ffffff" stroke="#cbd5e1"/>
     <text x="8" y="106" font-family="'Inter', sans-serif" font-size="10.5" font-weight="600" fill="#0d9488">Dispersi: P_ed = 0.15</text>

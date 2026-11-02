@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 280" width="100%" height="100%">
+  <defs>
+    <linearGradient id="kocokCardBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#fffbeb"/>
+    </linearGradient>
+    <linearGradient id="kocokStone" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#475569"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="kocokAmber" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <filter id="kocokGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Card Background -->
+  <rect width="380" height="280" rx="16" fill="url(#kocokCardBg)" stroke="#fde68a" stroke-width="2"/>
+
+  <!-- Character Presentation Area (Right side) -->
+  <g transform="translate(255, 140)">
+    <!-- Soft Shadow on Ground -->
+    <ellipse cx="0" cy="85" rx="55" ry="12" fill="#0f172a" opacity="0.14"/>
+
+    <!-- Shaking Staff 3.6m -->
+    <g transform="translate(44, -30)">
+      <rect x="-3" y="-65" width="6" height="175" rx="3" fill="#64748b"/>
+      <rect x="-5" y="-55" width="10" height="5" rx="1.5" fill="#f59e0b"/>
+      <rect x="-5" y="-15" width="10" height="5" rx="1.5" fill="#f59e0b"/>
+      <rect x="-5" y="45" width="10" height="5" rx="1.5" fill="#f59e0b"/>
+      <!-- Glowing Amber Orb on Staff -->
+      <circle cx="0" cy="-70" r="14" fill="url(#kocokAmber)" filter="url(#kocokGlow)"/>
+      <circle cx="-3" cy="-73" r="4" fill="#ffffff" opacity="0.8"/>
+      <!-- Energy Aura -->
+      <ellipse cx="0" cy="-70" rx="20" ry="6" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,3" transform="rotate(-15)"/>
+    </g>
+
+    <!-- Golem Legs -->
+    <rect x="-30" y="50" width="22" height="32" rx="6" fill="#1e293b"/>
+    <rect x="8" y="50" width="22" height="32" rx="6" fill="#1e293b"/>
+
+    <!-- Golem Torso (Polygonal Stone) -->
+    <rect x="-44" y="-25" width="88" height="80" rx="20" fill="url(#kocokStone)" stroke="#64748b" stroke-width="1.5"/>
+    <path d="M -36 5 L -8 15 L -38 40" fill="none" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M 36 10 L 12 20 L 34 45" fill="none" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round"/>
+
+    <!-- Glowing Amber Core on Chest -->
+    <polygon points="0,-8 14,10 0,28 -14,10" fill="url(#kocokAmber)" filter="url(#kocokGlow)"/>
+    <polygon points="0,-4 9,10 0,22 -9,10" fill="#fef08a"/>
+
+    <!-- Golem Head -->
+    <rect x="-32" y="-68" width="64" height="46" rx="14" fill="url(#kocokStone)" stroke="#64748b" stroke-width="1.5"/>
+    <rect x="-34" y="-65" width="68" height="10" rx="3" fill="#0f172a"/>
+
+    <!-- Anime Blue Glowing Eyes -->
+    <ellipse cx="-14" cy="-48" rx="8" ry="5.5" fill="#38bdf8" filter="url(#kocokGlow)"/>
+    <circle cx="-12" cy="-50" r="2.5" fill="#ffffff"/>
+    <ellipse cx="14" cy="-48" rx="8" ry="5.5" fill="#38bdf8" filter="url(#kocokGlow)"/>
+    <circle cx="16" cy="-50" r="2.5" fill="#ffffff"/>
+
+    <!-- Left Arm -->
+    <rect x="-56" y="-12" width="16" height="42" rx="7" fill="#334155" transform="rotate(15 -48 9)"/>
+    <circle cx="-56" cy="35" r="10" fill="#1e293b"/>
+
+    <!-- Right Arm holding Staff -->
+    <rect x="38" y="-12" width="16" height="38" rx="7" fill="#334155" transform="rotate(-18 46 7)"/>
+    <circle cx="45" cy="28" r="9" fill="#1e293b"/>
+  </g>
+
+  <!-- Information Section (Left side) -->
+  <g transform="translate(20, 24)">
+    <rect width="130" height="22" rx="5" fill="#fef3c7" stroke="#f59e0b" stroke-width="1"/>
+    <text x="10" y="15" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#b45309">MODEL VNS GOLEM</text>
+
+    <text x="0" y="52" font-family="'Fraunces', serif" font-size="24" font-weight="700" fill="#0f172a" font-style="italic">Kocorock</text>
+    <text x="0" y="70" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="#64748b">The Shaking Golem</text>
+
+    <!-- Bullet Specs -->
+    <g transform="translate(0, 90)">
+      <rect width="145" height="28" rx="6" fill="#ffffff" stroke="#cbd5e1"/>
+      <text x="8" y="18" font-family="'Inter', sans-serif" font-size="11" font-weight="600" fill="#334155">Metode: Trajectory</text>
+
+      <rect y="36" width="145" height="28" rx="6" fill="#ffffff" stroke="#cbd5e1"/>
+      <text x="8" y="54" font-family="'Inter', sans-serif" font-size="11" font-weight="600" fill="#334155">Senjata: Shaking Staff</text>
+
+      <rect y="72" width="145" height="28" rx="6" fill="#ffffff" stroke="#cbd5e1"/>
+      <text x="8" y="90" font-family="'Inter', sans-serif" font-size="11" font-weight="600" fill="#b45309">Radius: k = 1, 2, 3</text>
+
+      <rect y="108" width="145" height="28" rx="6" fill="#fef3c7" stroke="#fcd34d"/>
+      <text x="8" y="126" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#92400e">Fokus: Local Descent</text>
+    </g>
+  </g>
+</svg>

@@ -2185,20 +2185,20 @@
             src.buffer = buffer;
 
             // Character-specific acoustic tuning:
-            // Golem (Kocorock) gets a deep, heavy stone rumble; Pipimon gets a bright, cute voice!
+            // Fast, energetic tempo across all characters (Kocorock brisk stone pace, Pipimon fast agile slime)
             if (speakerType === 'kocorock') {
-              src.playbackRate.value = 0.82; // Deeper, heavier stone golem tempo & pitch
+              src.playbackRate.value = 1.14; // Brisk energetic tempo with deep stone bass rumble
               const bassFilter = ctx.createBiquadFilter();
               bassFilter.type = 'lowshelf';
-              bassFilter.frequency.value = 350;
-              bassFilter.gain.value = 8.5; // Heavy resonant stone rumble
+              bassFilter.frequency.value = 320;
+              bassFilter.gain.value = 7.0; // Resonant stone rumble without dragging tempo
               src.connect(bassFilter);
               bassFilter.connect(ctx.destination);
             } else if (speakerType === 'pipimon') {
               src.playbackRate.value = 1.25; // Energetic, cute, agile child slime
               src.connect(ctx.destination);
             } else {
-              src.playbackRate.value = 0.92; // Balanced duo narration
+              src.playbackRate.value = 1.18; // Lively, snappy intro and celebration tempo
               src.connect(ctx.destination);
             }
 
@@ -2224,16 +2224,16 @@
         const u = new SpeechSynthesisUtterance(text);
         u.lang = 'id-ID';
 
-        // Golem heavy voice vs Pipimon light voice
+        // Fast, energetic pacing for both Kocorock and Pipimon
         if (speakerType === 'kocorock') {
-          u.pitch = 0.65; // Suara golem batu berat & berwibawa
-          u.rate = 0.90;
+          u.pitch = 0.82; // Suara golem batu berwibawa
+          u.rate = 1.18;  // Tempo cepat & tanggap
         } else if (speakerType === 'pipimon') {
-          u.pitch = 1.55; // Suara anak kecil / slime ceria
-          u.rate = 1.15;
+          u.pitch = 1.45; // Suara slime ceria
+          u.rate = 1.22;  // Lincah & cepat
         } else {
-          u.pitch = 0.95;
-          u.rate = 1.0;
+          u.pitch = 1.05;
+          u.rate = 1.20;  // Narasi awal ceria & cepat
         }
 
         const voices = window.speechSynthesis.getVoices();
