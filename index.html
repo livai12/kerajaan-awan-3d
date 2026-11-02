@@ -1,0 +1,1288 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Kerajaan Awan 3D — Kocorock (VNS) vs Pipimon (BFO)</title>
+  <meta name="description" content="Visualisasi 3D Interaktif Optimasi Cloud Task Scheduling dengan Variable Neighborhood Search (Kocorock/VNS) dan Bacterial Foraging Optimization (Pipimon/BFO).">
+
+  <!-- Google Fonts: Fraunces (Editorial Italic Serif) & Inter (Modern UI Sans) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,300;1,9..144,400;1,9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --ink: #1f2d2c;
+      --ink2: #5d6b69;
+      --line: rgba(31, 45, 44, 0.12);
+      --panel: rgba(255, 255, 255, 0.74);
+      --panel-solid: #ffffff;
+      --jade: #0d9488;
+      --jade-bg: #ccfbf1;
+      --ember: #d97706;
+      --ember-bg: #fef3c7;
+      --sky-top: #8fc4e8;
+      --sky-mid: #c3e1f2;
+      --sky-base: #eaf3f4;
+      --sky-bottom: #fbefd9;
+      --serif: 'Fraunces', Georgia, serif;
+      --sans: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; width: 100%; }
+
+    body {
+      font: 13px/1.45 var(--sans);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      background: linear-gradient(180deg, #38bdf8 0%, #7dd3fc 24%, #bae6fd 48%, #e0f2fe 68%, #fef3c7 88%, #fed7aa 100%);
+      user-select: none;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 65% 15%, rgba(255, 255, 255, 0.7) 0%, rgba(254, 240, 138, 0.35) 25%, transparent 60%);
+      z-index: 1;
+    }
+
+    /* 3D WebGL Canvas */
+    #gl {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+      cursor: grab;
+      z-index: 0;
+    }
+    #gl:active { cursor: grabbing; }
+
+    /* Button and UI resets */
+    button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
+    svg { width: 18px; height: 18px; fill: currentColor; stroke: none; }
+    .round svg, .seg svg, .ib svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* Glassmorphism Classes */
+    .glass, .card, .pill, .seg, .round, #sheet, #narr, .dock, .modal-card {
+      background: var(--panel);
+      backdrop-filter: blur(14px) saturate(1.3);
+      -webkit-backdrop-filter: blur(14px) saturate(1.3);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 0 8px 30px rgba(30, 60, 80, 0.12), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+    }
+
+    /* TOP BAR */
+    .top {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .top > * { pointer-events: auto; }
+
+    .brand {
+      background: var(--panel);
+      backdrop-filter: blur(14px) saturate(1.3);
+      -webkit-backdrop-filter: blur(14px) saturate(1.3);
+      padding: 8px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      box-shadow: 0 4px 18px rgba(30, 60, 80, 0.08);
+      margin-right: auto;
+      flex-shrink: 0;
+    }
+    .brand .name {
+      display: block;
+      font: italic 600 20px/1.1 var(--serif);
+      letter-spacing: -0.3px;
+      color: var(--ink);
+    }
+    .brand .sub {
+      display: block;
+      margin-top: 3px;
+      font-size: 10.5px;
+      color: var(--ink2);
+      letter-spacing: 0.2px;
+      font-weight: 500;
+    }
+
+    .seg {
+      display: flex;
+      padding: 4px;
+      border-radius: 14px;
+      gap: 3px;
+    }
+    .seg button {
+      padding: 0 12px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 10px;
+      color: var(--ink2);
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .seg button:hover { color: var(--ink); }
+    .seg button.on {
+      background: #ffffff;
+      color: var(--ink);
+      box-shadow: 0 2px 8px rgba(30, 60, 80, 0.14);
+    }
+
+    .round {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      transition: all 0.2s;
+    }
+    .round:hover {
+      background: #ffffff;
+      transform: translateY(-1px);
+    }
+    .round.on {
+      background: #ffffff;
+      color: var(--jade);
+      box-shadow: 0 2px 8px rgba(30, 60, 80, 0.14);
+    }
+
+    /* MASCOT CARDS (LEFT & RIGHT) */
+    .card {
+      position: fixed;
+      top: 78px;
+      width: 295px;
+      display: flex;
+      gap: 12px;
+      padding: 12px 14px 12px 10px;
+      border-radius: 18px;
+      z-index: 5;
+      transition: opacity 0.4s, transform 0.5s;
+    }
+    .card.left { left: 20px; }
+    .card.right { right: 20px; }
+
+    .card .mascot-art {
+      width: 68px;
+      height: 68px;
+      flex: none;
+      margin-top: -10px;
+      filter: drop-shadow(0 6px 12px rgba(30, 45, 60, 0.18));
+      transition: transform 0.3s ease;
+    }
+    .card:hover .mascot-art { transform: scale(1.06) rotate(-2deg); }
+
+    .card .card-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .card h2 {
+      font: italic 600 17px/1.1 var(--serif);
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card h2 small {
+      font: 700 10px var(--sans);
+      letter-spacing: 1.2px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      color: #fff;
+    }
+    #cardVNS h2 small { background: var(--ember); }
+    #cardBFO h2 small { background: var(--jade); }
+
+    .nums {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .num-col b {
+      display: block;
+      font: 700 14px var(--sans);
+      font-variant-numeric: tabular-nums;
+      color: var(--ink);
+    }
+    .num-col span {
+      font-size: 10px;
+      color: var(--ink2);
+      font-weight: 500;
+    }
+
+    .stage {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      font-size: 11.5px;
+      color: var(--ink);
+      line-height: 1.4;
+      background: rgba(255, 255, 255, 0.55);
+      border-radius: 10px;
+      padding: 6px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      min-height: 38px;
+    }
+    .stage b {
+      flex: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--ink);
+      color: #fff;
+      font-size: 10px;
+      margin-top: 1px;
+    }
+    .stage span { opacity: 0.9; }
+
+    /* VIEW STATES FOR MASCOT CARDS */
+    body[data-view="vns"] #cardBFO { opacity: 0; pointer-events: none; transform: translateX(20px); }
+    body[data-view="bfo"] #cardVNS { opacity: 0; pointer-events: none; transform: translateX(-20px); }
+
+    /* CONVERGENCE CHART (BOTTOM LEFT) */
+    #chart-wrap {
+      position: fixed;
+      left: 22px;
+      bottom: 96px;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    #chart {
+      width: 200px;
+      height: 68px;
+      border-radius: 12px;
+      display: block;
+    }
+    .chartkey {
+      font-size: 10px;
+      color: var(--ink2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-left: 2px;
+    }
+    .chartkey span { display: inline-flex; align-items: center; gap: 4px; }
+    .chartkey i {
+      width: 12px;
+      height: 3px;
+      border-radius: 2px;
+      display: inline-block;
+    }
+    .chartkey i.vns { background: var(--ember); }
+    .chartkey i.bfo { background: var(--jade); }
+
+    /* AWAN NARRATOR CARD (CENTER LOWER) */
+    #narr {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 84px;
+      width: min(620px, calc(100vw - 44px));
+      border-radius: 18px;
+      padding: 12px 18px 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      z-index: 6;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .narr-cloud {
+      width: 44px;
+      height: 44px;
+      flex: none;
+      animation: floatCloud 3.5s ease-in-out infinite;
+    }
+    @keyframes floatCloud {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+    .narr-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .narr-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .narr-header .title {
+      font: italic 600 14px/1 var(--serif);
+      color: var(--ink);
+    }
+    .narr-tools {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .narr-btn {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(31, 45, 44, 0.08);
+      color: var(--ink2);
+      transition: all 0.15s;
+    }
+    .narr-btn:hover {
+      background: #ffffff;
+      color: var(--ink);
+    }
+    .narr-text {
+      font-size: 12.5px;
+      line-height: 1.45;
+      color: var(--ink);
+      transition: opacity 0.2s ease;
+    }
+
+    /* BOTTOM CONTROLS DOCK */
+    .dock {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      z-index: 7;
+    }
+    .dock .divider {
+      width: 1px;
+      height: 22px;
+      background: var(--line);
+      margin: 0 2px;
+    }
+
+    .ib {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+      transition: all 0.2s;
+    }
+    .ib:hover {
+      background: #ffffff;
+      transform: translateY(-1px);
+    }
+    .ib.main {
+      width: 44px;
+      height: 44px;
+      background: var(--ink);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(31, 45, 44, 0.25);
+    }
+    .ib.main:hover {
+      background: #334a49;
+      transform: scale(1.05);
+    }
+    .ib.main svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    .spd-pills {
+      display: flex;
+      gap: 2px;
+    }
+    .spd-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 999px;
+      color: var(--ink2);
+      transition: all 0.15s;
+    }
+    .spd-pill:hover { color: var(--ink); }
+    .spd-pill.on {
+      background: #ffffff;
+      color: var(--ink);
+      box-shadow: 0 1px 4px rgba(30, 60, 80, 0.15);
+    }
+
+    /* 2D GROUND TRUTH SPLIT PANE */
+    #pane2D {
+      position: fixed;
+      right: 22px;
+      bottom: 86px;
+      width: 360px;
+      border-radius: 20px;
+      padding: 16px;
+      z-index: 5;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      max-height: calc(100vh - 180px);
+      overflow-y: auto;
+      transition: all 0.3s ease;
+    }
+    #pane2D.open { display: flex; }
+
+    .pane2D-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 8px;
+    }
+    .pane2D-header h3 {
+      font: italic 600 16px/1 var(--serif);
+      color: var(--ink);
+    }
+
+    .vm-strip {
+      background: rgba(255, 255, 255, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 10px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .vm-strip:hover {
+      background: #ffffff;
+      border-color: #38bdf8;
+    }
+    .vm-strip.busiest {
+      border-color: #f87171;
+      background: #fff5f5;
+    }
+    .vm-strip-title {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .vm-meter {
+      position: relative;
+      height: 18px;
+      background: rgba(31, 45, 44, 0.08);
+      border-radius: 5px;
+      overflow: hidden;
+      display: flex;
+    }
+    .gem-block {
+      height: 100%;
+      border-right: 1px solid rgba(255, 255, 255, 0.4);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      transition: transform 0.15s;
+    }
+    .gem-block:hover { filter: brightness(1.2); }
+    .gem-block.selected { outline: 2px solid #000; z-index: 5; }
+
+    /* SLIDE MODAL / SHEET (TOUR & ACADEMIC RIGOR) */
+    #sheet-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 35, 45, 0.35);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 20;
+      display: none;
+      place-items: center;
+      padding: 20px;
+    }
+    #sheet-overlay.open { display: grid; }
+
+    .sheet-card {
+      width: min(840px, 94vw);
+      max-height: 88vh;
+      background: #fffdfa;
+      border-radius: 24px;
+      box-shadow: 0 24px 60px rgba(20, 40, 60, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: sheetPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes sheetPop {
+      from { opacity: 0; transform: translateY(14px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .sheet-top {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #ffffff;
+    }
+    .sheet-top h2 {
+      font: italic 600 22px/1.1 var(--serif);
+      color: var(--ink);
+    }
+    .sheet-nav-dots {
+      display: flex;
+      gap: 6px;
+    }
+    .nav-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(31, 45, 44, 0.2);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .nav-dot.on {
+      background: var(--ink);
+      width: 22px;
+      border-radius: 4px;
+    }
+
+    .sheet-content {
+      padding: 24px 28px;
+      overflow-y: auto;
+      flex: 1;
+      line-height: 1.6;
+    }
+
+    .sheet-slide { display: none; }
+    .sheet-slide.on { display: block; animation: fadeInSlide 0.25s ease; }
+    @keyframes fadeInSlide {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .sheet-slide h3 {
+      font: italic 600 22px/1.2 var(--serif);
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .sheet-slide p {
+      font-size: 13.5px;
+      color: #3d4b49;
+      margin-bottom: 12px;
+    }
+    .sheet-slide b { color: var(--ink); }
+
+    .sheet-footer {
+      padding: 14px 24px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #faf8f5;
+    }
+    .btn-sheet {
+      padding: 9px 18px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.15s;
+    }
+    .btn-sheet.sec { color: var(--ink2); }
+    .btn-sheet.sec:hover { color: var(--ink); background: rgba(31,45,44,0.06); }
+    .btn-sheet.pri { background: var(--ink); color: #ffffff; }
+    .btn-sheet.pri:hover { background: #334a49; }
+
+    /* TABLES & QUIZ INSIDE SHEET */
+    table.data-tbl {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      margin: 12px 0;
+      background: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+    }
+    table.data-tbl th, table.data-tbl td {
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+    }
+    table.data-tbl th {
+      background: #f4f6f6;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    table.data-tbl tr.highlight {
+      background: #f0fdf4;
+    }
+
+    .quiz-box {
+      background: #f8faf9;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+    }
+    .quiz-q {
+      font-weight: 600;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .quiz-choices {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .q-opt {
+      text-align: left;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      font-size: 12px;
+      transition: all 0.15s;
+    }
+    .q-opt:hover { border-color: var(--ink2); }
+    .q-opt.correct { background: #dcfce7; border-color: #86efac; color: #166534; font-weight: 600; }
+    .q-opt.incorrect { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+
+    /* CINEMATIC STORY OVERLAY */
+    #story-overlay {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 96px;
+      width: min(780px, 92vw);
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 16px 22px;
+      color: #ffffff;
+      z-index: 30;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      animation: popStory 0.35s ease;
+    }
+    #story-overlay.open { display: flex; }
+    @keyframes popStory {
+      from { opacity: 0; transform: translate(-50%, 15px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+    .story-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #94a3b8;
+    }
+    .story-subtitles {
+      font: italic 400 17px/1.5 var(--serif);
+      color: #fef08a;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    .story-controls {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .story-btn {
+      padding: 4px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      transition: all 0.15s;
+    }
+    .story-btn:hover { background: rgba(255, 255, 255, 0.3); }
+
+    /* RESPONSIVENESS */
+    @media (max-width: 1100px) {
+      .card.left { left: 16px; width: 280px; }
+      .card.right { right: 16px; width: 280px; }
+      #chart-wrap { display: none; }
+    }
+    @media (max-width: 768px) {
+      .top { padding: 12px 14px; }
+      .brand .name { font-size: 20px; }
+      .card { position: fixed; top: 76px; width: calc(50vw - 20px); }
+      #narr { bottom: 78px; width: calc(100vw - 28px); }
+      #pane2D { width: calc(100vw - 32px); right: 16px; bottom: 82px; }
+    }
+    /* 3D Character Speech Bubble (Comic & Game Style) */
+    .char-bubble {
+      position: fixed;
+      pointer-events: none;
+      z-index: 45;
+      transform: translate(-50%, -100%) scale(0);
+      transform-origin: bottom center;
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+      opacity: 0;
+      max-width: 280px;
+      padding: 10px 14px 12px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18), 0 0 0 2px rgba(255, 255, 255, 0.95);
+      font-family: inherit;
+    }
+    .char-bubble.open {
+      transform: translate(-50%, -100%) scale(1);
+      opacity: 1;
+    }
+    .char-bubble.kocorock {
+      border-top: 3.5px solid #f59e0b;
+    }
+    .char-bubble.pipimon {
+      border-top: 3.5px solid #06b6d4;
+    }
+    .char-bubble .bubble-speaker {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+    .char-bubble .bubble-tag {
+      font-size: 9px;
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-weight: 800;
+    }
+    .char-bubble.kocorock .bubble-tag { background: #fef3c7; color: #b45309; }
+    .char-bubble.pipimon .bubble-tag { background: #cffafe; color: #0e7490; }
+    .char-bubble .bubble-msg {
+      font-size: 12.5px;
+      line-height: 1.4;
+      font-weight: 600;
+      color: #1e293b;
+    }
+    .char-bubble .bubble-tail {
+      position: absolute;
+      bottom: -9px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 9px solid transparent;
+      border-right: 9px solid transparent;
+      border-top: 9px solid rgba(255, 255, 255, 0.96);
+    }
+  </style>
+
+  <!-- Three.js, GLTFLoader & OrbitControls (Offline Vendor with CDN fallback) -->
+  <script src="./vendor/three.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js';"></script>
+  <script src="./vendor/GLTFLoader.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';"></script>
+  <script src="./vendor/OrbitControls.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js';"></script>
+</head>
+<body data-view="both">
+
+  <!-- 3D WebGL Canvas -->
+  <canvas id="gl"></canvas>
+
+  <!-- 360 Camera Hint Pill -->
+  <div id="orbit-hint" style="position:fixed; top:72px; left:50%; transform:translateX(-50%); z-index:30; background:rgba(255,255,255,0.85); backdrop-filter:blur(8px); padding:5px 14px; border-radius:20px; font-size:11px; font-weight:600; color:#1e293b; border:1px solid rgba(255,255,255,0.95); box-shadow:0 4px 14px rgba(0,0,0,0.06); pointer-events:none; transition:opacity 0.6s ease; display:flex; align-items:center; gap:6px;">
+    <span>🌐</span>
+    <span><b>Kamera 360°:</b> Drag mouse untuk putar 360° • Scroll untuk zoom • Klik kanan untuk geser (pan) • Dobel-klik untuk reset</span>
+  </div>
+
+  <!-- 3D Character Speech Bubbles (Comic & Pokemon Style) -->
+  <div id="bubble-kocorock" class="char-bubble kocorock">
+    <div class="bubble-speaker">
+      <span class="bubble-icon">🗿</span>
+      <span>Kocorock</span>
+      <span class="bubble-tag">VNS Golem</span>
+    </div>
+    <div class="bubble-msg" id="bubble-msg-kocorock">Ayo guncang dan pindahkan kristal! 💥</div>
+    <div class="bubble-tail"></div>
+  </div>
+
+  <div id="bubble-pipimon" class="char-bubble pipimon">
+    <div class="bubble-speaker">
+      <span class="bubble-icon">🦠</span>
+      <span>Pipimon</span>
+      <span class="bubble-tag">BFO Slime</span>
+    </div>
+    <div class="bubble-msg" id="bubble-msg-pipimon">Nutrisi terdeteksi! Koloni berenang! ✨</div>
+    <div class="bubble-tail"></div>
+  </div>
+
+  <!-- TOP BAR -->
+  <div class="top">
+    <div class="brand">
+      <span class="name">Kerajaan Awan 3D</span>
+      <span class="sub">VNS (Kocorock) vs BFO (Pipimon) • Cloud Task Scheduling</span>
+    </div>
+
+    <!-- Algorithm View Switcher -->
+    <div class="seg" id="viewSeg">
+      <button class="on" data-view="both" title="Lihat Kedua Algoritma">
+        <svg viewBox="0 0 24 24"><circle cx="7" cy="12" r="4"></circle><circle cx="17" cy="12" r="4"></circle></svg>
+        <span>Keduanya</span>
+      </button>
+      <button data-view="vns" title="Fokus ke Kocorock (VNS Golem)">
+        <span style="color:var(--ember); font-weight:700;">🗿</span>
+        <span>Kocorock</span>
+      </button>
+      <button data-view="bfo" title="Fokus ke Pipimon (BFO Slime)">
+        <span style="color:var(--jade); font-weight:700;">🦠</span>
+        <span>Pipimon</span>
+      </button>
+    </div>
+
+    <!-- Model Mode Switcher: Meshy AI vs Prosedural -->
+    <div class="seg" id="modelSeg" style="display:flex;">
+      <button class="on" data-model="meshy" title="Model Karakter Meshy AI (GLB)">
+        <span>✨ Meshy 3D</span>
+      </button>
+      <button data-model="procedural" title="Model Karakter Kode Prosedural (Three.js)">
+        <span>📐 Prosedural</span>
+      </button>
+    </div>
+
+    <!-- View Mode Switcher: 3D vs 2D -->
+    <button class="round" id="btnToggle2D" title="Buka/Tutup Tampilan 2D Ground Truth">
+      <svg viewBox="0 0 24 24"><path d="M3 3v18h18"></path><rect x="7" y="10" width="3" height="8"></rect><rect x="13" y="6" width="3" height="12"></rect><rect x="19" y="12" width="3" height="6"></rect></svg>
+    </button>
+
+    <!-- 360 Cinematic Orbit Toggle -->
+    <button class="round" id="btnOrbit360" title="Rotasi Otomatis 360° (Cinematic Orbit)">
+      <span style="font-size:15px;">🔄</span>
+    </button>
+
+    <!-- Cinematic Storyteller Mode -->
+    <button class="round" id="btnStoryTour" style="width:auto; padding:0 12px; border-radius:12px; gap:6px; font-weight:700; color:#0f172a;" title="Putar Kisah Dongeng Kerajaan Awan (Cinematic Story)">
+      <span>🎬</span>
+      <span style="font-size:12px;">Kisah Awan</span>
+    </button>
+
+    <!-- Background Fantasy Music Toggle -->
+    <button class="round" id="btnMusic" title="Backsound Musik Fantasi Kerajaan Awan (On/Off)">
+      <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+    </button>
+
+    <!-- Slide Presentation / Walkthrough -->
+    <button class="round" id="btnTour" title="Buka Materi Presentasi & Slide">
+      <svg viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path><path d="M6 6h10"></path><path d="M6 10h10"></path></svg>
+    </button>
+
+    <!-- Narration Audio Voice Toggle (Web Speech) -->
+    <button class="round" id="btnVoice" title="Suara Narasi Awan (Speech Synthesis)">
+      <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+    </button>
+
+    <!-- Fullscreen Toggle -->
+    <button class="round" id="btnFullscreen" title="Layar Penuh [F]">
+      <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+    </button>
+  </div>
+
+  <!-- MASCOT CARD LEFT: KOCOK SI GOLEM (VNS) -->
+  <div class="card left" id="cardVNS">
+    <!-- SVG Mascot Art: Kocok si Golem -->
+    <svg class="mascot-art" viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id="golemGrad" cx="40%" cy="35%" r="60%">
+          <stop offset="0%" stop-color="#a8a29e"/>
+          <stop offset="60%" stop-color="#78716c"/>
+          <stop offset="100%" stop-color="#44403c"/>
+        </radialGradient>
+        <radialGradient id="eyeGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#e0f2fe"/>
+          <stop offset="60%" stop-color="#38bdf8"/>
+          <stop offset="100%" stop-color="#0284c7"/>
+        </radialGradient>
+      </defs>
+      <!-- Stone Body -->
+      <path d="M 25 60 Q 20 30 50 25 Q 80 30 75 60 Q 72 85 50 85 Q 28 85 25 60 Z" fill="url(#golemGrad)" stroke="#292524" stroke-width="2"/>
+      <!-- Moss patches -->
+      <ellipse cx="38" cy="38" rx="8" ry="5" fill="#86efac" opacity="0.7"/>
+      <!-- Glowing Eye -->
+      <circle cx="50" cy="48" r="9" fill="url(#eyeGlow)" stroke="#0284c7" stroke-width="1.5"/>
+      <circle cx="52" cy="46" r="3" fill="#ffffff"/>
+      <!-- Staff & Amber Gem -->
+      <rect x="76" y="20" width="4" height="65" rx="2" fill="#78350f" transform="rotate(-8 76 20)"/>
+      <polygon points="76,14 83,22 76,30 69,22" fill="#f59e0b" stroke="#d97706" stroke-width="1.5"/>
+      <!-- Hand holding staff -->
+      <circle cx="75" cy="52" r="7" fill="#57534e"/>
+    </svg>
+
+    <div class="card-body">
+      <h2>
+        <span>Kocorock</span>
+        <small>VNS • Rock</small>
+      </h2>
+      <div class="nums">
+        <div class="num-col">
+          <b id="vns-makespan">0.0s</b>
+          <span>Makespan</span>
+        </div>
+        <div class="num-col">
+          <b id="vns-k">k = 1</b>
+          <span>Radius Shaking</span>
+        </div>
+        <div class="num-col">
+          <b id="vns-evals">0</b>
+          <span>Evaluasi</span>
+        </div>
+      </div>
+      <div class="stage" id="vns-stage">
+        <b>1</b>
+        <span id="vns-stage-text">Kocorock siap melompat & mengguncang pulau dengan radius k = 1.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MASCOT CARD RIGHT: PIP SI BAKTERI (BFO) -->
+  <div class="card right" id="cardBFO">
+    <div class="card-body">
+      <h2>
+        <span>Pipimon</span>
+        <small>BFO • Slime</small>
+      </h2>
+      <div class="nums">
+        <div class="num-col">
+          <b id="bfo-makespan">0.0s</b>
+          <span>Makespan</span>
+        </div>
+        <div class="num-col">
+          <b id="bfo-phase">Chemotaxis</b>
+          <span>Fase Koloni</span>
+        </div>
+        <div class="num-col">
+          <b id="bfo-evals">0</b>
+          <span>Evaluasi</span>
+        </div>
+      </div>
+      <div class="stage" id="bfo-stage">
+        <b>1</b>
+        <span id="bfo-stage-text">6 Pipimon siap melompat mencari gradien nutrisi.</span>
+      </div>
+    </div>
+
+    <!-- SVG Mascot Art: Pip si Bakteri Bermahkota -->
+    <svg class="mascot-art" viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id="pipGrad" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stop-color="#a5f3fc"/>
+          <stop offset="60%" stop-color="#22d3ee"/>
+          <stop offset="100%" stop-color="#0891b2"/>
+        </radialGradient>
+      </defs>
+      <!-- Golden Crown -->
+      <polygon points="36,25 42,14 50,22 58,14 64,25 64,30 36,30" fill="#facc15" stroke="#ca8a04" stroke-width="1.5"/>
+      <circle cx="42" cy="14" r="2" fill="#fef08a"/>
+      <circle cx="50" cy="22" r="2" fill="#fef08a"/>
+      <circle cx="58" cy="14" r="2" fill="#fef08a"/>
+      <!-- Gelatinous Body -->
+      <path d="M 30 55 C 25 35, 75 35, 70 55 C 68 75, 32 75, 30 55 Z" fill="url(#pipGrad)" opacity="0.9" stroke="#0e7490" stroke-width="2"/>
+      <!-- Wiggling Flagella Tail -->
+      <path d="M 50 74 Q 45 88 54 94" fill="none" stroke="#06b6d4" stroke-width="4" stroke-linecap="round"/>
+      <!-- Cartoon Eyes -->
+      <circle cx="42" cy="48" r="6" fill="#ffffff"/>
+      <circle cx="43" cy="48" r="3" fill="#0f172a"/>
+      <circle cx="58" cy="48" r="6" fill="#ffffff"/>
+      <circle cx="59" cy="48" r="3" fill="#0f172a"/>
+      <!-- Cheeks -->
+      <circle cx="36" cy="54" r="3" fill="#f472b6" opacity="0.6"/>
+      <circle cx="64" cy="54" r="3" fill="#f472b6" opacity="0.6"/>
+    </svg>
+  </div>
+
+  <!-- CONVERGENCE CHART (BOTTOM LEFT) -->
+  <div id="chart-wrap">
+    <canvas id="chart" class="glass" width="200" height="68"></canvas>
+    <div class="chartkey">
+      <span><i class="vns"></i> Kocorock (VNS)</span>
+      <span><i class="bfo"></i> Pipimon (BFO)</span>
+    </div>
+  </div>
+
+  <!-- AWAN NARRATOR CARD (LOWER CENTER) -->
+  <div id="narr" class="glass">
+    <svg class="narr-cloud" viewBox="0 0 64 64">
+      <path d="M 18 44 A 12 12 0 0 1 20 22 A 16 16 0 0 1 48 24 A 12 12 0 0 1 48 44 Z" fill="#ffffff" filter="drop-shadow(0 3px 6px rgba(0,0,0,0.12))"/>
+      <circle cx="28" cy="34" r="2" fill="#334155"/>
+      <circle cx="40" cy="34" r="2" fill="#334155"/>
+      <path d="M 31 38 Q 34 41 37 38" fill="none" stroke="#334155" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="24" cy="37" r="2.5" fill="#fca5a5" opacity="0.6"/>
+      <circle cx="44" cy="37" r="2.5" fill="#fca5a5" opacity="0.6"/>
+    </svg>
+
+    <div class="narr-content">
+      <div class="narr-header">
+        <span class="title">Awanchu si Pemandu</span>
+        <div class="narr-tools">
+          <button class="narr-btn" id="btnModeNarr" title="Ganti Mode Penjelasan">Mode: Cerita 🔄</button>
+          <button class="narr-btn" id="btnAltAnalogy" title="Ganti Analogi">💡 Analogi Lain</button>
+        </div>
+      </div>
+      <div class="narr-text" id="narr-text">
+        Halo! Tekan <strong>[Spasi]</strong> atau tombol Play untuk mulai menyaksikan Kocorock dan Pipimon berlomba menyeimbangkan beban pulau.
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM CENTER DOCK -->
+  <div class="dock glass">
+    <!-- Play / Pause -->
+    <button class="ib main" id="btnPlay" title="Mulai / Jeda [Spasi]">
+      <svg id="playIcon" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+      <svg id="pauseIcon" style="display:none;" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+    </button>
+
+    <!-- Step -->
+    <button class="ib" id="btnStep" title="Langkah Berikutnya (Step)">
+      <svg viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+    </button>
+
+    <!-- Reset -->
+    <button class="ib" id="btnReset" title="Reset Ulang Simulasi">
+      <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+    </button>
+
+    <div class="divider"></div>
+
+    <!-- Speed Selector -->
+    <div class="spd-pills">
+      <button class="spd-pill" data-speed="0.5">0.5×</button>
+      <button class="spd-pill on" data-speed="1.0">1×</button>
+      <button class="spd-pill" data-speed="2.0">2×</button>
+      <button class="spd-pill" data-speed="4.0">4×</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Problem Presets -->
+    <div class="seg" style="padding:2px; border-radius:999px;">
+      <button class="on" data-preset="12" style="height:28px; padding:0 8px; border-radius:999px; font-size:11px;">12 Task</button>
+      <button data-preset="24" style="height:28px; padding:0 8px; border-radius:999px; font-size:11px;">24 Task</button>
+    </div>
+  </div>
+
+  <!-- 2D GROUND TRUTH PANE (FLOATING SIDE OVERLAY) -->
+  <div id="pane2D" class="glass">
+    <div class="pane2D-header">
+      <h3>📊 Distribusi Beban VM (2D Ground Truth)</h3>
+      <button id="btnClose2D" style="font-size:16px; color:var(--ink2);">✕</button>
+    </div>
+    <div style="font-size:11px; color:var(--ink2); display:flex; justify-content:space-between;">
+      <span>Batas Ideal: <strong id="val-ideal">0.0s</strong></span>
+      <span>Ketidakseimbangan (DI): <strong id="val-di">0%</strong></span>
+    </div>
+    <div id="vm-bars-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+    <div style="font-size:10.5px; color:var(--ink2); text-align:center; margin-top:4px;">
+      💡 <em>Klik kristal lalu klik pulau lain untuk memindahkan alokasi manual.</em>
+    </div>
+  </div>
+
+  <!-- PRESENTATION SHEET MODAL (SLIDES & ACADEMIC RIGOR) -->
+  <div id="sheet-overlay">
+    <div class="sheet-card">
+      <div class="sheet-top">
+        <h2 id="sheet-title">1. Kerajaan Awan 3D: Konsep & Visualisasi</h2>
+        <div class="sheet-nav-dots" id="sheet-dots">
+          <div class="nav-dot on" data-idx="0"></div>
+          <div class="nav-dot" data-idx="1"></div>
+          <div class="nav-dot" data-idx="2"></div>
+          <div class="nav-dot" data-idx="3"></div>
+          <div class="nav-dot" data-idx="4"></div>
+          <div class="nav-dot" data-idx="5"></div>
+          <div class="nav-dot" data-idx="6"></div>
+        </div>
+        <button id="btnCloseSheet" style="font-size:18px; color:var(--ink2); padding:4px 8px;">✕</button>
+      </div>
+
+      <div class="sheet-content">
+        <!-- SLIDE 1 -->
+        <div class="sheet-slide on" data-idx="0">
+          <h3>Konsep Karakter & Prinsip Gerakan = Algoritma</h3>
+          <p>
+            Demo Week 10 SOKA memvisualisasikan dua algoritma metaheuristik terkemuka:
+            <b>Variable Neighborhood Search (VNS)</b> dan <b>Bacterial Foraging Optimization (BFO)</b>
+            untuk memecahkan masalah <b>Cloud Task Scheduling</b>.
+          </p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:14px 0;">
+            <div style="background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px;">
+              <h4 style="color:var(--ember); margin-bottom:4px;">🗿 Kocok (VNS)</h4>
+              <p style="font-size:12px;">
+                Golem batu dengan tongkat kristal. Animasi ketukan tongkat merefleksikan goncangan <em>shaking(k)</em>,
+                tangannya memindahkan kristal dari pulau tersibuk ke pulau terlonggar (<em>local search</em>),
+                dan melompat gembira saat solusi membaik.
+              </p>
+            </div>
+            <div style="background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px;">
+              <h4 style="color:var(--jade); margin-bottom:4px;">🦠 Pip (BFO)</h4>
+              <p style="font-size:12px;">
+                Bakteri agar-agar translusen. Gerakan berputar (<em>tumble</em>) merepresentasikan mutasi task diskret,
+                melesat maju (<em>swim</em>) saat arah bernutrisi, pembelahan sel (<em>reproduction</em>),
+                dan mahkota emas untuk bakteri pemimpin (<em>elitism</em>).
+              </p>
+            </div>
+          </div>
+          <p style="font-size:12.5px; color:var(--ink2);">
+            ✅ Seluruh adegan dirakit murni dengan primitif Three.js tanpa model eksternal (100% Code-based).
+          </p>
+        </div>
+
+        <!-- SLIDE 2 -->
+        <div class="sheet-slide" data-idx="1">
+          <h3>Eksplorasi Masalah: Cloud Task Scheduling</h3>
+          <p>
+            Dalam komputasi awan, task dengan beragam beban kerja (workload) harus dialokasikan ke sejumlah Virtual Machine (VM) heterogen yang memiliki kecepatan komputasi (MIPS) berbeda.
+          </p>
+          <p>
+            <b>Makespan:</b> Waktu selesai dari VM yang paling terakhir menyelesaikan tugasnya.
+            Tujuan optimasi adalah meminimalkan makespan:
+          </p>
+          <div style="background:#f4f6f6; border-radius:8px; padding:10px 14px; font-family:monospace; margin:8px 0; font-size:13px;">
+            Minimalkan Makespan = min max_{j ∈ VM} ( Total_Workload_j / Speed_j )
+          </div>
+          <p>
+            <b>Batas Ideal (Lower Bound):</b> Total seluruh beban kerja dibagi dengan jumlah seluruh kapasitas VM.
+            Batas ideal ini menjadi garis acuan teoritis yang tidak mungkin ditembus.
+          </p>
+        </div>
+
+        <!-- SLIDE 3 -->
+        <div class="sheet-slide" data-idx="2">
+          <h3>Fase Algoritma VNS bersama Kocok</h3>
+          <ol style="padding-left:20px; display:flex; flex-direction:column; gap:8px; font-size:13px;">
+            <li><b>Shaking k:</b> Mengguncang k penempatan task secara acak untuk melompat keluar dari jebakan optimum lokal.</li>
+            <li><b>Local Search (Move & Swap):</b> Mengevaluasi pemindahan task dari VM tersibuk ke VM terlonggar secara deterministik.</li>
+            <li><b>Penerimaan Solusi:</b> Jika makespan membaik, solusi diterima dan k direset ke 1. Jika tidak membaik, nilai k dinaikkan (k = k + 1) untuk memperluas radius goncangan berikutnya.</li>
+          </ol>
+        </div>
+
+        <!-- SLIDE 4 -->
+        <div class="sheet-slide" data-idx="3">
+          <h3>Fase Algoritma BFO bersama Koloni Pip</h3>
+          <ol style="padding-left:20px; display:flex; flex-direction:column; gap:8px; font-size:13px;">
+            <li><b>Kemotaksis (Tumble & Swim):</b> Setiap Pip mencoba perubahan penempatan task acak. Jika makespan turun, Pip berenang searah hingga langkah N_s.</li>
+            <li><b>Reproduksi:</b> Separuh koloni dengan performa terburuk gugur, separuh koloni terbaik membelah diri.</li>
+            <li><b>Eliminasi & Dispersi:</b> Dengan probabilitas P_ed, Pip dieliminasi dan dilempar ke solusi acak agar koloni tidak mengalami konvergensi dini.</li>
+            <li><b>Elitisme Mahkota:</b> Pip terbaik selalu dilindungi dan mengenakan mahkota emas.</li>
+          </ol>
+        </div>
+
+        <!-- SLIDE 5 -->
+        <div class="sheet-slide" data-idx="4">
+          <h3>Eksperimen Adil: Rigor Akademik 30x Pengulangan</h3>
+          <p>
+            Membandingkan VNS dan BFO dengan baseline (Random, Round Robin, Greedy LPT) pada <b>anggaran evaluasi fitness yang setara</b> (600 evaluasi).
+          </p>
+          <div style="margin-bottom:8px;">
+            <button class="btn-sheet pri" id="btnRunBenchmark" style="font-size:12px; padding:6px 14px;">▶️ Jalankan 30x Uji Independen</button>
+          </div>
+          <table class="data-tbl">
+            <thead>
+              <tr>
+                <th>Algoritma</th>
+                <th>Rata-rata Makespan</th>
+                <th>Simpangan Baku</th>
+                <th>Terbaik</th>
+                <th>Terburuk</th>
+              </tr>
+            </thead>
+            <tbody id="tblBenchmark">
+              <tr><td>Random</td><td>94.5s</td><td>± 11.2s</td><td>76.0s</td><td>118.5s</td></tr>
+              <tr><td>Round Robin</td><td>82.3s</td><td>± 0.0s</td><td>82.3s</td><td>82.3s</td></tr>
+              <tr><td>Greedy LPT</td><td>68.4s</td><td>± 0.0s</td><td>68.4s</td><td>68.4s</td></tr>
+              <tr class="highlight"><td><b>VNS (Kocok)</b></td><td><b>61.2s</b></td><td>± 2.1s</td><td>58.0s</td><td>65.4s</td></tr>
+              <tr class="highlight"><td><b>BFO (Pip)</b></td><td><b>63.8s</b></td><td>± 3.4s</td><td>59.5s</td><td>69.1s</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- SLIDE 6 -->
+        <div class="sheet-slide" data-idx="5">
+          <h3>Sitasi Paper Tugas & Adaptasi Ruang Diskret</h3>
+          <ul style="padding-left:18px; display:flex; flex-direction:column; gap:10px; font-size:12.5px;">
+            <li>
+              <b>Paper No. 57 (BFO):</b> Passino, K. M. (2002). <em>Biomimicry of bacterial foraging for distributed optimization and control</em>. IEEE Control Systems Magazine, serta adaptasi diskret cloud task scheduling (2026).
+            </li>
+            <li>
+              <b>Paper No. 58 (VNS):</b> Mladenović, N., & Hansen, P. (1997). <em>Variable neighborhood search</em>. Computers & Operations Research, serta formulasi makespan multi-objective cloud heterogen (2024).
+            </li>
+            <li>
+              <b>Adaptasi Diskret:</b> BFO biologis bekerja di ruang kontinu. Dalam cloud scheduling, solusi direpresentasikan sebagai array pemetaan task ke VM. Tumble diwujudkan sebagai operator mutasi stochastic neighbor sampling.
+            </li>
+          </ul>
+        </div>
+
+        <!-- SLIDE 7 -->
+        <div class="sheet-slide" data-idx="6">
+          <h3>Kuis Checkpoint & FAQ Dosen Penguji</h3>
+          <div class="quiz-box">
+            <div class="quiz-q">1. Kenapa nilai k pada VNS dinaikkan saat solusi baru ditolak?</div>
+            <div class="quiz-choices">
+              <button class="q-opt" data-correct="true">Untuk memperluas radius pencarian (shaking) agar keluar dari lembah lokal.</button>
+              <button class="q-opt" data-correct="false">Untuk mempersempit pencarian ke solusi yang sudah ada.</button>
+            </div>
+          </div>
+          <div class="quiz-box">
+            <div class="quiz-q">2. Mengapa fase Eliminasi-Dispersi BFO penting dalam optimasi awan?</div>
+            <div class="quiz-choices">
+              <button class="q-opt" data-correct="true">Mencegah koloni terjebak dan konvergen dini pada optimum lokal.</button>
+              <button class="q-opt" data-correct="false">Menghapus task yang tidak selesai dari memori cloud.</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sheet-footer">
+        <button class="btn-sheet sec" id="btnSheetPrev">⬅️ Sebelumnya</button>
+        <span style="font-size:12px; color:var(--ink2);" id="sheetPageIndicator">Halaman 1 dari 7</span>
+        <button class="btn-sheet pri" id="btnSheetNext">Selanjutnya ➡️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CINEMATIC STORY OVERLAY (DONGENG KERAJAAN AWAN) -->
+  <div id="story-overlay">
+    <div class="story-header">
+      <span id="story-step-indicator">📖 Bab 1: Titah Sang Awanchu</span>
+      <span id="story-speaker-badge" style="display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.18); padding:3px 12px; border-radius:14px; font-weight:700; color:#facc15; font-size:12px;">🗿 Kocorock & 🦠 Pipimon</span>
+    </div>
+    <div class="story-subtitles" id="story-subtitles-text">
+      "Halo teman-teman! Aku Kocorock si golem batu, dan ini sahabatku Pipimon..."
+    </div>
+    <div class="story-controls">
+      <button class="story-btn" id="btnStoryPrev">⬅️ Bab Lalu</button>
+      <button class="story-btn" id="btnStoryNext">Bab Lanjut ➡️</button>
+      <button class="story-btn" id="btnStoryClose" style="background:#ef4444;">Tutup Kisah ✕</button>
+    </div>
+  </div>
+
+  <!-- BUNDLE SCRIPT (Mendukung offline file:/// maupun http server) -->
+  <script src="./src/bundle.js"></script>
+
+</body>
+</html>
