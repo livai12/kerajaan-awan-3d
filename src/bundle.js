@@ -2030,6 +2030,171 @@
         window.addEventListener('pointerdown', () => { hint.style.opacity = '0'; }, { once: true });
       }
 
+            // ==========================================
+      // PEER DRILL & AUDIENCE QUIZ MODAL LOGIC
+      // ==========================================
+      this.drillOverlay = document.getElementById('drill-overlay');
+      this.btnAudienceQuiz = document.getElementById('btnAudienceQuiz');
+      this.btnCloseDrill = document.getElementById('btnCloseDrill');
+      this.btnRollPeer = document.getElementById('btnRollPeer');
+      this.inputPeerPool = document.getElementById('inputPeerPool');
+      this.peerRollDisplay = document.getElementById('peerRollDisplay');
+
+      this.toggleDrillModal = () => {
+        if (!this.drillOverlay) return;
+        const isOpen = this.drillOverlay.classList.contains('open');
+        if (isOpen) {
+          this.drillOverlay.classList.remove('open');
+        } else {
+          this.drillOverlay.classList.add('open');
+          if (this.soundtrack && this.soundtrack.playChime) {
+            this.soundtrack.playChime(659.25, 0, 1.2, 0.15);
+          }
+        }
+      };
+
+      if (this.btnAudienceQuiz) {
+        this.btnAudienceQuiz.addEventListener('click', () => this.toggleDrillModal());
+      }
+      if (this.btnCloseDrill) {
+        this.btnCloseDrill.addEventListener('click', () => this.drillOverlay.classList.remove('open'));
+      }
+
+      // Close on backdrop click
+      if (this.drillOverlay) {
+        this.drillOverlay.addEventListener('click', (e) => {
+          if (e.target === this.drillOverlay) this.drillOverlay.classList.remove('open');
+        });
+      }
+
+      // 🎲 Peer Roulette Picker (Rolling Animation)
+      if (this.btnRollPeer) {
+        this.btnRollPeer.addEventListener('click', () => {
+          const raw = (this.inputPeerPool ? this.inputPeerPool.value : '').trim();
+          let candidates = [];
+          if (raw.toLowerCase().includes('presensi') || /^\d+\s*-\s*\d+$/.test(raw) || raw.includes('1 - 35')) {
+            const match = raw.match(/(\d+)\s*-\s*(\d+)/);
+            const start = match ? parseInt(match[1]) : 1;
+            const end = match ? parseInt(match[2]) : 35;
+            for (let i = start; i <= end; i++) candidates.push(`Nomor Presensi #${i}`);
+          } else if (raw.includes(',')) {
+            candidates = raw.split(',').map(s => s.trim()).filter(Boolean);
+          } else {
+            for (let i = 1; i <= 35; i++) candidates.push(`Nomor Presensi #${i}`);
+          }
+
+          let counter = 0;
+          this.btnRollPeer.disabled = true;
+          this.btnRollPeer.textContent = '🎲 Mengocok...';
+          const interval = setInterval(() => {
+            const randItem = candidates[Math.floor(Math.random() * candidates.length)];
+            if (this.peerRollDisplay) {
+              this.peerRollDisplay.textContent = `🎯 ${randItem}...`;
+              this.peerRollDisplay.style.background = '#fef3c7';
+              this.peerRollDisplay.style.color = '#b45309';
+            }
+            if (this.soundtrack && this.soundtrack.playChime && counter % 3 === 0) {
+              this.soundtrack.playChime(784 + (counter * 20), 0, 0.2, 0.08);
+            }
+            counter++;
+            if (counter > 14) {
+              clearInterval(interval);
+              const winner = candidates[Math.floor(Math.random() * candidates.length)];
+              if (this.peerRollDisplay) {
+                this.peerRollDisplay.textContent = `🎉 Terpilih: ${winner}!`;
+                this.peerRollDisplay.style.background = '#dcfce7';
+                this.peerRollDisplay.style.color = '#15803d';
+              }
+              if (this.soundtrack && this.soundtrack.playChime) {
+                this.soundtrack.playChime(1046.5, 0, 1.8, 0.2);
+              }
+              this.btnRollPeer.disabled = false;
+              this.btnRollPeer.textContent = '🎲 Putar / Kocok!';
+            }
+          }, 85);
+        });
+      }
+
+      // Case Tab Switching
+      const drillTabs = document.querySelectorAll('#drillTabs .drill-tab-btn');
+      drillTabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+          drillTabs.forEach(b => b.classList.remove('on'));
+          btn.classList.add('on');
+          const caseIdx = btn.getAttribute('data-case');
+          document.querySelectorAll('.drill-case').forEach(c => c.classList.remove('on'));
+          const targetCase = document.getElementById(`drillCase${caseIdx}`);
+          if (targetCase) targetCase.classList.add('on');
+        });
+      });
+
+      // 3D Camera Focus Handlers
+      const btnFocusBottleneck = document.getElementById('btnFocusBottleneck');
+      if (btnFocusBottleneck) {
+        btnFocusBottleneck.addEventListener('click', () => {
+          this.drillOverlay.classList.remove('open');
+          const loads = calculateVmLoads(this.vns.bestSolution, this.problem.tasks, this.problem.vms);
+          const maxIdx = loads.indexOf(Math.max(...loads));
+          if (this.world) {
+            this.world.setView('vns');
+            this.world.pokemonHopKocorock(maxIdx);
+            this.world.showBubble('kocorock', 'Perhatikan pulau ini! Kristal tugas menumpuk paling tinggi, menjadi bottleneck Makespan sistem!', 7000);
+          }
+          this.say("🎥 Kamera menyorot pulau dengan beban tugas paling tinggi (Bottleneck)!");
+        });
+      }
+
+      const btnFocusKocorock = document.getElementById('btnFocusKocorock');
+      if (btnFocusKocorock) {
+        btnFocusKocorock.addEventListener('click', () => {
+          this.drillOverlay.classList.remove('open');
+          if (this.world) {
+            this.world.setView('vns');
+            this.world.animateKocokShake(1, 1, 'Mengentakkan tongkat batu! Shaking radius k=1 untuk keluar dari optimum lokal.');
+          }
+          this.say("🎥 Kamera menyorot aksi jurus Shaking Kocorock (VNS)!");
+        });
+      }
+
+      const btnFocusPipimon = document.getElementById('btnFocusPipimon');
+      if (btnFocusPipimon) {
+        btnFocusPipimon.addEventListener('click', () => {
+          this.drillOverlay.classList.remove('open');
+          if (this.world) {
+            this.world.setView('bfo');
+            this.world.animatePipBest(0, 1, 'Koloni Pipimon berenang kemotaksis ke arah gradien nutrisi Makespan terendah!');
+          }
+          this.say("🎥 Kamera menyorot koloni berenang Pipimon (BFO)!");
+        });
+      }
+
+      const btnFocusLaser = document.getElementById('btnFocusLaser');
+      if (btnFocusLaser) {
+        btnFocusLaser.addEventListener('click', () => {
+          this.drillOverlay.classList.remove('open');
+          if (this.world) {
+            this.world.setView('both');
+            this.world.pokemonCelebrateAll();
+            this.world.showBubble('kocorock', 'Garis laser biru adalah Theoretical Lower Bound, batas bawah teoretis ideal!', 7000);
+          }
+          this.say("🎥 Kamera disejajarkan dengan garis laser Theoretical Lower Bound!");
+        });
+      }
+
+      // Voice reading for questions
+      const setupSpeakBtn = (btnId, text, speaker) => {
+        const b = document.getElementById(btnId);
+        if (b) {
+          b.addEventListener('click', () => {
+            this.speakWithBestIndonesianVoice(text, null, speaker);
+          });
+        }
+      };
+      setupSpeakBtn('btnSpeakQ1', 'Coba perhatikan salah satu pulau yang menjulang paling tinggi di Kerajaan Awan. Mengapa pulau tersebut lebih tinggi dibanding yang lain, dan mengapa Makespan sistem ditentukan oleh pulau ini?', 'kocorock');
+      setupSpeakBtn('btnSpeakQ2', 'Apa yang sebenarnya dilakukan Kocorock saat mengentakkan tongkat batunya? Bagaimana ia memutuskan kapan radius guncangan k diperbesar atau direset kembali?', 'kocorock');
+      setupSpeakBtn('btnSpeakQ3', 'Pipimon terdiri dari koloni banyak slime kecil yang berenang bersama. Mengapa ada fase berenang swim dan berguling tumble, serta apa yang terjadi saat fase reproduksi?', 'pipimon');
+      setupSpeakBtn('btnSpeakQ4', 'Apa fungsi garis laser horizontal biru yang melintang di atas pulau-pulau, dan mengapa Makespan jadwal mana pun tidak mungkin berada di bawah garis laser itu?', 'kocorock');
+
       // Keyboard Shortcuts
       window.addEventListener('keydown', (e) => {
         if (e.code === 'Space') {
@@ -2050,7 +2215,13 @@
           }
         } else if (e.key.toLowerCase() === 'f') {
           document.getElementById('btnFullscreen').click();
+        } else if (e.key.toLowerCase() === 'q') {
+          if (!this.inputPeerPool || document.activeElement !== this.inputPeerPool) {
+            e.preventDefault();
+            this.toggleDrillModal();
+          }
         } else if (e.key === 'Escape') {
+          if (this.drillOverlay) this.drillOverlay.classList.remove('open');
           this.sheetOverlay.classList.remove('open');
           this.pane2D.classList.remove('open');
         }
