@@ -1477,6 +1477,9 @@
       this.ctx = null;
       this.isPlaying = false;
       this.timer = null;
+      this.idleVolume = 0.30; // Clearly audible, warm, lush ambient presence when idle
+      this.duckVolume = 0.08; // Gentle background bed while characters speak
+      this.chordStep = 0;
     }
 
     init() {
@@ -1484,9 +1487,36 @@
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (AudioCtx) {
           this.ctx = new AudioCtx();
+
+          // Master Gain Node
           this.masterGain = this.ctx.createGain();
-          this.masterGain.gain.setValueAtTime(0.06, this.ctx.currentTime);
-          this.masterGain.connect(this.ctx.destination);
+          this.masterGain.gain.setValueAtTime(this.idleVolume, this.ctx.currentTime);
+
+          // Ethereal Delay / Space Reverb Bus for Cloud Kingdom atmosphere
+          this.delayNode = this.ctx.createDelay();
+          this.delayNode.delayTime.value = 0.38;
+
+          this.feedbackGain = this.ctx.createGain();
+          this.feedbackGain.gain.value = 0.35;
+
+          this.delayFilter = this.ctx.createBiquadFilter();
+          this.delayFilter.type = 'lowpass';
+          this.delayFilter.frequency.value = 1600;
+
+          // Connect Delay Loop
+          this.delayNode.connect(this.delayFilter);
+          this.delayFilter.connect(this.feedbackGain);
+          this.feedbackGain.connect(this.delayNode);
+          this.delayFilter.connect(this.masterGain);
+
+          // Warm Master Filter (smooth analog feel, eliminates digital harshness)
+          this.masterFilter = this.ctx.createBiquadFilter();
+          this.masterFilter.type = 'lowpass';
+          this.masterFilter.frequency.value = 4800;
+          this.masterFilter.Q.value = 0.7;
+
+          this.masterGain.connect(this.masterFilter);
+          this.masterFilter.connect(this.ctx.destination);
         }
       }
     }
@@ -1494,71 +1524,181 @@
     start() {
       this.init();
       if (!this.ctx) return;
-      if (this.ctx.state === 'suspended') this.ctx.resume();
+      if (this.ctx.state === 'suspended') {
+        this.ctx.resume();
+      }
       if (!this.isPlaying) {
         this.isPlaying = true;
+        this.restoreVolume();
         this.playChordSequence();
+      }
+    }
+
+    stop() {
+      if (this.timer) clearTimeout(this.timer);
+      this.timer = null;
+      this.isPlaying = false;
+      if (this.masterGain && this.ctx) {
+        this.masterGain.gain.cancelScheduledValues(this.ctx.currentTime);
+        this.masterGain.gain.setTargetAtTime(0.0001, this.ctx.currentTime, 0.25);
       }
     }
 
     toggle() {
-      this.init();
-      if (!this.ctx) return false;
-      if (this.ctx.state === 'suspended') this.ctx.resume();
-
-      this.isPlaying = !this.isPlaying;
       if (this.isPlaying) {
-        this.playChordSequence();
+        this.stop();
+        return false;
       } else {
-        if (this.timer) clearTimeout(this.timer);
+        this.start();
+        return true;
       }
-      return this.isPlaying;
     }
 
-    playNote(freq, dur, gainVal = 0.04) {
+    duck() {
+      if (!this.ctx || !this.masterGain) return;
+      this.masterGain.gain.cancelScheduledValues(this.ctx.currentTime);
+      this.masterGain.gain.setTargetAtTime(this.duckVolume, this.ctx.currentTime, 0.15);
+    }
+
+    restoreVolume() {
+      if (!this.ctx || !this.masterGain) return;
+      this.masterGain.gain.cancelScheduledValues(this.ctx.currentTime);
+      this.masterGain.gain.setTargetAtTime(this.idleVolume, this.ctx.currentTime, 0.45);
+    }
+
+    // Warm Ambient Pad Layer (Dual-Oscillator Sine + Triangle with 800Hz lowpass filter)
+    playPad(frequencies, duration = 3.8) {
       if (!this.ctx || !this.isPlaying) return;
+      const now = this.ctx.currentTime;
+
+      frequencies.forEach((freq) => {
+        const osc1 = this.ctx.createOscillator();
+        const osc2 = this.ctx.createOscillator();
+        const padFilter = this.ctx.createBiquadFilter();
+        const gain = this.ctx.createGain();
+
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(freq, now);
+
+        osc2.type = 'triangle';
+        osc2.frequency.setValueAtTime(freq * 1.002, now); // Subtle celestial detune shimmer
+
+        padFilter.type = 'lowpass';
+        padFilter.frequency.setValueAtTime(800, now);
+
+        // Smooth swell & crossfade
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.linearRampToValueAtTime(0.075, now + 0.6);
+        gain.gain.setValueAtTime(0.075, now + duration - 1.0);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+        osc1.connect(padFilter);
+        osc2.connect(padFilter);
+        padFilter.connect(gain);
+        gain.connect(this.masterGain);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + duration + 0.1);
+        osc2.stop(now + duration + 0.1);
+      });
+    }
+
+    // Deep Gentle Sub/Mid Bass Root
+    playBass(freq, duration = 3.4) {
+      if (!this.ctx || !this.isPlaying) return;
+      const now = this.ctx.currentTime;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
 
-      gain.gain.setValueAtTime(0.001, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(gainVal, this.ctx.currentTime + 0.12);
-      gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + dur);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.linearRampToValueAtTime(0.14, now + 0.3);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
       osc.connect(gain);
-      if (this.masterGain) {
-        gain.connect(this.masterGain);
-      } else {
-        gain.connect(this.ctx.destination);
-      }
-      osc.start();
-      osc.stop(this.ctx.currentTime + dur + 0.1);
+      gain.connect(this.masterGain);
+
+      osc.start(now);
+      osc.stop(now + duration + 0.1);
+    }
+
+    // Sparkling Music Box / Harp Chime
+    playChime(freq, delaySeconds = 0, duration = 2.4, gainVal = 0.11) {
+      if (!this.ctx || !this.isPlaying) return;
+      const now = this.ctx.currentTime + delaySeconds;
+
+      const osc1 = this.ctx.createOscillator();
+      const osc2 = this.ctx.createOscillator();
+      const chimeGain = this.ctx.createGain();
+
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(freq, now);
+
+      // Soft harmonic sparkle (2nd overtone)
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(freq * 2.0, now);
+
+      chimeGain.gain.setValueAtTime(0.0001, now);
+      chimeGain.gain.exponentialRampToValueAtTime(gainVal, now + 0.02);
+      chimeGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+      osc1.connect(chimeGain);
+      osc2.connect(chimeGain);
+
+      chimeGain.connect(this.masterGain);
+      if (this.delayNode) chimeGain.connect(this.delayNode);
+
+      osc1.start(now);
+      osc2.start(now);
+      osc1.stop(now + duration + 0.1);
+      osc2.stop(now + duration + 0.1);
     }
 
     playChordSequence() {
       if (!this.isPlaying) return;
-      // Dreamy Ghibli/Pokemon Pentatonic Chords: Cmaj7, Am9, Fmaj7, G9
-      const chords = [
-        [261.63, 329.63, 392.00, 493.88],
-        [220.00, 261.63, 329.63, 392.00],
-        [174.61, 220.00, 261.63, 329.63],
-        [196.00, 246.94, 293.66, 392.00]
+
+      // Nostalgic Ghibli / Pokemon Route Sky Fantasy Progression
+      const chordSheet = [
+        // 1. Cmaj9 (Fresh morning sky)
+        { bass: 65.41, pad: [261.63, 329.63, 392.00, 493.88], chimes: [523.25, 659.25, 783.99, 987.77] },
+        // 2. Am9 (Gentle breeze over the islands)
+        { bass: 55.00, pad: [220.00, 261.63, 329.63, 392.00], chimes: [659.25, 783.99, 880.00, 1046.50] },
+        // 3. Fmaj7#11 (Wondrous floating kingdom)
+        { bass: 87.31, pad: [261.63, 329.63, 370.00, 440.00], chimes: [740.00, 880.00, 987.77, 1318.51] },
+        // 4. Gsus4 -> G9 (Optimistic horizon)
+        { bass: 98.00, pad: [293.66, 392.00, 440.00, 523.25], chimes: [783.99, 880.00, 987.77, 1174.66] },
+        // 5. Em7 (Peaceful clouds)
+        { bass: 82.41, pad: [246.94, 329.63, 392.00, 493.88], chimes: [659.25, 783.99, 987.77, 1174.66] },
+        // 6. Dm9 (Whimsical adventure)
+        { bass: 73.42, pad: [220.00, 261.63, 293.66, 349.23], chimes: [587.33, 698.46, 880.00, 1046.50] }
       ];
-      const chord = chords[Math.floor(Math.random() * chords.length)];
-      chord.forEach((freq, i) => {
-        setTimeout(() => {
-          this.playNote(freq * 1.5, 3.0, 0.035);
-        }, i * 220);
+
+      const currentChord = chordSheet[this.chordStep % chordSheet.length];
+      this.chordStep++;
+
+      // 1. Play warm sub-bass
+      this.playBass(currentChord.bass, 3.4);
+
+      // 2. Play warm ambient chord pad
+      this.playPad(currentChord.pad, 3.8);
+
+      // 3. Play light fairy bell arpeggios
+      currentChord.chimes.forEach((f, idx) => {
+        const offset = 0.25 + idx * 0.42 + (Math.random() * 0.08);
+        this.playChime(f, offset, 2.2, 0.11);
       });
 
-      // Harp bell melody note
-      const bells = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50];
-      setTimeout(() => {
-        this.playNote(bells[Math.floor(Math.random() * bells.length)], 3.2, 0.03);
-      }, 950);
+      // Occasional extra sweet high bell at beat 2.1s
+      if (Math.random() > 0.35) {
+        const highBell = currentChord.chimes[Math.floor(Math.random() * currentChord.chimes.length)] * 1.5;
+        this.playChime(highBell, 2.1, 2.4, 0.08);
+      }
 
-      this.timer = setTimeout(() => this.playChordSequence(), 2400);
+      // Seamless crossfade into the next chord
+      this.timer = setTimeout(() => this.playChordSequence(), 3200);
     }
   }
 
@@ -1777,12 +1917,30 @@
 
       // Fantasy Ambient Music (Web Audio API)
       if (this.btnMusic) {
-        this.btnMusic.addEventListener('click', () => {
+        this.btnMusic.addEventListener('click', (e) => {
+          e.stopPropagation();
           const isPlaying = this.soundtrack.toggle();
           this.btnMusic.classList.toggle('on', isPlaying);
-          this.btnMusic.textContent = isPlaying ? '🎵 Musik: ON' : '🔇 Musik: OFF';
+          this.btnMusic.setAttribute('title', isPlaying ? 'Musik Fantasi Awan: AKTIF (Klik untuk Mematikan)' : 'Musik Fantasi Awan: NONAKTIF (Klik untuk Menyalakan)');
         });
       }
+
+      // Auto-start ambient fantasy backsound on first user gesture anywhere (pointerdown, click, touch, keydown)
+      const startMusicOnFirstGesture = () => {
+        if (this.soundtrack && !this.soundtrack.isPlaying) {
+          this.soundtrack.start();
+          if (this.btnMusic) {
+            this.btnMusic.classList.add('on');
+            this.btnMusic.setAttribute('title', 'Musik Fantasi Awan: AKTIF (Klik untuk Mematikan)');
+          }
+        }
+        ['pointerdown', 'click', 'keydown', 'touchstart'].forEach(evt => {
+          window.removeEventListener(evt, startMusicOnFirstGesture);
+        });
+      };
+      ['pointerdown', 'click', 'keydown', 'touchstart'].forEach(evt => {
+        window.addEventListener(evt, startMusicOnFirstGesture, { passive: true });
+      });
 
       // Cinematic Story Tour Mode
       if (this.btnStoryTour) {
@@ -2023,7 +2181,7 @@
         this.soundtrack.start();
         if (this.btnMusic) {
           this.btnMusic.classList.add('on');
-          this.btnMusic.textContent = '🎵 Musik: ON';
+          this.btnMusic.setAttribute('title', 'Musik Fantasi Awan: AKTIF (Klik untuk Mematikan)');
         }
       }
       this.playStoryChapter(0);
@@ -2037,8 +2195,8 @@
         this.currentAudioSource = null;
       }
       if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-      if (this.soundtrack && this.soundtrack.masterGain) {
-        this.soundtrack.masterGain.gain.setValueAtTime(0.06, this.soundtrack.ctx.currentTime);
+      if (this.soundtrack) {
+        this.soundtrack.restoreVolume();
       }
     }
 
@@ -2160,13 +2318,13 @@
       }
 
       // Duck background soundtrack volume smoothly
-      if (this.soundtrack && this.soundtrack.masterGain) {
-        this.soundtrack.masterGain.gain.setValueAtTime(0.012, this.soundtrack.ctx.currentTime);
+      if (this.soundtrack) {
+        this.soundtrack.duck();
       }
 
       const restoreMusicAndAutoNext = () => {
-        if (this.soundtrack && this.soundtrack.masterGain) {
-          this.soundtrack.masterGain.gain.setValueAtTime(0.06, this.soundtrack.ctx.currentTime);
+        if (this.soundtrack) {
+          this.soundtrack.restoreVolume();
         }
         // Auto-next timer after narration completes: 5s!
         this.startAutoNextCountdown(5);
