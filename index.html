@@ -1462,10 +1462,10 @@
     <div class="drill-card">
       <div class="drill-top">
         <div class="drill-top-title">
-          <span style="font-size:22px;">🎯</span>
+          <span style="font-size:24px;">✨</span>
           <div>
-            <div style="font-size:17px; font-weight:800; color:#92400e;">Mode Interaktif: Uji Audiens &amp; Bedah Pemahaman 3D</div>
-            <div style="font-size:11.5px; font-weight:500; color:#b45309;">Pedagogi Aktif Sidang: Tunjuk Teman, Sorot Objek Spasial 3D, &amp; Bedah Bertahap Jika Belum Paham</div>
+            <div style="font-size:18px; font-weight:800; color:#92400e;">Tanya Teman &amp; Bedah Konsep Awan</div>
+            <div style="font-size:12px; font-weight:600; color:#b45309;">Tunjuk teman untuk menjelaskan kembali materi, lalu bedah bersama jika masih bingung!</div>
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
@@ -1480,7 +1480,7 @@
           <span style="font-weight:700; font-size:13px; color:#1e293b; display:flex; align-items:center; gap:5px;">
             <span>🎲</span> Tunjuk Teman:
           </span>
-          <input type="text" id="inputPeerPool" value="Presensi 1 - 35" style="height:32px; padding:0 10px; border-radius:8px; border:1px solid #cbd5e1; font-size:12.5px; width:160px; outline:none;" title="Ketik nomor presensi atau daftar nama (pisahkan koma)">
+          <input type="text" id="inputPeerPool" value="Presensi 1 - 35" style="height:32px; padding:0 10px; border-radius:8px; border:1px solid #cbd5e1; font-size:12.5px; width:160px; outline:none;" title="Ketik nomor presensi atau nama teman">
           <button id="btnRollPeer" style="height:32px; padding:0 14px; border-radius:8px; background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:#ffffff; border:none; font-weight:700; font-size:12px; cursor:pointer; box-shadow:0 2px 6px rgba(245,158,11,0.25);">🎲 Putar / Kocok!</button>
         </div>
         <div id="peerRollDisplay" style="font-weight:800; font-size:13.5px; color:#0369a1; background:#e0f2fe; padding:6px 14px; border-radius:10px; border:1px solid #bae6fd; min-width:180px; text-align:center;">
@@ -1488,25 +1488,35 @@
         </div>
       </div>
 
-      <!-- Navigasi 4 Kasus Uji -->
-      <div class="drill-nav-tabs" id="drillTabs">
-        <button class="drill-tab-btn on" data-case="0">🏝️ 1. Pulau Bottleneck &amp; Makespan</button>
-        <button class="drill-tab-btn" data-case="1">🪨 2. Shaking Kocorock (VNS)</button>
-        <button class="drill-tab-btn" data-case="2">🦠 3. Kemotaksis Pipimon (BFO)</button>
-        <button class="drill-tab-btn" data-case="3">📏 4. Garis Laser Lower Bound</button>
+      <!-- Navigasi 4 Kasus Uji (Grid 4 Kolom Rapi Tanpa Scrollbar) -->
+      <div class="drill-nav-tabs" id="drillTabs" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; padding:10px 24px; background:#f1f5f9; border-bottom:1px solid #e2e8f0;">
+        <button class="drill-tab-btn on" data-case="0" style="text-align:center; padding:8px 6px;">
+          🏝️ 1. Makespan &amp; Pulau<br><span style="font-size:10px; opacity:0.85; font-weight:500;">(Slide 2 &amp; 6)</span>
+        </button>
+        <button class="drill-tab-btn" data-case="1" style="text-align:center; padding:8px 6px;">
+          🪨 2. Shaking Kocorock<br><span style="font-size:10px; opacity:0.85; font-weight:500;">(Slide 3 - VNS)</span>
+        </button>
+        <button class="drill-tab-btn" data-case="2" style="text-align:center; padding:8px 6px;">
+          🦠 3. Kemotaksis Pipimon<br><span style="font-size:10px; opacity:0.85; font-weight:500;">(Slide 4 - BFO)</span>
+        </button>
+        <button class="drill-tab-btn" data-case="3" style="text-align:center; padding:8px 6px;">
+          📏 4. Garis Laser Ideal<br><span style="font-size:10px; opacity:0.85; font-weight:500;">(Slide 2 &amp; 6)</span>
+        </button>
       </div>
 
       <div class="drill-body">
         <!-- KASUS 1: BOTTLENECK & MAKESPAN -->
         <div class="drill-case on" id="drillCase0">
-          <div class="drill-q-box">
-            <div style="font-size:11.5px; font-weight:700; color:#d97706; text-transform:uppercase; margin-bottom:4px;">Pertanyaan Uji Audiens (Kasus 1)</div>
-            <div class="drill-q-text">
-              "Coba perhatikan salah satu pulau yang menjulang paling tinggi di Kerajaan Awan. Mengapa pulau tersebut lebih tinggi dibanding yang lain, dan mengapa Makespan sistem ditentukan oleh pulau ini?"
+          <div class="drill-q-box" style="background:#fffbeb; border:1px solid #fef3c7; border-left:5px solid #f59e0b; border-radius:14px; padding:16px 20px; margin-bottom:18px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+              <span style="font-size:11.5px; font-weight:800; color:#d97706; text-transform:uppercase;">Pertanyaan untuk Teman (Kasus 1)</span>
+              <a href="presentasi.html" target="_blank" style="font-size:11px; font-weight:700; color:#0369a1; text-decoration:none; background:#e0f2fe; padding:3px 8px; border-radius:6px;">📖 Tertera di Slide 2 &amp; 6 ↗</a>
+            </div>
+            <div class="drill-q-text" style="font-size:16px; font-weight:800; color:#0f172a; line-height:1.45; margin-bottom:12px;">
+              "Coba jelaskan lagi pengertian Makespan dan kenapa pulau yang tinggi menjadi masalah?"
             </div>
             <div class="drill-actions">
               <button class="drill-btn-act drill-btn-cam" id="btnFocusBottleneck">
-                <svg viewBox="0 0 24 24" style="width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2;"><circle cx="12" cy="12" r="10"></circle><polygon points="12 8 8 12 12 16 12 8"></polygon></svg>
                 <span>🎥 Sorot Pulau Tertinggi (3D Zoom)</span>
               </button>
               <button class="drill-btn-act drill-btn-speak" id="btnSpeakQ1">
@@ -1515,50 +1525,51 @@
             </div>
           </div>
 
-          <!-- Bedah Bertahap -->
-          <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-            <span>💡</span> Panduan Bedah Pemahaman (Jika Teman Belum Paham):
+          <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+            <span>💡</span> Panduan Bedah Bersama (Jika Teman Masih Bingung):
           </div>
 
           <div class="drill-breakdown-levels">
             <div class="drill-level-card">
               <div class="drill-level-hdr l1">
-                <span>🟢 Level 1: Analogi Sederhana (Pemula / ELI5)</span>
-                <span>Analogi Pelabuhan Kontainer</span>
+                <span>💡 Penjelasan Singkat (Bahasa Santai)</span>
+                <span>Analogi Pelabuhan Peti Kemas</span>
               </div>
               <div class="drill-level-body">
-                Bayangkan Kerajaan Awan adalah pelabuhan peti kemas. Setiap pulau adalah dermaga bongkar muat, dan kristal adalah peti kemas. Kalau semua kapal menurunkan barang ke Dermaga 1, dermaga itu akan macet total (bottleneck), sedangkan dermaga lainnya menganggur. Waktu kapal terakhir selesai dibongkar itulah yang disebut <strong>Makespan</strong>.
+                Pulau itu seperti dermaga pelabuhan peti kemas. Kalau semua barang ditumpuk di satu dermaga, dermaga itu akan macet total (bottleneck) sementara dermaga lain kosong menganggur. Waktu selesainya kapal terakhir itulah yang disebut <strong>Makespan</strong>.
               </div>
             </div>
 
             <div class="drill-level-card">
               <div class="drill-level-hdr l2">
-                <span>🔵 Level 2: Translasi Visual Spasial 3D</span>
-                <span>Metafora Beban Akumulasi</span>
+                <span>🎨 Yang Terlihat di Layar 3D</span>
+                <span>Tinggi Pulau &amp; Beban Tugas</span>
               </div>
               <div class="drill-level-body">
-                Tinggi pulau awan berbanding lurus dengan akumulasi waktu komputasi tugas ($L_i = \sum ETC(i,j)$). Semakin lambat kecepatan CPU MIPS atau semakin panjang instruksi kristal tugas yang ditumpuk, semakin tinggi pulau melayang. Bendera merah di atas pulau menandakan status beban paling kritis.
+                Tinggi pulau awan menunjukkan total akumulasi waktu tugas yang diberikan ke mesin tersebut. Semakin tinggi pulau, semakin lama mesin itu bekerja. Bendera merah menandakan pulau yang bebannya paling kritis dan menentukan Makespan keseluruhan!
               </div>
             </div>
 
             <div class="drill-level-card">
               <div class="drill-level-hdr l3">
-                <span>🟣 Level 3: Formulasi Matematika &amp; Penilaian Dosen</span>
-                <span>Fungsi Objektif Minimax</span>
+                <span>📐 Rumus di Slide 2 &amp; 6 (Biar Jawaban Lengkap)</span>
+                <span>Formulasi Matematis ETC &amp; Minimax</span>
               </div>
               <div class="drill-level-body">
-                Fungsi objektif formal: $\min f(x) = \max_{i \in \{1..m\}} L_i$. Algoritma optimasi bertugas meminimalkan puncak tertinggi (minimax), bukan sekadar rata-rata beban. Selain itu, sebaran beban diukur melalui metrik <em>Degree of Imbalance (DI)</em>: $DI = \frac{L_{\max} - L_{\min}}{L_{\text{avg}}}$.
+                • <strong>Waktu Eksekusi:</strong> ETC(i, j) = Panjang Instruksi Tugas (MI) / Kecepatan Mesin (MIPS)<br>
+                • <strong>Beban Total Mesin L_i:</strong> Penjumlahan waktu seluruh tugas di pulau tersebut.<br>
+                • <strong>Makespan:</strong> f(x) = max(L_1, L_2, ..., L_m). Tujuan algoritma adalah memperkecil puncak tertinggi ini!
               </div>
             </div>
 
             <div class="drill-level-card">
               <div class="drill-level-hdr defense">
-                <span>🎓 Kunci Jawaban Penguji (Presenter Quick-Cue)</span>
-                <span>Poin Penilaian Dosen</span>
+                <span>🎯 Poin Kunci untuk Dosen</span>
+                <span>Kata Kunci Penilaian</span>
               </div>
               <div class="drill-level-body" style="background:#fffaf5;">
-                <strong>Kata Kunci yang Dinilai:</strong> <em>Makespan, Bottleneck, Worst-Case Execution, Degree of Imbalance (DI)</em>.<br>
-                <strong>Kriteria Jawaban Tuntas:</strong> Teman memahami bahwa sistem komputasi cloud tidak dinilai dari rata-rata beban, melainkan dari waktu penyelesaian tugas terakhir yang paling lambat.
+                <strong>Kata Kunci:</strong> <em>Makespan, Bottleneck, Degree of Imbalance (DI)</em>.<br>
+                Sistem cloud dinilai dari tugas terakhir yang paling lambat selesai, bukan rata-rata beban. Kita ingin beban terbagi seimbang antar semua mesin.
               </div>
             </div>
           </div>
@@ -1566,14 +1577,16 @@
 
         <!-- KASUS 2: SHAKING KOCOROCK (VNS) -->
         <div class="drill-case" id="drillCase1">
-          <div class="drill-q-box">
-            <div style="font-size:11.5px; font-weight:700; color:#d97706; text-transform:uppercase; margin-bottom:4px;">Pertanyaan Uji Audiens (Kasus 2)</div>
-            <div class="drill-q-text">
-              "Apa yang sebenarnya dilakukan Kocorock saat mengentakkan tongkat batunya? Bagaimana ia memutuskan kapan radius guncangan k diperbesar dari k=1 ke k=2 atau direset kembali ke k=1?"
+          <div class="drill-q-box" style="background:#fffbeb; border:1px solid #fef3c7; border-left:5px solid #f59e0b; border-radius:14px; padding:16px 20px; margin-bottom:18px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+              <span style="font-size:11.5px; font-weight:800; color:#d97706; text-transform:uppercase;">Pertanyaan untuk Teman (Kasus 2)</span>
+              <a href="presentasi.html" target="_blank" style="font-size:11px; font-weight:700; color:#0369a1; text-decoration:none; background:#e0f2fe; padding:3px 8px; border-radius:6px;">📖 Tertera di Slide 3 ↗</a>
+            </div>
+            <div class="drill-q-text" style="font-size:16px; font-weight:800; color:#0f172a; line-height:1.45; margin-bottom:12px;">
+              "Coba jelaskan lagi pengertian Shaking pada Kocorock (VNS) saat mengentakkan tongkat!"
             </div>
             <div class="drill-actions">
               <button class="drill-btn-act drill-btn-cam" id="btnFocusKocorock">
-                <svg viewBox="0 0 24 24" style="width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2;"><circle cx="12" cy="12" r="10"></circle><polygon points="12 8 8 12 12 16 12 8"></polygon></svg>
                 <span>🎥 Sorot Aksi Kocorock (3D Zoom)</span>
               </button>
               <button class="drill-btn-act drill-btn-speak" id="btnSpeakQ2">
@@ -1582,49 +1595,50 @@
             </div>
           </div>
 
-          <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-            <span>💡</span> Panduan Bedah Pemahaman (Jika Teman Belum Paham):
+          <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+            <span>💡</span> Panduan Bedah Bersama (Jika Teman Masih Bingung):
           </div>
 
           <div class="drill-breakdown-levels">
             <div class="drill-level-card">
               <div class="drill-level-hdr l1">
-                <span>🟢 Level 1: Analogi Sederhana (Pemula / ELI5)</span>
+                <span>💡 Penjelasan Singkat (Bahasa Santai)</span>
                 <span>Analogi Mengocok Toples Permen</span>
               </div>
               <div class="drill-level-body">
-                Seperti mengocok toples permen yang macet. Kalau permen tersangkut di sudut (optimum lokal), kita guncang perlahan ($k=1$). Kalau masih macet, kita guncang lebih kuat ($k=2, k=3$). Begitu permen tertata rapi dan lebih padat, kekuatan guncangan langsung kita kembalikan lagi ke awal ($k=1$).
+                Seperti mengocok toples permen yang macet. Kalau susunan permen tersangkut di sudut (optimum lokal), Kocorock mengguncang dengan kekuatan k=1. Kalau masih belum membaik, diguncang lebih keras (k=2). Begitu susunannya membaik, kekuatan guncangan langsung dikembalikan ke k=1!
               </div>
             </div>
 
             <div class="drill-level-card">
               <div class="drill-level-hdr l2">
-                <span>🔵 Level 2: Translasi Visual Spasial 3D</span>
+                <span>🎨 Yang Terlihat di Layar 3D</span>
                 <span>Perpindahan Kristal Tugas</span>
               </div>
               <div class="drill-level-body">
-                Saat tongkat dihentakkan, Kocorock mencabut 1 kristal dari pulau terbebani dan meletakkannya di pulau yang lebih luang. Jika tinggi pulau tertinggi berhasil turun (Makespan membaik), aura emas menyala di tongkat dan solusi baru langsung diadopsi.
+                Saat tongkat dihentakkan, Kocorock memindahkan kristal tugas dari pulau yang penuh ke pulau yang lebih luang. Jika pulau tertinggi berhasil turun (Makespan membaik), aura emas menyala di tongkat Kocorock dan jadwal baru langsung dipakai.
               </div>
             </div>
 
             <div class="drill-level-card">
               <div class="drill-level-hdr l3">
-                <span>🟣 Level 3: Formulasi Matematika &amp; Penilaian Dosen</span>
-                <span>First-Improvement Descent &amp; Neighborhood Change</span>
+                <span>📐 Konsep di Slide 3 (Biar Jawaban Lengkap)</span>
+                <span>Struktur Lingkungan &amp; First-Improvement</span>
               </div>
               <div class="drill-level-body">
-                VNS menggunakan aturan <em>First-Improvement</em>: solusi tetangga $x' \in N_k(x)$ langsung diterima jika $f(x') < f(x)$, menghemat Number of Fitness Evaluations (NFE). Aturan pergantian radius: jika membaik maka $x \leftarrow x'$ dan $k \leftarrow 1$ (intensifikasi); jika stagnan maka $k \leftarrow k + 1$ (diversifikasi untuk melompat dari jebakan lokal).
+                • <strong>First-Improvement:</strong> Begitu menemukan susunan tugas yang Makespan-nya lebih cepat, langsung diterima tanpa menunggu.<br>
+                • <strong>Perubahan Radius (k=1, 2, 3):</strong> Jika hasil guncangan tidak membaik, perbesar k (diversifikasi) agar algoritma bisa melompat keluar dari jebakan optimum lokal!
               </div>
             </div>
 
             <div class="drill-level-card">
               <div class="drill-level-hdr defense">
-                <span>🎓 Kunci Jawaban Penguji (Presenter Quick-Cue)</span>
-                <span>Poin Penilaian Dosen</span>
+                <span>🎯 Poin Kunci untuk Dosen</span>
+                <span>Kata Kunci Penilaian</span>
               </div>
               <div class="drill-level-body" style="background:#fffaf5;">
-                <strong>Kata Kunci yang Dinilai:</strong> <em>Shaking, Neighborhood Structure N1..N3, First-Improvement, Diversifikasi vs Intensifikasi</em>.<br>
-                <strong>Kriteria Jawaban Tuntas:</strong> Teman dapat menjelaskan bahwa pembesaran $k$ bertujuan meloloskan algoritma dari jebakan optimum lokal.
+                <strong>Kata Kunci:</strong> <em>Shaking, Neighborhood Change, First-Improvement, Diversifikasi vs Intensifikasi</em>.<br>
+                VNS adalah algoritma lintasan tunggal (Single Trajectory) yang efisien di ruang diskrit tanpa parameter rumit.
               </div>
             </div>
           </div>
@@ -1632,14 +1646,16 @@
 
         <!-- KASUS 3: KEMOTAKSIS PIPIMON (BFO) -->
         <div class="drill-case" id="drillCase2">
-          <div class="drill-q-box">
-            <div style="font-size:11.5px; font-weight:700; color:#d97706; text-transform:uppercase; margin-bottom:4px;">Pertanyaan Uji Audiens (Kasus 3)</div>
-            <div class="drill-q-text">
-              "Pipimon terdiri dari koloni banyak slime kecil yang berenang bersama. Mengapa ada fase berenang terarah (swim) dan berguling acak (tumble), serta apa yang terjadi saat fase reproduksi?"
+          <div class="drill-q-box" style="background:#fffbeb; border:1px solid #fef3c7; border-left:5px solid #f59e0b; border-radius:14px; padding:16px 20px; margin-bottom:18px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+              <span style="font-size:11.5px; font-weight:800; color:#d97706; text-transform:uppercase;">Pertanyaan untuk Teman (Kasus 3)</span>
+              <a href="presentasi.html" target="_blank" style="font-size:11px; font-weight:700; color:#0369a1; text-decoration:none; background:#e0f2fe; padding:3px 8px; border-radius:6px;">📖 Tertera di Slide 4 ↗</a>
+            </div>
+            <div class="drill-q-text" style="font-size:16px; font-weight:800; color:#0f172a; line-height:1.45; margin-bottom:12px;">
+              "Coba jelaskan lagi pengertian Kemotaksis pada Pipimon (BFO) saat berenang mencari nutrisi!"
             </div>
             <div class="drill-actions">
               <button class="drill-btn-act drill-btn-cam" id="btnFocusPipimon">
-                <svg viewBox="0 0 24 24" style="width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2;"><circle cx="12" cy="12" r="10"></circle><polygon points="12 8 8 12 12 16 12 8"></polygon></svg>
                 <span>🎥 Sorot Koloni Pipimon (3D Zoom)</span>
               </button>
               <button class="drill-btn-act drill-btn-speak" id="btnSpeakQ3">
@@ -1648,49 +1664,51 @@
             </div>
           </div>
 
-          <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-            <span>💡</span> Panduan Bedah Pemahaman (Jika Teman Belum Paham):
+          <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+            <span>💡</span> Panduan Bedah Bersama (Jika Teman Masih Bingung):
           </div>
 
           <div class="drill-breakdown-levels">
             <div class="drill-level-card">
               <div class="drill-level-hdr l1">
-                <span>🟢 Level 1: Analogi Sederhana (Pemula / ELI5)</span>
-                <span>Analogi Kawanan Lebah Pencari Nektar</span>
+                <span>💡 Penjelasan Singkat (Bahasa Santai)</span>
+                <span>Analogi Kawanan Lebah Madu</span>
               </div>
               <div class="drill-level-body">
-                Seperti kawanan lebah mencari nektar. Lebah yang mencium bunga manis akan terbang lurus mendekatinya (swim/run). Jika baunya hilang, ia terbang acak mencari arah baru (tumble). Pada akhir hari, lebah yang paling kenyang akan melahirkan keturunan baru, menggantikan lebah yang lemas.
+                Seperti kawanan lebah mencari nektar bunga. Pipimon yang mencium aroma nektar manis (Makespan rendah) akan berenang lurus ke arah itu (swim/run). Kalau aromanya hilang, ia akan berguling acak mencari arah baru (tumble). Pada akhir hari, Pipimon paling sehat akan membelah diri melahirkan keturunan baru (reproduksi)!
               </div>
             </div>
 
             <div class="drill-level-card">
               <div class="drill-level-hdr l2">
-                <span>🔵 Level 2: Translasi Visual Spasial 3D</span>
-                <span>Koloni Bakteri &amp; Mahkota Emas</span>
+                <span>🎨 Yang Terlihat di Layar 3D</span>
+                <span>Koloni Slime &amp; Mahkota Emas</span>
               </div>
               <div class="drill-level-body">
-                Setiap Pipimon kecil di pulau kanan mewakili 1 solusi penjadwalan alternatif. Pipimon bermahkota emas adalah bakteri dengan Makespan terbaik. Pada fase reproduksi, setengah Pipimon terlemah lenyap dan digantikan kloning Pipimon unggul yang membelah diri.
+                Setiap slime Pipimon kecil di pulau kanan mewakili satu alternatif jadwal tugas. Pipimon yang memakai mahkota emas adalah bakteri dengan Makespan tercepat saat ini.
               </div>
             </div>
 
             <div class="drill-level-card">
               <div class="drill-level-hdr l3">
-                <span>🟣 Level 3: Formulasi Matematika &amp; Penilaian Dosen</span>
-                <span>Kemotaksis Vektor &amp; Diskritisasi SPV</span>
+                <span>📐 Konsep di Slide 4 (Biar Jawaban Lengkap)</span>
+                <span>Kemotaksis, Reproduksi, &amp; Diskritisasi SPV</span>
               </div>
               <div class="drill-level-body">
-                Persamaan gerak kemotaksis: $\theta^i(j+1, k, l) = \theta^i(j, k, l) + C(i) \frac{\Delta(i)}{\sqrt{\Delta^T(i)\Delta(i)}}$. Karena BFO aslinya kontinu, kami menerapkan <em>Smallest Position Value (SPV)</em> untuk memetakan vektor kontinu ke penugasan tugas diskrit. Akumulasi kesehatan: $J_{\text{health}}^i = \sum_{j=1}^{N_c} J(i, j, k, l)$.
+                • <strong>Kemotaksis:</strong> Gabungan gerakan berenang terarah (swim) dan berguling acak (tumble) menuju gradien nutrisi.<br>
+                • <strong>Reproduksi:</strong> Separuh koloni dengan performa terburuk dieliminasi, separuh terbaik membelah diri.<br>
+                • <strong>SPV (Smallest Position Value):</strong> Metode pengurutan untuk memetakan koordinat renang kontinu ke penugasan tugas diskrit di VM.
               </div>
             </div>
 
             <div class="drill-level-card">
               <div class="drill-level-hdr defense">
-                <span>🎓 Kunci Jawaban Penguji (Presenter Quick-Cue)</span>
-                <span>Poin Penilaian Dosen</span>
+                <span>🎯 Poin Kunci untuk Dosen</span>
+                <span>Kata Kunci Penilaian</span>
               </div>
               <div class="drill-level-body" style="background:#fffaf5;">
-                <strong>Kata Kunci yang Dinilai:</strong> <em>Chemotaxis (Swim/Tumble), Reproduction (Health Sort), Swarming Attraction, SPV Discretization</em>.<br>
-                <strong>Kriteria Jawaban Tuntas:</strong> Teman memahami bahwa BFO menggunakan prinsip koloni (populasi) bukan lintasan tunggal, sehingga mampu mengeksplorasi banyak area solusi secara simultan.
+                <strong>Kata Kunci:</strong> <em>Chemotaxis (Swim &amp; Tumble), Reproduction (Health Sort), Swarm Intelligence, SPV</em>.<br>
+                BFO adalah metode berbasis populasi yang mencari solusi bersama-sama secara gotong royong.
               </div>
             </div>
           </div>
@@ -1698,14 +1716,16 @@
 
         <!-- KASUS 4: LOWER BOUND & GAP -->
         <div class="drill-case" id="drillCase3">
-          <div class="drill-q-box">
-            <div style="font-size:11.5px; font-weight:700; color:#d97706; text-transform:uppercase; margin-bottom:4px;">Pertanyaan Uji Audiens (Kasus 4)</div>
-            <div class="drill-q-text">
-              "Apa fungsi garis laser horizontal biru yang melintang di atas pulau-pulau, dan mengapa Makespan jadwal mana pun tidak mungkin berada di bawah garis laser itu?"
+          <div class="drill-q-box" style="background:#fffbeb; border:1px solid #fef3c7; border-left:5px solid #f59e0b; border-radius:14px; padding:16px 20px; margin-bottom:18px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+              <span style="font-size:11.5px; font-weight:800; color:#d97706; text-transform:uppercase;">Pertanyaan untuk Teman (Kasus 4)</span>
+              <a href="presentasi.html" target="_blank" style="font-size:11px; font-weight:700; color:#0369a1; text-decoration:none; background:#e0f2fe; padding:3px 8px; border-radius:6px;">📖 Tertera di Slide 2 &amp; 6 ↗</a>
+            </div>
+            <div class="drill-q-text" style="font-size:16px; font-weight:800; color:#0f172a; line-height:1.45; margin-bottom:12px;">
+              "Coba jelaskan lagi apa arti garis laser biru (Theoretical Lower Bound) di atas pulau!"
             </div>
             <div class="drill-actions">
               <button class="drill-btn-act drill-btn-cam" id="btnFocusLaser">
-                <svg viewBox="0 0 24 24" style="width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2;"><circle cx="12" cy="12" r="10"></circle><polygon points="12 8 8 12 12 16 12 8"></polygon></svg>
                 <span>🎥 Sorot Garis Laser Biru (Sudut Samping)</span>
               </button>
               <button class="drill-btn-act drill-btn-speak" id="btnSpeakQ4">
@@ -1714,51 +1734,50 @@
             </div>
           </div>
 
-          <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-            <span>💡</span> Panduan Bedah Pemahaman (Jika Teman Belum Paham):
+          <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+            <span>💡</span> Panduan Bedah Bersama (Jika Teman Masih Bingung):
           </div>
 
           <div class="drill-breakdown-levels">
             <div class="drill-level-card">
               <div class="drill-level-hdr l1">
-                <span>🟢 Level 1: Analogi Sederhana (Pemula / ELI5)</span>
+                <span>💡 Penjelasan Singkat (Bahasa Santai)</span>
                 <span>Analogi Rekor Dunia Fisika</span>
               </div>
               <div class="drill-level-body">
-                Seperti batas rekor lari manusia tercepat yang dibatasi oleh hukum fisika. Garis laser adalah waktu tercepat yang mungkin dicapai jika semua mesin bekerja bersamaan 100% tanpa ada jeda atau waktu tunggu sedetik pun. Tidak ada algoritma di dunia ini yang bisa menembus ke bawah garis itu!
+                Seperti rekor dunia lari manusia yang dibatasi oleh hukum fisika. Garis laser biru adalah batas waktu tercepat yang mustahil ditembus, yaitu waktu jika semua mesin bekerja bersamaan nonstop tanpa ada sedetik pun waktu menganggur. Tidak ada algoritma di dunia yang bisa menembus ke bawah garis itu!
               </div>
             </div>
 
             <div class="drill-level-card">
               <div class="drill-level-hdr l2">
-                <span>🔵 Level 2: Translasi Visual Spasial 3D</span>
+                <span>🎨 Yang Terlihat di Layar 3D</span>
                 <span>Visual Optimality Gap</span>
               </div>
               <div class="drill-level-body">
-                Laser biru membentang melintang di atas seluruh pulau VM. Audiens dan dosen dapat langsung melihat jarak vertikal antara puncak pulau tertinggi dengan garis laser (visual optimality gap) tanpa harus menghitung angka matematis manual di kalkulator.
+                Laser biru membentang melintang di atas seluruh pulau VM. Jarak vertikal antara puncak pulau tertinggi dengan garis laser ini disebut <strong>Optimality Gap</strong>. Semakin dekat pulau ke garis, semakin sempurna penjadwalannya!
               </div>
             </div>
 
             <div class="drill-level-card">
               <div class="drill-level-hdr l3">
-                <span>🟣 Level 3: Formulasi Matematika &amp; Penilaian Dosen</span>
-                <span>Theoretical Lower Bound Formula</span>
+                <span>📐 Rumus di Slide 2 &amp; 6 (Biar Jawaban Lengkap)</span>
+                <span>Formulasi Batas Bawah Teoretis Ideal</span>
               </div>
               <div class="drill-level-body">
-                Formulasi batas bawah teoretis ideal:
-                $L_{\text{ideal}} \ge \max\left( \max_{j} \frac{\text{Length}(t_j)}{\text{Speed}_{\max}}, \frac{\sum_{j=1}^n \text{Length}(t_j)}{\sum_{i=1}^m \text{Speed}(v_i)} \right)$
-                Suku pertama dibatasi oleh tugas terpanjang pada VM tercepat, dan suku kedua dibatasi oleh kapasitas total pemrosesan klaster cloud.
+                L_ideal >= max( Tugas Terpanjang / Kecepatan Mesin Tercepat, Total Panjang Semua Tugas / Total Kecepatan Semua Mesin ).<br>
+                Batas bawah ini membuktikan secara matematis performa absolut klaster cloud.
               </div>
             </div>
 
             <div class="drill-level-card">
               <div class="drill-level-hdr defense">
-                <span>🎓 Kunci Jawaban Penguji (Presenter Quick-Cue)</span>
-                <span>Poin Penilaian Dosen</span>
+                <span>🎯 Poin Kunci untuk Dosen</span>
+                <span>Kata Kunci Penilaian</span>
               </div>
               <div class="drill-level-body" style="background:#fffaf5;">
-                <strong>Kata Kunci yang Dinilai:</strong> <em>Theoretical Lower Bound, Optimality Gap, Dual Bound, Heterogeneous Cluster Capacity</em>.<br>
-                <strong>Kriteria Jawaban Tuntas:</strong> Teman memahami bahwa garis laser berfungsi sebagai acuan kebenaran ilmiah (ground truth) untuk mengukur seberapa dekat solusi heuristik dengan kesempurnaan teoretis.
+                <strong>Kata Kunci:</strong> <em>Theoretical Lower Bound, Optimality Gap, Ground Truth, Dual Bound</em>.<br>
+                Garis laser berfungsi sebagai standar pembanding objektif untuk mengukur seberapa dekat hasil algoritma metaheuristik dengan kondisi sempurna.
               </div>
             </div>
           </div>

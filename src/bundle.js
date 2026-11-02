@@ -403,6 +403,7 @@
 
       // 8. Distant Citadels & Cascading Waterfalls
       this.createDistantCitadels();
+      this.createBigFriendshipCastle();
 
       // 9. Flying Anime Birds Flock
       this.createBirdFlock();
@@ -480,6 +481,156 @@
 
       this.idealBeamGroup.position.set(0, 5.0, 0);
       this.rootGroup.add(this.idealBeamGroup);
+    }
+
+        createBigFriendshipCastle() {
+      this.bigCastle = new THREE.Group();
+      // Center position directly behind the island rocks
+      this.bigCastle.position.set(0, 6.5, -34);
+
+      // 1. Massive Floating Island
+      const isleMat = new THREE.MeshToonMaterial({ color: 0x5eead4 });
+      const isle = new THREE.Mesh(new THREE.CylinderGeometry(14, 11, 3.2, 24), isleMat);
+      
+      const rockMat = new THREE.MeshToonMaterial({ color: 0x334155 });
+      const rock = new THREE.Mesh(new THREE.ConeGeometry(11, 14, 16).rotateX(Math.PI), rockMat);
+      rock.position.y = -8.5;
+      this.bigCastle.add(isle);
+      this.bigCastle.add(rock);
+
+      // Fluffy clouds hugging the castle island base
+      const cloudMat = new THREE.MeshToonMaterial({ color: 0xffffff, transparent: true, opacity: 0.92 });
+      for (let i = 0; i < 8; i++) {
+        const ang = (i / 8) * Math.PI * 2;
+        const cSphere = new THREE.Mesh(new THREE.SphereGeometry(2.4 + (i % 2) * 0.8, 12, 12), cloudMat);
+        cSphere.position.set(Math.cos(ang) * 12.5, -1.2, Math.sin(ang) * 10);
+        this.bigCastle.add(cSphere);
+      }
+
+      // Cascading crystal waterfalls flowing from island edge into the clouds
+      const waterMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.75 });
+      const wf1 = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.4, 18, 8), waterMat);
+      wf1.position.set(-6, -9.5, 5);
+      const wf2 = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 1.2, 16, 8), waterMat);
+      wf2.position.set(7, -8.5, 4);
+      this.bigCastle.add(wf1);
+      this.bigCastle.add(wf2);
+
+      // 2. Main Castle Citadel (Istana Utama)
+      const stoneMat = new THREE.MeshToonMaterial({ color: 0xf8fafc });
+      const trimMat = new THREE.MeshToonMaterial({ color: 0xe2e8f0 });
+      const goldMat = new THREE.MeshToonMaterial({ color: 0xf59e0b });
+
+      // Base Castle Keep
+      const keep = new THREE.Mesh(new THREE.BoxGeometry(11, 7.5, 7.5), stoneMat);
+      keep.position.y = 5.2;
+      this.bigCastle.add(keep);
+
+      // Grand Arched Gate with glowing warm amber portal
+      const gateFrame = new THREE.Mesh(new THREE.BoxGeometry(3.2, 4.4, 0.6), trimMat);
+      gateFrame.position.set(0, 3.8, 3.9);
+      const gatePortal = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 3.6), new THREE.MeshBasicMaterial({ color: 0xfef08a, side: THREE.DoubleSide }));
+      gatePortal.position.set(0, 3.6, 4.22);
+      this.bigCastle.add(gateFrame);
+      this.bigCastle.add(gatePortal);
+
+      // Arched Castle Windows with glowing lights
+      const winMat = new THREE.MeshBasicMaterial({ color: 0x67e8f9 });
+      for (let w = -3.2; w <= 3.2; w += 3.2) {
+        if (Math.abs(w) > 0.5) {
+          const win = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.8), winMat);
+          win.position.set(w, 6.2, 3.8);
+          this.bigCastle.add(win);
+        }
+      }
+
+      // Central Grand Spire Tower
+      const centerTower = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.8, 9, 16), stoneMat);
+      centerTower.position.y = 13.0;
+      const goldenDome = new THREE.Mesh(new THREE.SphereGeometry(2.8, 16, 16), goldMat);
+      goldenDome.position.y = 17.5;
+      goldenDome.scale.set(1, 1.35, 1);
+      const topNeedle = new THREE.Mesh(new THREE.ConeGeometry(0.5, 4.0, 8), goldMat);
+      topNeedle.position.y = 22.0;
+      const celestialGem = new THREE.Mesh(new THREE.OctahedronGeometry(0.7), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
+      celestialGem.position.y = 24.2;
+
+      this.bigCastle.add(centerTower);
+      this.bigCastle.add(goldenDome);
+      this.bigCastle.add(topNeedle);
+      this.bigCastle.add(celestialGem);
+
+      // 3. Menara Kembar Persahabatan (Twin Towers of Friendship)
+      // Left Tower (Kocorock's VNS Tower - Amber/Stone Theme)
+      const towerL = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.9, 11, 12), new THREE.MeshToonMaterial({ color: 0x64748b }));
+      towerL.position.set(-6.5, 7.0, 1.5);
+      const roofL = new THREE.Mesh(new THREE.ConeGeometry(2.2, 4.2, 12), new THREE.MeshToonMaterial({ color: 0xd97706 }));
+      roofL.position.set(-6.5, 14.5, 1.5);
+      const flagPoleL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.4, 6), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+      flagPoleL.position.set(-6.5, 17.2, 1.5);
+      const flagL = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.8), new THREE.MeshBasicMaterial({ color: 0xf59e0b, side: THREE.DoubleSide }));
+      flagL.position.set(-5.7, 17.6, 1.5);
+      this.bigCastle.add(towerL);
+      this.bigCastle.add(roofL);
+      this.bigCastle.add(flagPoleL);
+      this.bigCastle.add(flagL);
+
+      // Right Tower (Pipimon's BFO Tower - Cyan/Water Theme)
+      const towerR = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.9, 11, 12), new THREE.MeshToonMaterial({ color: 0xe0f2fe }));
+      towerR.position.set(6.5, 7.0, 1.5);
+      const roofR = new THREE.Mesh(new THREE.ConeGeometry(2.2, 4.2, 12), new THREE.MeshToonMaterial({ color: 0x0284c7 }));
+      roofR.position.set(6.5, 14.5, 1.5);
+      const flagPoleR = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.4, 6), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+      flagPoleR.position.set(6.5, 17.2, 1.5);
+      const flagR = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.8), new THREE.MeshBasicMaterial({ color: 0x06b6d4, side: THREE.DoubleSide }));
+      flagR.position.set(7.3, 17.6, 1.5);
+      this.bigCastle.add(towerR);
+      this.bigCastle.add(roofR);
+      this.bigCastle.add(flagPoleR);
+      this.bigCastle.add(flagR);
+
+      // Connecting Sky Bridge of Friendship
+      const bridge = new THREE.Mesh(new THREE.BoxGeometry(15, 0.8, 2.2), stoneMat);
+      bridge.position.set(0, 7.0, 1.5);
+      this.bigCastle.add(bridge);
+
+      // 4. Large Friendship Banner / Crest Billboard
+      const bannerCanvas = document.createElement('canvas');
+      bannerCanvas.width = 512;
+      bannerCanvas.height = 160;
+      const bCtx = bannerCanvas.getContext('2d');
+
+      // Rounded pill with soft golden glow
+      bCtx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      if (bCtx.roundRect) bCtx.roundRect(10, 10, 492, 140, 26);
+      else bCtx.rect(10, 10, 492, 140);
+      bCtx.fill();
+      bCtx.strokeStyle = '#f59e0b';
+      bCtx.lineWidth = 5;
+      bCtx.stroke();
+
+      bCtx.font = 'bold 30px sans-serif';
+      bCtx.fillStyle = '#1e293b';
+      bCtx.textAlign = 'center';
+      bCtx.fillText('🏰 ISTANA KERAJAAN AWAN', 256, 62);
+
+      bCtx.font = 'bold 22px sans-serif';
+      bCtx.fillStyle = '#0284c7';
+      bCtx.fillText('Kocorock (VNS) 🤝 Pipimon (BFO)', 256, 104);
+
+      bCtx.font = 'bold 15px sans-serif';
+      bCtx.fillStyle = '#d97706';
+      bCtx.fillText('✨ Simbol Kolaborasi & Persahabatan Abadi ✨', 256, 134);
+
+      const bannerTex = new THREE.CanvasTexture(bannerCanvas);
+      const castleBanner = new THREE.Mesh(
+        new THREE.PlaneGeometry(8.5, 2.7),
+        new THREE.MeshBasicMaterial({ map: bannerTex, transparent: true, side: THREE.DoubleSide })
+      );
+      castleBanner.position.set(0, 10.4, 4.4);
+      this.bigCastle.add(castleBanner);
+
+      this.rootGroup.add(this.bigCastle);
     }
 
     createDistantCitadels() {
@@ -1362,6 +1513,11 @@
         this.birdGroup.rotation.y = -t * 0.4 + Math.PI / 2;
       }
 
+      // Castle gentle floating breathing animation
+      if (this.bigCastle) {
+        this.bigCastle.position.y = 6.5 + Math.sin(t * 0.7) * 0.22;
+      }
+
       // 7. Floating Airship & Banners
       if (this.airship) {
         this.airship.position.y = 16 + Math.sin(t * 1.5) * 0.5;
@@ -2190,10 +2346,10 @@
           });
         }
       };
-      setupSpeakBtn('btnSpeakQ1', 'Coba perhatikan salah satu pulau yang menjulang paling tinggi di Kerajaan Awan. Mengapa pulau tersebut lebih tinggi dibanding yang lain, dan mengapa Makespan sistem ditentukan oleh pulau ini?', 'kocorock');
-      setupSpeakBtn('btnSpeakQ2', 'Apa yang sebenarnya dilakukan Kocorock saat mengentakkan tongkat batunya? Bagaimana ia memutuskan kapan radius guncangan k diperbesar atau direset kembali?', 'kocorock');
-      setupSpeakBtn('btnSpeakQ3', 'Pipimon terdiri dari koloni banyak slime kecil yang berenang bersama. Mengapa ada fase berenang swim dan berguling tumble, serta apa yang terjadi saat fase reproduksi?', 'pipimon');
-      setupSpeakBtn('btnSpeakQ4', 'Apa fungsi garis laser horizontal biru yang melintang di atas pulau-pulau, dan mengapa Makespan jadwal mana pun tidak mungkin berada di bawah garis laser itu?', 'kocorock');
+      setupSpeakBtn('btnSpeakQ1', 'Coba jelaskan lagi pengertian Makespan dan kenapa pulau yang tinggi menjadi masalah?', 'kocorock');
+      setupSpeakBtn('btnSpeakQ2', 'Coba jelaskan lagi pengertian Shaking pada Kocorock saat mengentakkan tongkat batunya!', 'kocorock');
+      setupSpeakBtn('btnSpeakQ3', 'Coba jelaskan lagi pengertian Kemotaksis pada Pipimon saat berenang mencari nutrisi!', 'pipimon');
+      setupSpeakBtn('btnSpeakQ4', 'Coba jelaskan lagi apa arti garis laser biru Theoretical Lower Bound di atas pulau-pulau!', 'kocorock');
 
       // Keyboard Shortcuts
       window.addEventListener('keydown', (e) => {
