@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 280" width="100%" height="100%">
+  <defs>
+    <linearGradient id="cloudIsland" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#86efac"/>
+      <stop offset="100%" stop-color="#22c55e"/>
+    </linearGradient>
+    <filter id="softShad" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Panel Back -->
+  <rect x="5" y="5" width="450" height="270" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" filter="url(#softShad)"/>
+
+  <!-- Section 1: N1 Single Shift -->
+  <g transform="translate(15, 20)">
+    <rect width="135" height="240" rx="12" fill="#fffbeb" stroke="#fde68a"/>
+    <rect x="10" y="10" width="115" height="22" rx="6" fill="#fef3c7"/>
+    <text x="18" y="25" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#b45309">N1: Single Shift</text>
+    
+    <!-- Island A Overloaded -->
+    <ellipse cx="67" cy="85" rx="42" ry="14" fill="#6ee7b7" stroke="#059669"/>
+    <!-- Stack of crystals -->
+    <rect x="52" y="52" width="12" height="18" rx="2" fill="#f59e0b"/>
+    <rect x="68" y="44" width="14" height="26" rx="2" fill="#ef4444"/>
+    <rect x="58" y="32" width="12" height="12" rx="2" fill="#3b82f6"/>
+
+    <!-- Shift Arrow -->
+    <path d="M 68 30 C 68 10 75 110 75 140" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+    <text x="25" y="125" font-family="'Inter', sans-serif" font-size="10" font-weight="700" fill="#dc2626">Migrasi 1 Task</text>
+
+    <!-- Island B Underloaded -->
+    <ellipse cx="67" cy="180" rx="42" ry="14" fill="#a7f3d0" stroke="#059669"/>
+    <rect x="62" y="155" width="12" height="12" rx="2" fill="#3b82f6"/>
+
+    <text x="12" y="218" font-family="'Inter', sans-serif" font-size="9.5" fill="#475569">Pindahkan 1 task dari VM terberat ke VM terluang.</text>
+  </g>
+
+  <!-- Section 2: N2 Pair Swap -->
+  <g transform="translate(162, 20)">
+    <rect width="135" height="240" rx="12" fill="#f0fdf4" stroke="#bbf7d0"/>
+    <rect x="10" y="10" width="115" height="22" rx="6" fill="#dcfce7"/>
+    <text x="20" y="25" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#15803d">N2: Pair Swap</text>
+
+    <!-- Island A & B side by side -->
+    <ellipse cx="38" cy="95" rx="28" ry="10" fill="#86efac"/>
+    <rect x="32" y="70" width="12" height="18" rx="2" fill="#8b5cf6"/>
+
+    <ellipse cx="98" cy="95" rx="28" ry="10" fill="#86efac"/>
+    <rect x="92" y="74" width="12" height="14" rx="2" fill="#06b6d4"/>
+
+    <!-- Swap Curved Arrows -->
+    <path d="M 40 65 Q 68 45 92 65" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round"/>
+    <polygon points="90,60 97,67 88,70" fill="#2563eb"/>
+
+    <path d="M 92 88 Q 68 110 40 88" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round"/>
+    <polygon points="42,93 35,86 44,83" fill="#2563eb"/>
+
+    <text x="32" y="135" font-family="'Inter', sans-serif" font-size="10" font-weight="700" fill="#2563eb">Tukar 2 Tugas</text>
+
+    <!-- Result islands below -->
+    <ellipse cx="38" cy="180" rx="28" ry="10" fill="#a7f3d0"/>
+    <rect x="32" y="160" width="12" height="14" rx="2" fill="#06b6d4"/>
+
+    <ellipse cx="98" cy="180" rx="28" ry="10" fill="#a7f3d0"/>
+    <rect x="92" y="156" width="12" height="18" rx="2" fill="#8b5cf6"/>
+
+    <text x="12" y="218" font-family="'Inter', sans-serif" font-size="9.5" fill="#475569">Saling menukar beban tanpa merubah jumlah task.</text>
+  </g>
+
+  <!-- Section 3: N3 Multi Shaking -->
+  <g transform="translate(310, 20)">
+    <rect width="135" height="240" rx="12" fill="#eff6ff" stroke="#bfdbfe"/>
+    <rect x="10" y="10" width="115" height="22" rx="6" fill="#dbeafe"/>
+    <text x="15" y="25" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#1d4ed8">N3: Shaking (k)</text>
+
+    <!-- Kocorock Slamming Staff Icon -->
+    <circle cx="67" cy="70" r="18" fill="#334155"/>
+    <line x1="82" y1="50" x2="82" y2="92" stroke="#d97706" stroke-width="3"/>
+    <polygon points="82,45 88,52 76,52" fill="#f59e0b"/>
+
+    <!-- Shockwaves -->
+    <path d="M 45 92 Q 67 85 90 92" fill="none" stroke="#f59e0b" stroke-width="2.5"/>
+    <path d="M 35 98 Q 67 89 100 98" fill="none" stroke="#f59e0b" stroke-width="2"/>
+
+    <!-- Scrambled Tasks across islands -->
+    <ellipse cx="38" cy="150" rx="25" ry="9" fill="#93c5fd"/>
+    <rect x="32" y="132" width="10" height="12" rx="2" fill="#ef4444"/>
+
+    <ellipse cx="98" cy="150" rx="25" ry="9" fill="#93c5fd"/>
+    <rect x="92" y="130" width="10" height="14" rx="2" fill="#10b981"/>
+
+    <text x="20" y="180" font-family="'Inter', sans-serif" font-size="10" font-weight="700" fill="#d97706">Goncangan Acak k</text>
+    <text x="12" y="210" font-family="'Inter', sans-serif" font-size="9.5" fill="#475569">Lolos dari perangkap optimum lokal saat stagnan.</text>
+  </g>
+</svg>

@@ -444,8 +444,8 @@
         return plane;
       };
 
-      this.bannerKocok = makeBanner('🗿 ALAM KOCOROCK (VNS)', 'Eksploitasi & Shaking Lingkungan', '#d97706', -11);
-      this.bannerPip = makeBanner('🦠 ALAM PIPIMON (BFO)', 'Eksplorasi & Koloni Kemotaksis', '#0d9488', 11);
+      this.bannerKocok = makeBanner('ALAM KOCOROCK (VNS)', 'Eksploitasi & Shaking Lingkungan', '#d97706', -11);
+      this.bannerPip = makeBanner('ALAM PIPIMON (BFO)', 'Eksplorasi & Koloni Kemotaksis', '#0d9488', 11);
     }
 
     createIdealBeam() {
@@ -825,7 +825,7 @@
       this.kocok.add(this.staff);
 
       // 3D Floating Name Tag for Kocorock
-      const tagKocok = this.createFloatingTag('🗿 KOCOROCK', 'VNS • Rock Golem', '#f59e0b');
+      const tagKocok = this.createFloatingTag('KOCOROCK', 'VNS • Rock Golem', '#f59e0b');
       tagKocok.position.set(0, 3.7, 0);
       this.kocok.add(tagKocok);
 
@@ -889,7 +889,7 @@
           pip.add(crown);
 
           // 3D Floating Name Tag for Pipimon
-          const tagPip = this.createFloatingTag('👑 PIPIMON', 'BFO • Bio Slime', '#06b6d4');
+          const tagPip = this.createFloatingTag('PIPIDON', 'BFO • Bio Slime', '#06b6d4');
           tagPip.position.set(0, 3.4, 0);
           pip.add(tagPip);
 
@@ -928,7 +928,7 @@
           });
 
           // Add 3D Floating Tag
-          const tagM = this.createFloatingTag('🗿 KOCOROCK', 'VNS • Rock Golem', '#f59e0b');
+          const tagM = this.createFloatingTag('KOCOROCK', 'VNS • Rock Golem', '#f59e0b');
           tagM.position.set(0, 1.5, 0);
           this.meshyKocok.add(tagM);
 
@@ -956,7 +956,7 @@
           });
 
           // Add 3D Floating Tag
-          const tagP = this.createFloatingTag('👑 PIPIMON', 'BFO • Bio Slime', '#06b6d4');
+          const tagP = this.createFloatingTag('PIPIDON', 'BFO • Bio Slime', '#06b6d4');
           tagP.position.set(0, 1.4, 0);
           this.meshyPip.add(tagP);
 
@@ -1064,8 +1064,8 @@
     pokemonCelebrateAll() {
       this.pokemonHopKocorock(1);
       this.pokemonHopPipimon(1);
-      this.showBubble('kocorock', "Beban seluruh pulau seimbang! Horeee! 🎉", 4500);
-      this.showBubble('pipimon', "Kerajaan Awan kembali damai! ✨", 4500);
+      this.showBubble('kocorock', "Beban seluruh pulau seimbang sempurna!", 4500);
+      this.showBubble('pipimon', "Kerajaan Awan kembali optimal dan stabil!", 4500);
     }
 
     showBubble(charKey, text, duration = 4000) {
@@ -1139,7 +1139,7 @@
       }
       const dialog = customText || (k === 1
         ? `Lompat ke Pulau #${(targetVmIdx !== null ? targetVmIdx + 1 : 1)}! Guncang muatan berat!`
-        : `Jurus Shaking k=${k}! Guncang pulau untuk cari solusi baru! 💥`);
+        : `Jurus Shaking k=${k}! Guncang pulau untuk cari solusi baru!`);
       this.showBubble('kocorock', dialog, 3800);
     }
 
@@ -1148,7 +1148,7 @@
       this.pips.forEach((p, idx) => {
         if (p.userData.crown) p.userData.crown.visible = (idx === bestId);
       });
-      const dialog = customText || `Chemotaxis aktif! Koloni berenang ke Pulau #${(targetVmIdx !== null ? targetVmIdx + 1 : 1)}! ✨`;
+      const dialog = customText || `Chemotaxis aktif! Koloni berenang ke Pulau #${(targetVmIdx !== null ? targetVmIdx + 1 : 1)}!`;
       this.showBubble('pipimon', dialog, 3800);
     }
 
@@ -1582,43 +1582,43 @@
 
       this.storyChapters = [
         {
-          header: "📖 Bab 1: Perkenalan Kocorock & Pipimon",
-          speaker: "🗿 Kocorock & 🦠 Pipimon",
+          header: "Bab 1: Perkenalan Kocorock & Pipimon",
+          speaker: "Kocorock & Pipimon",
           speakerType: "both",
-          bubbleText: "Halo teman-teman! Selamat datang di Kerajaan Awan kami! ✨",
-          text: "Halo teman-teman! Aku Kocorock si golem batu, dan ini sahabatku Pipimon si bakteri cerdas! Selamat datang di Kerajaan Awan kami! Setiap hari, kristal tugas komputasi jatuh dari langit dan harus dipikul oleh pulau virtual machine agar tidak runtuh!",
+          bubbleText: "Selamat datang di Kerajaan Awan kami.",
+          text: "Halo rekan-rekan penguji dan mahasiswa! Aku Kocorock si golem VNS, dan ini rekanku Pipimon si koloni bakteri BFO! Selamat datang di Kerajaan Awan! Setiap hari, tugas komputasi awan berjatuhan dan harus dialokasikan ke pulau virtual machine secara merata!",
           cam: "both"
         },
         {
-          header: "⚡ Bab 2: Peringatan Kocorock Soal Makespan",
-          speaker: "🗿 Kocorock",
+          header: "Bab 2: Peringatan Kocorock Terkait Makespan",
+          speaker: "Kocorock (VNS)",
           speakerType: "kocorock",
-          bubbleText: "Aduh gawat! Kristal di pulau itu menumpuk! Makespan naik! 🚩",
-          text: "Aduh gawat! Lihat pulau di sana, benderanya naik tinggi karena kristal tugas menumpuk! Kalau satu pulau terlalu berat, waktu Makespan melonjak dan kerajaan macet parah! Keseimbangan beban adalah kunci kelangsungan kerajaan!",
+          bubbleText: "Perhatian! Kristal tugas menumpuk di pulau itu, Makespan melonjak!",
+          text: "Perhatikan pulau di sana! Kristal tugas menumpuk sehingga beban mesin virtual melonjak drastis! Jika satu mesin virtual terlalu terbebani, waktu Makespan total sistem akan membengkak dan utilisasi menjadi tidak seimbang!",
           cam: "both"
         },
         {
-          header: "🗿 Bab 3: Jurus Shaking Kocorock (VNS)",
-          speaker: "🗿 Kocorock",
+          header: "Bab 3: Mekanisme Shaking Kocorock (VNS)",
+          speaker: "Kocorock (VNS)",
           speakerType: "kocorock",
-          bubbleText: "Tenang! Jurus andalanku adalah Shaking! Guncang kristal! 💥",
-          text: "Tenang saja! Sebagai golem VNS, aku punya jurus andalan bernama Shaking! Aku melompat langsung ke pulau terberat, lalu mengentakkan tongkat batuku untuk memindahkan kristal ke pulau yang lebih lengang!",
+          bubbleText: "Tenang, gunakan jurus Shaking! Guncang kristal ke pulau seimbang.",
+          text: "Jangan khawatir! Sebagai representasi Variable Neighborhood Search, aku mengeksekusi mekanisme Shaking! Aku melompat langsung ke pulau terberat, lalu mengentakkan tongkat batuku untuk memindahkan tugas ke pulau yang lebih lengang!",
           cam: "vns"
         },
         {
-          header: "🦠 Bab 4: Strategi Berenang Pipimon (BFO)",
-          speaker: "🦠 Pipimon",
+          header: "Bab 4: Eksplorasi Koloni Pipimon (BFO)",
+          speaker: "Pipimon (BFO)",
           speakerType: "pipimon",
-          bubbleText: "Giliranku! Koloni kami berenang dengan Chemotaxis! 🌊",
-          text: "Dan giliranku! Koloni kami Pipimon berenang lincah mengikuti jejak nutrisi Chemotaxis! Kami membelah diri saat menemukan pulau efisien, dan menyebar kembali agar tidak terjebak dalam jebakan lokal!",
+          bubbleText: "Giliranku! Koloni kami berenang lincah dengan Chemotaxis!",
+          text: "Sekarang giliranku! Koloni kami Pipimon berenang lincah mengikuti gradien nutrisi Chemotaxis! Bakteri terunggul membelah diri pada fase reproduksi, dan sebagian disebar untuk mencegah jebakan lokal!",
           cam: "bfo"
         },
         {
-          header: "👑 Bab 5: Kemenangan Seimbang Kocorock & Pipimon",
-          speaker: "🗿 Kocorock & 🦠 Pipimon",
+          header: "Bab 5: Konvergensi Optimal Kocorock & Pipimon",
+          speaker: "Kocorock & Pipimon",
           speakerType: "both",
-          bubbleText: "Horeee! Beban semua pulau seimbang sempurna! 🏆",
-          text: "Horeee! Berkat lompatanku dan kerja sama koloni Pipimon, beban seluruh pulau sekarang seimbang sempurna! Makespan berhasil diminimalkan dan Kerajaan Awan kembali damai! Bukti kehebatan algoritma kita!",
+          bubbleText: "Beban seluruh pulau kini seimbang mendekati batas ideal!",
+          text: "Berkat kombinasi goncangan terarah Kocorock dan penjelajahan luas koloni Pipimon, beban seluruh pulau kini seimbang mendekati batas bawah teoretis! Makespan berhasil diminimalkan dan penjadwalan komputasi awan sukses dioptimalkan!",
           cam: "both"
         }
       ];
@@ -2132,11 +2132,11 @@
         }
       }
 
-      // Play Child Voice Audio Narration with Music Ducking and 5s Auto-Next
-      this.playNaturalNarration(idx, chap.text);
+      // Play Character Audio Narration with Character-Specific Pitch & Resonance (Golem heavier bass vs Slime cute)
+      this.playNaturalNarration(idx, chap.text, chap.speakerType);
     }
 
-    playNaturalNarration(idx, fallbackText) {
+    playNaturalNarration(idx, fallbackText, speakerType = 'both') {
       if (this.currentAudioSource) {
         try { this.currentAudioSource.stop(); } catch(e) {}
         this.currentAudioSource = null;
@@ -2169,22 +2169,38 @@
           .then(buffer => {
             const src = ctx.createBufferSource();
             src.buffer = buffer;
-            // Elevates the pitch and tempo into an energetic, cheerful child voice!
-            src.playbackRate.value = 1.24;
-            src.connect(ctx.destination);
+
+            // Character-specific acoustic tuning:
+            // Golem (Kocorock) gets a deep, heavy, resonant voice; Pipimon gets a bright, cute voice!
+            if (speakerType === 'kocorock') {
+              src.playbackRate.value = 0.86; // Deeper, heavier stone golem tempo & pitch
+              const bassFilter = ctx.createBiquadFilter();
+              bassFilter.type = 'lowshelf';
+              bassFilter.frequency.value = 380;
+              bassFilter.gain.value = 7.0; // Resonant stone rumble
+              src.connect(bassFilter);
+              bassFilter.connect(ctx.destination);
+            } else if (speakerType === 'pipimon') {
+              src.playbackRate.value = 1.25; // Energetic, cute, agile child slime
+              src.connect(ctx.destination);
+            } else {
+              src.playbackRate.value = 0.96; // Balanced duo narration
+              src.connect(ctx.destination);
+            }
+
             src.onended = restoreMusicAndAutoNext;
             this.currentAudioSource = src;
             src.start();
           })
           .catch(() => {
-            this.speakWithBestIndonesianVoice(fallbackText, restoreMusicAndAutoNext);
+            this.speakWithBestIndonesianVoice(fallbackText, restoreMusicAndAutoNext, speakerType);
           });
       } else {
-        this.speakWithBestIndonesianVoice(fallbackText, restoreMusicAndAutoNext);
+        this.speakWithBestIndonesianVoice(fallbackText, restoreMusicAndAutoNext, speakerType);
       }
     }
 
-    speakWithBestIndonesianVoice(text, onEnd = null) {
+    speakWithBestIndonesianVoice(text, onEnd = null, speakerType = 'both') {
       if (!('speechSynthesis' in window)) {
         if (onEnd) onEnd();
         return;
@@ -2193,8 +2209,18 @@
         window.speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(text);
         u.lang = 'id-ID';
-        u.pitch = 1.55; // Suara anak kecil
-        u.rate = 1.12;
+
+        // Golem heavy voice vs Pipimon light voice
+        if (speakerType === 'kocorock') {
+          u.pitch = 0.72; // Suara golem batu berat & berwibawa
+          u.rate = 0.94;
+        } else if (speakerType === 'pipimon') {
+          u.pitch = 1.55; // Suara anak kecil / slime ceria
+          u.rate = 1.15;
+        } else {
+          u.pitch = 1.0;
+          u.rate = 1.02;
+        }
 
         const voices = window.speechSynthesis.getVoices();
         const naturalVoice = voices.find(v => v.lang.startsWith('id') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Ardi')));

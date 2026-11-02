@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320" width="100%" height="100%">
+  <defs>
+    <linearGradient id="golemBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#475569"/>
+      <stop offset="50%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="amberCore" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="40%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="staffGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#64748b"/>
+      <stop offset="50%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </linearGradient>
+    <filter id="glowAmber" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <!-- Background Soft Pill -->
+  <rect x="10" y="10" width="380" height="300" rx="20" fill="#fffbeb" stroke="#fde68a" stroke-width="2" filter="url(#softShadow)"/>
+  
+  <!-- Subtle cloud puffs behind -->
+  <circle cx="70" cy="80" r="35" fill="#fef3c7" opacity="0.6"/>
+  <circle cx="110" cy="70" r="45" fill="#fef3c7" opacity="0.6"/>
+  <circle cx="320" cy="240" r="40" fill="#fef3c7" opacity="0.6"/>
+
+  <!-- Badge Header -->
+  <rect x="25" y="24" width="135" height="26" rx="6" fill="#fef3c7" stroke="#f59e0b"/>
+  <text x="34" y="41" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#b45309">VNS TRAJECTORY</text>
+
+  <!-- Title -->
+  <text x="25" y="78" font-family="'Fraunces', serif" font-size="22" font-weight="700" fill="#1e293b" font-style="italic">Kocorock</text>
+  <text x="25" y="96" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="#64748b">The Shaking Golem</text>
+
+  <!-- Stat Chips -->
+  <g transform="translate(25, 115)">
+    <rect width="145" height="24" rx="6" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="8" y="16" font-family="'Inter', sans-serif" font-size="10.5" font-weight="600" fill="#334155">Peran: Guncang Beban (VNS)</text>
+    
+    <rect y="30" width="145" height="24" rx="6" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="8" y="46" font-family="'Inter', sans-serif" font-size="10.5" font-weight="600" fill="#334155">Senjata: Shaking Staff 3.6m</text>
+
+    <rect y="60" width="145" height="24" rx="6" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="8" y="76" font-family="'Inter', sans-serif" font-size="10.5" font-weight="600" fill="#334155">Suara: Berat &amp; Berwibawa</text>
+
+    <rect y="90" width="145" height="24" rx="6" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="8" y="106" font-family="'Inter', sans-serif" font-size="10.5" font-weight="600" fill="#b45309">Radius: k = 1, 2, 3</text>
+  </g>
+
+  <!-- CHARACTER ARTWORK -->
+  <g transform="translate(270, 160)">
+    <!-- Shadow on ground -->
+    <ellipse cx="0" cy="95" rx="55" ry="14" fill="#0f172a" opacity="0.18"/>
+
+    <!-- Shaking Staff in right hand -->
+    <g transform="translate(48, -40)">
+      <rect x="-4" y="-70" width="8" height="195" rx="3" fill="url(#staffGrad)"/>
+      <!-- Gold Rings -->
+      <rect x="-6" y="-60" width="12" height="6" rx="2" fill="#f59e0b"/>
+      <rect x="-6" y="-20" width="12" height="6" rx="2" fill="#f59e0b"/>
+      <rect x="-6" y="40" width="12" height="6" rx="2" fill="#f59e0b"/>
+      <!-- Glowing Amber Orb on top -->
+      <circle cx="0" cy="-75" r="16" fill="url(#amberCore)" filter="url(#glowAmber)"/>
+      <circle cx="-4" cy="-79" r="5" fill="#ffffff" opacity="0.8"/>
+      <!-- Floating Energy Rings -->
+      <ellipse cx="0" cy="-75" rx="24" ry="7" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4,3" transform="rotate(-15)"/>
+    </g>
+
+    <!-- Golem Legs -->
+    <rect x="-34" y="55" width="26" height="36" rx="8" fill="#1e293b"/>
+    <rect x="8" y="55" width="26" height="36" rx="8" fill="#1e293b"/>
+    <path d="M-38 85 L-8 85 L-8 93 L-38 93 Z" fill="#334155"/>
+    <path d="M4 85 L34 85 L34 93 L4 93 Z" fill="#334155"/>
+
+    <!-- Golem Main Body (Sturdy Rock) -->
+    <rect x="-48" y="-30" width="96" height="92" rx="24" fill="url(#golemBody)" stroke="#64748b" stroke-width="2"/>
+    
+    <!-- Rock Segment Lines -->
+    <path d="M-40 0 L-10 10 L-42 35" fill="none" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+    <path d="M40 5 L15 15 L38 42" fill="none" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- Glowing Amber Chest Crystal Core -->
+    <polygon points="0,-10 16,10 0,30 -16,10" fill="url(#amberCore)" filter="url(#glowAmber)"/>
+    <polygon points="0,-6 10,10 0,24 -10,10" fill="#fef08a"/>
+
+    <!-- Golem Head -->
+    <rect x="-36" y="-75" width="72" height="52" rx="16" fill="url(#golemBody)" stroke="#64748b" stroke-width="2"/>
+    
+    <!-- Stone Brow -->
+    <rect x="-38" y="-72" width="76" height="12" rx="4" fill="#1e293b"/>
+
+    <!-- Anime Blue Glowing Eyes -->
+    <ellipse cx="-16" cy="-52" rx="9" ry="6" fill="#38bdf8" filter="url(#glowAmber)"/>
+    <circle cx="-14" cy="-54" r="3" fill="#ffffff"/>
+    <ellipse cx="16" cy="-52" rx="9" ry="6" fill="#38bdf8" filter="url(#glowAmber)"/>
+    <circle cx="18" cy="-54" r="3" fill="#ffffff"/>
+
+    <!-- Left Arm -->
+    <rect x="-62" y="-15" width="18" height="48" rx="8" fill="#334155" transform="rotate(15 -53 9)"/>
+    <circle cx="-62" cy="38" r="12" fill="#1e293b"/>
+
+    <!-- Right Arm holding staff -->
+    <rect x="42" y="-15" width="18" height="42" rx="8" fill="#334155" transform="rotate(-20 51 6)"/>
+    <circle cx="50" cy="30" r="11" fill="#1e293b"/>
+  </g>
+</svg>
