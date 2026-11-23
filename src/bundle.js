@@ -6034,8 +6034,24 @@ reset() {
           title: "Bab 3: Algoritma VNS - Shaking & Eksploitasi Lokal Kocorock",
           speakerName: "🎙️ Dosen Magma-Kocorock (VNS Master)",
           speakerType: "kocorock",
-          elevenlabsScript: "[booming] [fierce] Sekarang keahlianku! Variable Neighborhood Search! Saat terjadi antrean bottleneck, aku menghantamkan Shaking radius k bertingkat untuk memindahkan tugas ke mesin yang lebih longgar!",
-          spokenText: "Sekarang keahlianku! Variable Neighborhood Search! Saat terjadi antrean bottleneck, aku menghantamkan Shaking radius k bertingkat untuk memindahkan tugas ke mesin yang lebih longgar!",
+          audioParts: [
+            {
+              audio: 'audio/bab3_01_kocorock.mp3',
+              speakerName: '🌋 Dosen Magma-Kocorock',
+              speakerType: 'kocorock',
+              elevenlabsScript: '[booming] [fierce] Sekarang giliranku unjuk gigi! Algoritmaku bernama VNS atau Variable Neighborhood Search. Saat antrean tugas macet di satu pulau, aku menggunakan jurus Shaking dengan radius k bertingkat!',
+              spokenText: 'Sekarang giliranku unjuk gigi! Algoritmaku bernama VNS atau Variable Neighborhood Search. Saat antrean tugas macet di satu pulau, aku menggunakan jurus Shaking dengan radius k bertingkat!'
+            },
+            {
+              audio: 'audio/bab3_02_kocorock.mp3',
+              speakerName: '🌋 Dosen Magma-Kocorock',
+              speakerType: 'kocorock',
+              elevenlabsScript: '[focused] [proud] Radius k sama dengan satu memindahkan satu tugas bottleneck. Jika belum membaik, radius k diperbesar menjadi dua dan tiga! Dipadukan dengan First-Improvement Descent, tugas segera dipindahkan ke mesin yang lebih longgar. Sangat tajam untuk eksploitasi lokal!',
+              spokenText: 'Radius k sama dengan satu memindahkan satu tugas bottleneck. Jika belum membaik, radius k diperbesar menjadi dua dan tiga! Dipadukan dengan First-Improvement Descent, tugas segera dipindahkan ke mesin yang lebih longgar. Sangat tajam untuk eksploitasi lokal!'
+            }
+          ],
+          elevenlabsScript: "[booming] [fierce] Sekarang giliranku unjuk gigi! Algoritmaku bernama VNS atau Variable Neighborhood Search. Saat antrean tugas macet di satu pulau, aku menggunakan jurus Shaking dengan radius k bertingkat!",
+          spokenText: "Sekarang giliranku unjuk gigi! Algoritmaku bernama VNS atau Variable Neighborhood Search. Saat antrean tugas macet di satu pulau, aku menggunakan jurus Shaking dengan radius k bertingkat!",
           contentHtml: `
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
               <div>
