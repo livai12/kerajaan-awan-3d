@@ -319,7 +319,7 @@
       this.reset();
     }
 
-    
+
 
     switchExperimentMode(mode) {
       this.expMode = mode;
@@ -500,7 +500,7 @@
         this.say("✅ Uji Ilmiah 30x Run Studi Ablasi selesai! Data empiris berhasil diverifikasi langsung di peramban.");
       }, 150);
     }
-reset() {
+    reset() {
       this.bacteria = [];
       for (let i = 0; i < this.popSize; i++) {
         const sol = this.tasks.map(() => Math.floor(Math.random() * this.vms.length));
@@ -980,7 +980,7 @@ reset() {
   }
 
 
-  
+
   // ==========================================
   // 2.5 HYBRID 2 ENGINE: PSO-MinMin (Pola B - HRH: Heuristik + Metaheuristik)
   // Sesuai Dokumen Riset: "Analisis Perbandingan Algoritma Hybrid BFO-VNS dan PSO-MinMin"
@@ -1154,7 +1154,7 @@ reset() {
     }
   }
 
-// ==========================================
+  // ==========================================
   // 3. 3D WORLD BUILDER (PROCEDURAL THREE.JS)
   // ==========================================
   class World3D {
@@ -1380,7 +1380,7 @@ reset() {
       this.rootGroup.add(this.idealBeamGroup);
     }
 
-        createGrandHybridCitadel() {
+    createGrandHybridCitadel() {
       this.citadel = new THREE.Group();
 
       // Materials
@@ -3040,264 +3040,264 @@ reset() {
     animate() {
       requestAnimationFrame(() => this.animate());
       try {
-      const t = performance.now() * 0.002;
+        const t = performance.now() * 0.002;
 
-      // 1. Gentle Floating Bob of Floating Realms
-      this.realmLeft.position.y = Math.sin(t) * 0.25;
+        // 1. Gentle Floating Bob of Floating Realms
+        this.realmLeft.position.y = Math.sin(t) * 0.25;
 
-      // Animate Grand Hybrid Reactor Core on the Dais
-      if (this.gyroRing1) this.gyroRing1.rotation.x += 0.02;
-      if (this.gyroRing1) this.gyroRing1.rotation.y += 0.015;
-      if (this.gyroRing2) this.gyroRing2.rotation.y -= 0.025;
-      if (this.gyroRing2) this.gyroRing2.rotation.z += 0.018;
-      if (this.plasmaCore) {
-        const sc = 1.0 + Math.sin(performance.now() * 0.005) * 0.12;
-        this.plasmaCore.scale.set(sc, sc, sc);
-      }
-      if (this.beamKocok && this.beamPip) {
-        const bPulse = 0.65 + Math.sin(performance.now() * 0.008) * 0.25;
-        this.beamKocok.material.opacity = bPulse;
-        this.beamPip.material.opacity = bPulse;
-      }
+        // Animate Grand Hybrid Reactor Core on the Dais
+        if (this.gyroRing1) this.gyroRing1.rotation.x += 0.02;
+        if (this.gyroRing1) this.gyroRing1.rotation.y += 0.015;
+        if (this.gyroRing2) this.gyroRing2.rotation.y -= 0.025;
+        if (this.gyroRing2) this.gyroRing2.rotation.z += 0.018;
+        if (this.plasmaCore) {
+          const sc = 1.0 + Math.sin(performance.now() * 0.005) * 0.12;
+          this.plasmaCore.scale.set(sc, sc, sc);
+        }
+        if (this.beamKocok && this.beamPip) {
+          const bPulse = 0.65 + Math.sin(performance.now() * 0.008) * 0.25;
+          this.beamKocok.material.opacity = bPulse;
+          this.beamPip.material.opacity = bPulse;
+        }
 
-      // Animate Citadel Wall Torches
-      if (this.citadelTorches) {
-        const now = performance.now();
-        this.citadelTorches.forEach((tc, idx) => {
-          tc.light.intensity = 1.0 + Math.sin(now * 0.012 + idx) * 0.3;
+        // Animate Citadel Wall Torches
+        if (this.citadelTorches) {
+          const now = performance.now();
+          this.citadelTorches.forEach((tc, idx) => {
+            tc.light.intensity = 1.0 + Math.sin(now * 0.012 + idx) * 0.3;
+          });
+        }
+        this.realmRight.position.y = Math.sin(t + 1.5) * 0.25;
+
+        const isJumping = (mesh) => this.activeJumps && this.activeJumps.some(j => j.mesh === mesh);
+
+        // 2. Animate Pips: Kawaii Blinking, Cheerful Arm Waving, Squishy Jelly Bounce & Mini Pip Leaps
+        if (this.pips && this.pips.length > 0) {
+          const leader = this.pips[0];
+          if (leader.userData) {
+            if (leader.userData.tail) {
+              leader.userData.tail.rotation.z = Math.sin(t * 3.5) * 0.25;
+            }
+            // Anime Blinking loop (every ~3.5 seconds)
+            if (leader.userData.leftEye && leader.userData.rightEye) {
+              const blinkTime = (t * 0.75) % (Math.PI * 2);
+              const isBlink = (blinkTime > 5.9 && blinkTime < 6.2);
+              const scY = isBlink ? 0.12 : 1.0;
+              leader.userData.leftEye.scale.y = scY;
+              leader.userData.rightEye.scale.y = scY;
+            }
+            // Cheerful arm waving loop
+            if (leader.userData.armL && leader.userData.armR) {
+              leader.userData.armL.rotation.z = 0.8 + Math.sin(t * 5.0) * 0.32;
+              leader.userData.armR.rotation.z = -0.8 - Math.cos(t * 5.0) * 0.32;
+            }
+          }
+          if (!isJumping(leader)) {
+            // Gelatinous squishy bounce physics
+            const sq = Math.sin(t * 3.6) * 0.06;
+            leader.scale.set(1.0 + sq, 1.0 - sq * 1.4, 1.0 + sq);
+            leader.position.y = 2.0 + Math.abs(Math.sin(t * 2.6)) * 0.16;
+          }
+          // Mini pips orbit and playful leaps around leader
+          for (let i = 1; i < this.pips.length; i++) {
+            const mp = this.pips[i];
+            if (mp.userData && mp.userData.angle !== undefined) {
+              mp.userData.angle += 0.028;
+              mp.position.x = leader.position.x + Math.cos(mp.userData.angle) * mp.userData.radius;
+              mp.position.z = leader.position.z + Math.sin(mp.userData.angle) * mp.userData.radius;
+              mp.position.y = leader.position.y + 0.25 + Math.abs(Math.sin(t * 4.2 + (mp.userData.offset || i))) * 0.55;
+            }
+          }
+        }
+
+        // 3. Magma Kocorock Breathing Core & Axe Channeling Animation
+        if (this.kocokCore) {
+          this.kocokCore.material.emissiveIntensity = 1.4 + Math.sin(t * 2.8) * 0.5;
+        }
+        if (this.axe) {
+          this.axe.rotation.z = -0.55 + Math.sin(t * 2.0) * 0.1;
+          this.axe.rotation.x = 0.2 + Math.cos(t * 2.0) * 0.08;
+        }
+        if (this.meshyKocok && !isJumping(this.meshyKocok)) {
+          this.meshyKocok.position.y = 2.0 + Math.sin(t * 1.5) * 0.08;
+        }
+        if (this.kocok && !isJumping(this.kocok)) {
+          this.kocok.position.y = 2.0 + Math.sin(t * 1.5) * 0.08;
+        }
+        if (this.meshyPip && !isJumping(this.meshyPip)) {
+          this.meshyPip.position.y = 2.0 + Math.sin(t * 2.0) * 0.12;
+        }
+
+        // Active Pokemon Jump Tweens (Squash, Stretch, & Impact Bounce)
+        if (this.activeJumps && this.activeJumps.length > 0) {
+          const now = performance.now();
+          for (let i = this.activeJumps.length - 1; i >= 0; i--) {
+            const j = this.activeJumps[i];
+            const elapsed = now - j.startTime;
+            const p = Math.min(1.0, elapsed / j.duration);
+
+            if (p < 0.15) {
+              // Anticipation squash
+              const sq = 1.0 - Math.sin((p / 0.15) * Math.PI) * 0.3;
+              j.mesh.scale.set(j.baseScale.x * (2 - sq), j.baseScale.y * sq, j.baseScale.z * (2 - sq));
+            } else if (p < 0.88) {
+              // Airborne arc + aerodynamic stretch
+              const airP = (p - 0.15) / 0.73;
+              j.mesh.position.x = THREE.MathUtils.lerp(j.startPos.x, j.targetPos.x, airP);
+              j.mesh.position.z = THREE.MathUtils.lerp(j.startPos.z, j.targetPos.z, airP);
+              j.mesh.position.y = j.targetPos.y + Math.sin(airP * Math.PI) * j.height;
+
+              const stretch = 1.0 + Math.sin(airP * Math.PI) * 0.35;
+              j.mesh.scale.set(j.baseScale.x / Math.sqrt(stretch), j.baseScale.y * stretch, j.baseScale.z / Math.sqrt(stretch));
+              j.mesh.rotation.x = Math.sin(airP * Math.PI) * 0.25;
+            } else {
+              // Landing impact squash & bounce
+              const landP = (p - 0.88) / 0.12;
+              const bounce = 1.0 - Math.sin(landP * Math.PI) * 0.28;
+              j.mesh.position.x = j.targetPos.x;
+              j.mesh.position.y = j.targetPos.y;
+              j.mesh.position.z = j.targetPos.z;
+              j.mesh.scale.set(j.baseScale.x * (2 - bounce), j.baseScale.y * bounce, j.baseScale.z * (2 - bounce));
+              j.mesh.rotation.x = 0;
+            }
+
+            if (p >= 1.0) {
+              j.mesh.scale.copy(j.baseScale);
+              j.mesh.position.copy(j.targetPos);
+              j.mesh.rotation.x = 0;
+              if (j.onComplete) j.onComplete();
+              this.activeJumps.splice(i, 1);
+            }
+          }
+        }
+
+        // 4. Animate Shrine Beacons & Halos
+        [...this.islandsLeft, ...this.islandsRight].forEach(isl => {
+          if (isl.userData.beacon) isl.userData.beacon.rotation.y += 0.025;
+          if (isl.userData.halo) isl.userData.halo.rotation.z += 0.015;
+          if (isl.userData.flag && isl.userData.flag.visible) {
+            isl.userData.flag.rotation.y = Math.sin(t * 4.5 + isl.userData.vmId) * 0.3;
+          }
         });
-      }
-      this.realmRight.position.y = Math.sin(t + 1.5) * 0.25;
 
-      const isJumping = (mesh) => this.activeJumps && this.activeJumps.some(j => j.mesh === mesh);
+        // 5. Drifting Fluffy Clouds
+        if (this.cloudGroup) {
+          this.cloudGroup.children.forEach(cloud => {
+            cloud.userData.baseAngle += cloud.userData.speed;
+            cloud.position.x = Math.cos(cloud.userData.baseAngle) * cloud.userData.rad;
+            cloud.position.z = Math.sin(cloud.userData.baseAngle) * cloud.userData.rad - 5;
+          });
+        }
 
-      // 2. Animate Pips: Kawaii Blinking, Cheerful Arm Waving, Squishy Jelly Bounce & Mini Pip Leaps
-      if (this.pips && this.pips.length > 0) {
-        const leader = this.pips[0];
-        if (leader.userData) {
-          if (leader.userData.tail) {
-            leader.userData.tail.rotation.z = Math.sin(t * 3.5) * 0.25;
+        // 6. Flying Anime Birds Flock
+        if (this.birds && this.birdGroup) {
+          this.birds.forEach(b => {
+            b.wingL.rotation.z = Math.sin(t * 12 + b.offset) * 0.55;
+            b.wingR.rotation.z = -Math.sin(t * 12 + b.offset) * 0.55;
+          });
+          this.birdGroup.position.x = Math.cos(t * 0.4) * 26;
+          this.birdGroup.position.z = Math.sin(t * 0.4) * 22 - 20;
+          this.birdGroup.rotation.y = -t * 0.4 + Math.PI / 2;
+        }
+
+        // 7. Animate Volcanic Caldera Embers & Molten Lava Sea (Image 3)
+        if (this.volcanicEmbers && this.emberData) {
+          const pos = this.volcanicEmbers.geometry.attributes.position.array;
+          for (let i = 0; i < this.emberData.length; i++) {
+            const ed = this.emberData[i];
+            ed.y += ed.speedY;
+            ed.x += ed.driftX;
+            ed.z += ed.driftZ;
+            if (ed.y > 22) {
+              ed.y = -5.5;
+              ed.x = (Math.random() - 0.5) * 60;
+              ed.z = (Math.random() - 0.5) * 50;
+            }
+            pos[i * 3] = ed.x;
+            pos[i * 3 + 1] = ed.y;
+            pos[i * 3 + 2] = ed.z;
           }
-          // Anime Blinking loop (every ~3.5 seconds)
-          if (leader.userData.leftEye && leader.userData.rightEye) {
-            const blinkTime = (t * 0.75) % (Math.PI * 2);
-            const isBlink = (blinkTime > 5.9 && blinkTime < 6.2);
-            const scY = isBlink ? 0.12 : 1.0;
-            leader.userData.leftEye.scale.y = scY;
-            leader.userData.rightEye.scale.y = scY;
-          }
-          // Cheerful arm waving loop
-          if (leader.userData.armL && leader.userData.armR) {
-            leader.userData.armL.rotation.z = 0.8 + Math.sin(t * 5.0) * 0.32;
-            leader.userData.armR.rotation.z = -0.8 - Math.cos(t * 5.0) * 0.32;
-          }
+          this.volcanicEmbers.geometry.attributes.position.needsUpdate = true;
         }
-        if (!isJumping(leader)) {
-          // Gelatinous squishy bounce physics
-          const sq = Math.sin(t * 3.6) * 0.06;
-          leader.scale.set(1.0 + sq, 1.0 - sq * 1.4, 1.0 + sq);
-          leader.position.y = 2.0 + Math.abs(Math.sin(t * 2.6)) * 0.16;
+        if (this.lavaSea) {
+          this.lavaSea.material.emissiveIntensity = 0.75 + Math.sin(t * 2.0) * 0.15;
         }
-        // Mini pips orbit and playful leaps around leader
-        for (let i = 1; i < this.pips.length; i++) {
-          const mp = this.pips[i];
-          if (mp.userData && mp.userData.angle !== undefined) {
-            mp.userData.angle += 0.028;
-            mp.position.x = leader.position.x + Math.cos(mp.userData.angle) * mp.userData.radius;
-            mp.position.z = leader.position.z + Math.sin(mp.userData.angle) * mp.userData.radius;
-            mp.position.y = leader.position.y + 0.25 + Math.abs(Math.sin(t * 4.2 + (mp.userData.offset || i))) * 0.55;
-          }
+        if (this.braziers) {
+          this.braziers.forEach((flame, idx) => {
+            const fScale = 1.0 + Math.sin(t * 8.0 + idx) * 0.15;
+            flame.scale.set(fScale, fScale * 1.1, fScale);
+          });
         }
-      }
 
-      // 3. Magma Kocorock Breathing Core & Axe Channeling Animation
-      if (this.kocokCore) {
-        this.kocokCore.material.emissiveIntensity = 1.4 + Math.sin(t * 2.8) * 0.5;
-      }
-      if (this.axe) {
-        this.axe.rotation.z = -0.55 + Math.sin(t * 2.0) * 0.1;
-        this.axe.rotation.x = 0.2 + Math.cos(t * 2.0) * 0.08;
-      }
-      if (this.meshyKocok && !isJumping(this.meshyKocok)) {
-        this.meshyKocok.position.y = 2.0 + Math.sin(t * 1.5) * 0.08;
-      }
-      if (this.kocok && !isJumping(this.kocok)) {
-        this.kocok.position.y = 2.0 + Math.sin(t * 1.5) * 0.08;
-      }
-      if (this.meshyPip && !isJumping(this.meshyPip)) {
-        this.meshyPip.position.y = 2.0 + Math.sin(t * 2.0) * 0.12;
-      }
+        // 8. Animate Istana Api dari Neraka (Nether Citadel Fire, Eye of Hell & Lava Falls)
+        if (this.bigCastle) {
+          this.bigCastle.position.y = 6.5 + Math.sin(t * 0.7) * 0.22;
+        }
+        if (this.hellfireEye) {
+          this.hellfireEye.rotation.y += 0.02;
+          this.hellfireEye.material.emissiveIntensity = 1.3 + Math.sin(t * 4.0) * 0.35;
+          const s = 1.0 + Math.sin(t * 3.5) * 0.08;
+          this.hellfireEye.scale.set(s, s * 1.05, s);
+        }
+        if (this.hellBraziers) {
+          this.hellBraziers.forEach((flame, idx) => {
+            const fScale = 1.0 + Math.sin(t * 9.0 + idx) * 0.2;
+            flame.scale.set(fScale, fScale * 1.15, fScale);
+          });
+        }
+        if (this.hellLavaFalls) {
+          this.hellLavaFalls.forEach((fall, idx) => {
+            fall.material.opacity = 0.85 + Math.sin(t * 5.0 + idx) * 0.12;
+          });
+        }
 
-      // Active Pokemon Jump Tweens (Squash, Stretch, & Impact Bounce)
-      if (this.activeJumps && this.activeJumps.length > 0) {
-        const now = performance.now();
-        for (let i = this.activeJumps.length - 1; i >= 0; i--) {
-          const j = this.activeJumps[i];
-          const elapsed = now - j.startTime;
-          const p = Math.min(1.0, elapsed / j.duration);
+        // 7. Floating Airship & Banners
+        if (this.airship) {
+          this.airship.position.y = 16 + Math.sin(t * 1.5) * 0.5;
+          this.airship.rotation.y = Math.sin(t * 0.8) * 0.15;
+        }
+        if (this.bannerKocok) this.bannerKocok.position.y = 8.2 + Math.sin(t * 2) * 0.15;
+        if (this.bannerPip) this.bannerPip.position.y = 8.2 + Math.sin(t * 2 + 1) * 0.15;
 
-          if (p < 0.15) {
-            // Anticipation squash
-            const sq = 1.0 - Math.sin((p / 0.15) * Math.PI) * 0.3;
-            j.mesh.scale.set(j.baseScale.x * (2 - sq), j.baseScale.y * sq, j.baseScale.z * (2 - sq));
-          } else if (p < 0.88) {
-            // Airborne arc + aerodynamic stretch
-            const airP = (p - 0.15) / 0.73;
-            j.mesh.position.x = THREE.MathUtils.lerp(j.startPos.x, j.targetPos.x, airP);
-            j.mesh.position.z = THREE.MathUtils.lerp(j.startPos.z, j.targetPos.z, airP);
-            j.mesh.position.y = j.targetPos.y + Math.sin(airP * Math.PI) * j.height;
-
-            const stretch = 1.0 + Math.sin(airP * Math.PI) * 0.35;
-            j.mesh.scale.set(j.baseScale.x / Math.sqrt(stretch), j.baseScale.y * stretch, j.baseScale.z / Math.sqrt(stretch));
-            j.mesh.rotation.x = Math.sin(airP * Math.PI) * 0.25;
-          } else {
-            // Landing impact squash & bounce
-            const landP = (p - 0.88) / 0.12;
-            const bounce = 1.0 - Math.sin(landP * Math.PI) * 0.28;
-            j.mesh.position.x = j.targetPos.x;
-            j.mesh.position.y = j.targetPos.y;
-            j.mesh.position.z = j.targetPos.z;
-            j.mesh.scale.set(j.baseScale.x * (2 - bounce), j.baseScale.y * bounce, j.baseScale.z * (2 - bounce));
-            j.mesh.rotation.x = 0;
+        // 8. Magic Pollen Particles drifting up
+        if (this.pollen) {
+          const pos = this.pollen.geometry.attributes.position.array;
+          for (let i = 1; i < pos.length; i += 3) {
+            pos[i] += 0.025;
+            if (pos[i] > 14) pos[i] = -4;
           }
+          this.pollen.geometry.attributes.position.needsUpdate = true;
+        }
 
-          if (p >= 1.0) {
-            j.mesh.scale.copy(j.baseScale);
-            j.mesh.position.copy(j.targetPos);
-            j.mesh.rotation.x = 0;
-            if (j.onComplete) j.onComplete();
-            this.activeJumps.splice(i, 1);
+        // 9. Smooth 360 Camera & Orbit interpolation
+        if (this.targetPos) {
+          this.camTarget.lerp(this.targetPos, 0.05);
+        }
+
+        // 9. Camera Controls: FPS Walkthrough vs Orbit 360
+        if (this.cameraMode === 'fps') {
+          const now = performance.now();
+          const delta = Math.min(0.08, (now - (this.lastFrameTime || now)) * 0.001);
+          this.lastFrameTime = now;
+          this.updateFPS(delta);
+        } else {
+          if (this.controls) {
+            this.controls.target.lerp(this.camTarget, 0.06);
+            this.controls.update();
+          } else if (this.spherical) {
+            const s = this.spherical;
+            if (this.autoRotate) s.theta += 0.003;
+            this.camera.position.x = this.camTarget.x + s.radius * Math.sin(s.phi) * Math.sin(s.theta);
+            this.camera.position.y = this.camTarget.y + s.radius * Math.cos(s.phi);
+            this.camera.position.z = this.camTarget.z + s.radius * Math.sin(s.phi) * Math.cos(s.theta);
+            this.camera.lookAt(this.camTarget);
           }
         }
-      }
 
-      // 4. Animate Shrine Beacons & Halos
-      [...this.islandsLeft, ...this.islandsRight].forEach(isl => {
-        if (isl.userData.beacon) isl.userData.beacon.rotation.y += 0.025;
-        if (isl.userData.halo) isl.userData.halo.rotation.z += 0.015;
-        if (isl.userData.flag && isl.userData.flag.visible) {
-          isl.userData.flag.rotation.y = Math.sin(t * 4.5 + isl.userData.vmId) * 0.3;
-        }
-      });
+        // 10. Update 3D-to-2D Screen-space Speech Bubbles
+        this.updateSpeechBubbles();
 
-      // 5. Drifting Fluffy Clouds
-      if (this.cloudGroup) {
-        this.cloudGroup.children.forEach(cloud => {
-          cloud.userData.baseAngle += cloud.userData.speed;
-          cloud.position.x = Math.cos(cloud.userData.baseAngle) * cloud.userData.rad;
-          cloud.position.z = Math.sin(cloud.userData.baseAngle) * cloud.userData.rad - 5;
-        });
-      }
-
-      // 6. Flying Anime Birds Flock
-      if (this.birds && this.birdGroup) {
-        this.birds.forEach(b => {
-          b.wingL.rotation.z = Math.sin(t * 12 + b.offset) * 0.55;
-          b.wingR.rotation.z = -Math.sin(t * 12 + b.offset) * 0.55;
-        });
-        this.birdGroup.position.x = Math.cos(t * 0.4) * 26;
-        this.birdGroup.position.z = Math.sin(t * 0.4) * 22 - 20;
-        this.birdGroup.rotation.y = -t * 0.4 + Math.PI / 2;
-      }
-
-      // 7. Animate Volcanic Caldera Embers & Molten Lava Sea (Image 3)
-      if (this.volcanicEmbers && this.emberData) {
-        const pos = this.volcanicEmbers.geometry.attributes.position.array;
-        for (let i = 0; i < this.emberData.length; i++) {
-          const ed = this.emberData[i];
-          ed.y += ed.speedY;
-          ed.x += ed.driftX;
-          ed.z += ed.driftZ;
-          if (ed.y > 22) {
-            ed.y = -5.5;
-            ed.x = (Math.random() - 0.5) * 60;
-            ed.z = (Math.random() - 0.5) * 50;
-          }
-          pos[i * 3] = ed.x;
-          pos[i * 3 + 1] = ed.y;
-          pos[i * 3 + 2] = ed.z;
-        }
-        this.volcanicEmbers.geometry.attributes.position.needsUpdate = true;
-      }
-      if (this.lavaSea) {
-        this.lavaSea.material.emissiveIntensity = 0.75 + Math.sin(t * 2.0) * 0.15;
-      }
-      if (this.braziers) {
-        this.braziers.forEach((flame, idx) => {
-          const fScale = 1.0 + Math.sin(t * 8.0 + idx) * 0.15;
-          flame.scale.set(fScale, fScale * 1.1, fScale);
-        });
-      }
-
-      // 8. Animate Istana Api dari Neraka (Nether Citadel Fire, Eye of Hell & Lava Falls)
-      if (this.bigCastle) {
-        this.bigCastle.position.y = 6.5 + Math.sin(t * 0.7) * 0.22;
-      }
-      if (this.hellfireEye) {
-        this.hellfireEye.rotation.y += 0.02;
-        this.hellfireEye.material.emissiveIntensity = 1.3 + Math.sin(t * 4.0) * 0.35;
-        const s = 1.0 + Math.sin(t * 3.5) * 0.08;
-        this.hellfireEye.scale.set(s, s * 1.05, s);
-      }
-      if (this.hellBraziers) {
-        this.hellBraziers.forEach((flame, idx) => {
-          const fScale = 1.0 + Math.sin(t * 9.0 + idx) * 0.2;
-          flame.scale.set(fScale, fScale * 1.15, fScale);
-        });
-      }
-      if (this.hellLavaFalls) {
-        this.hellLavaFalls.forEach((fall, idx) => {
-          fall.material.opacity = 0.85 + Math.sin(t * 5.0 + idx) * 0.12;
-        });
-      }
-
-      // 7. Floating Airship & Banners
-      if (this.airship) {
-        this.airship.position.y = 16 + Math.sin(t * 1.5) * 0.5;
-        this.airship.rotation.y = Math.sin(t * 0.8) * 0.15;
-      }
-      if (this.bannerKocok) this.bannerKocok.position.y = 8.2 + Math.sin(t * 2) * 0.15;
-      if (this.bannerPip) this.bannerPip.position.y = 8.2 + Math.sin(t * 2 + 1) * 0.15;
-
-      // 8. Magic Pollen Particles drifting up
-      if (this.pollen) {
-        const pos = this.pollen.geometry.attributes.position.array;
-        for (let i = 1; i < pos.length; i += 3) {
-          pos[i] += 0.025;
-          if (pos[i] > 14) pos[i] = -4;
-        }
-        this.pollen.geometry.attributes.position.needsUpdate = true;
-      }
-
-      // 9. Smooth 360 Camera & Orbit interpolation
-      if (this.targetPos) {
-        this.camTarget.lerp(this.targetPos, 0.05);
-      }
-
-      // 9. Camera Controls: FPS Walkthrough vs Orbit 360
-      if (this.cameraMode === 'fps') {
-        const now = performance.now();
-        const delta = Math.min(0.08, (now - (this.lastFrameTime || now)) * 0.001);
-        this.lastFrameTime = now;
-        this.updateFPS(delta);
-      } else {
-        if (this.controls) {
-          this.controls.target.lerp(this.camTarget, 0.06);
-          this.controls.update();
-        } else if (this.spherical) {
-          const s = this.spherical;
-          if (this.autoRotate) s.theta += 0.003;
-          this.camera.position.x = this.camTarget.x + s.radius * Math.sin(s.phi) * Math.sin(s.theta);
-          this.camera.position.y = this.camTarget.y + s.radius * Math.cos(s.phi);
-          this.camera.position.z = this.camTarget.z + s.radius * Math.sin(s.phi) * Math.cos(s.theta);
-          this.camera.lookAt(this.camTarget);
-        }
-      }
-
-      // 10. Update 3D-to-2D Screen-space Speech Bubbles
-      this.updateSpeechBubbles();
-
-      this.renderer.render(this.scene, this.camera);
+        this.renderer.render(this.scene, this.camera);
       } catch (err) {
         console.error('Animation loop error:', err);
         if (this.renderer && this.scene && this.camera) {
@@ -3641,7 +3641,7 @@ reset() {
       osc2.stop(now + duration + 0.1);
     }
 
-        playFootstep() {
+    playFootstep() {
       if (!this.ctx) return;
       const now = this.ctx.currentTime;
       const osc = this.ctx.createOscillator();
@@ -4076,9 +4076,9 @@ reset() {
       // Fullscreen
       document.getElementById('btnFullscreen').addEventListener('click', () => {
         if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen().catch(() => {});
+          document.documentElement.requestFullscreen().catch(() => { });
         } else {
-          document.exitFullscreen().catch(() => {});
+          document.exitFullscreen().catch(() => { });
         }
       });
 
@@ -4135,7 +4135,7 @@ reset() {
         window.addEventListener('pointerdown', () => { hint.style.opacity = '0'; }, { once: true });
       }
 
-            // ==========================================
+      // ==========================================
       // PEER DRILL & AUDIENCE QUIZ MODAL LOGIC
       // ==========================================
       this.drillOverlay = document.getElementById('drill-overlay');
@@ -4526,7 +4526,7 @@ reset() {
       this.clearAutoNext();
       if (this.storyOverlay) this.storyOverlay.classList.remove('open');
       if (this.currentAudioSource) {
-        try { this.currentAudioSource.stop(); } catch(e) {}
+        try { this.currentAudioSource.stop(); } catch (e) { }
         this.currentAudioSource = null;
       }
       if ('speechSynthesis' in window) window.speechSynthesis.cancel();
@@ -4557,8 +4557,8 @@ reset() {
       const updateBtn = () => {
         if (!this.btnStoryNext) return;
         const isLast = (this.storyIndex === this.storyChapters.length - 1);
-        this.btnStoryNext.textContent = isLast 
-          ? `Selesai (${remaining}s) 🏁` 
+        this.btnStoryNext.textContent = isLast
+          ? `Selesai (${remaining}s) 🏁`
           : `Lanjut (${remaining}s) ❯`;
       };
 
@@ -4616,7 +4616,7 @@ reset() {
           // Focus tightly on Kocorock and his shaking algorithm
           const loads = calculateVmLoads(this.vns.bestSolution, this.problem.tasks, this.problem.vms);
           const maxIdx = loads.indexOf(Math.max(...loads));
-          
+
           if (idx === 1) {
             // Bab 2: Kocorock hops directly to the bottleneck island, points staff and alerts!
             this.world.pokemonHopKocorock(maxIdx);
@@ -4645,7 +4645,7 @@ reset() {
 
     playNaturalNarration(idx, fallbackText, speakerType = 'both') {
       if (this.currentAudioSource) {
-        try { this.currentAudioSource.stop(); } catch(e) {}
+        try { this.currentAudioSource.stop(); } catch (e) { }
         this.currentAudioSource = null;
       }
       if ('speechSynthesis' in window) {
@@ -4781,9 +4781,9 @@ reset() {
             </div>
             <div class="vm-meter">
               ${tasksHere.map(t => {
-                const isSel = this.selectedTask === t.id;
-                const widthPct = ((t.length / vm.speed) / loads[vIdx]) * 100;
-                return `
+          const isSel = this.selectedTask === t.id;
+          const widthPct = ((t.length / vm.speed) / loads[vIdx]) * 100;
+          return `
                   <div class="gem-block ${isSel ? 'selected' : ''}"
                        data-taskid="${t.id}"
                        title="${t.name} (Beban: ${t.length})"
@@ -4791,7 +4791,7 @@ reset() {
                     #${t.id + 1}
                   </div>
                 `;
-              }).join('')}
+        }).join('')}
             </div>
           </div>
         `;
@@ -5586,7 +5586,7 @@ reset() {
           gain.connect(ctx.destination);
           osc.start();
           osc.stop(ctx.currentTime + 1.5);
-        } catch (e) {}
+        } catch (e) { }
       }
 
       let isCutsceneFinished = false;
@@ -5724,7 +5724,7 @@ reset() {
           welcomeAud.play().catch(e => {
             console.warn("Could not autoplay welcome audio:", e);
           });
-        } catch (e) {}
+        } catch (e) { }
       } else {
         this.showTheaterSlide(this.theaterSlideIndex);
       }
@@ -5760,7 +5760,7 @@ reset() {
 
     showTheaterSlide(idx, options = {}) {
       if (!this.theaterSlides || idx < 0 || idx >= this.theaterSlides.length) return;
-      
+
       // Stop any welcome or ongoing audio
       if (this.currentTheaterAudio) {
         this.currentTheaterAudio.pause();
@@ -6085,8 +6085,24 @@ reset() {
           title: "Bab 4: Algoritma BFO - Kemotaksis & Eksplorasi Global Pipimon",
           speakerName: "🎙️ Dosen Aqua-Pipimon (BFO Leader)",
           speakerType: "pipimon",
-          elevenlabsScript: "[cheerful] [giggling] Dan ini kehebatan koloni air kami! Bacterial Foraging Optimization! Kami berenang memindai ruang pencarian dengan Kemotaksis Tumble and Swim menuju Makespan terendah!",
-          spokenText: "Dan ini kehebatan koloni air kami! Bacterial Foraging Optimization! Kami berenang memindai ruang pencarian dengan Kemotaksis Tumble and Swim menuju Makespan terendah!",
+          audioParts: [
+            {
+              audio: 'audio/bab4_01_pipimon.mp3',
+              speakerName: '💧 Dosen Aqua-Pipimon',
+              speakerType: 'pipimon',
+              elevenlabsScript: '[cheerful] [giggling] Tapi Kocorock sering buntu jika terjebak di optimum lokal! Nah, itulah kehebatan algoritmaku: Bacterial Foraging Optimization!',
+              spokenText: 'Tapi Kocorock sering buntu jika terjebak di optimum lokal! Nah, itulah kehebatan algoritmaku: Bacterial Foraging Optimization!'
+            },
+            {
+              audio: 'audio/bab4_02_pipimon.mp3',
+              speakerName: '💧 Dosen Aqua-Pipimon',
+              speakerType: 'pipimon',
+              elevenlabsScript: '[excited] Ribuan bakteri droplet kami berenang memindai seluruh lanskap solusi menggunakan dinamika Kemotaksis, yaitu Tumble dan Swim! Kami berenang menuju konsentrasi nutrisi tertinggi, yaitu Makespan paling rendah. Bakteri terbaik membelah diri pada fase reproduksi, dan eliminasi dispersi mengacak koloni agar tidak pernah tersesat!',
+              spokenText: 'Ribuan bakteri droplet kami berenang memindai seluruh lanskap solusi menggunakan dinamika Kemotaksis, yaitu Tumble dan Swim! Kami berenang menuju konsentrasi nutrisi tertinggi, yaitu Makespan paling rendah. Bakteri terbaik membelah diri pada fase reproduksi, dan eliminasi dispersi mengacak koloni agar tidak pernah tersesat!'
+            }
+          ],
+          elevenlabsScript: "[cheerful] [giggling] Tapi Kocorock sering buntu jika terjebak di optimum lokal! Nah, itulah kehebatan algoritmaku: Bacterial Foraging Optimization!",
+          spokenText: "Tapi Kocorock sering buntu jika terjebak di optimum lokal! Nah, itulah kehebatan algoritmaku: Bacterial Foraging Optimization!",
           contentHtml: `
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
               <div>
