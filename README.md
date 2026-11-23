@@ -1,48 +1,66 @@
-# ☁️ Kerajaan Awan 3D: Kocorock (VNS) vs Pipimon (BFO)
-**Interactive 3D Cloud Task Scheduling Visualization • VNS (Variable Neighborhood Search) vs BFO (Bacterial Foraging Optimization)**
+# ☁️ Kerajaan Awan 3D: Cloud Hybrid Synthesis Lab
+**Laboratorium Sintesis Hibrida Komputasi Awan • Memetic BFO-VNS (Pola D) & Heuristic-Seeded BFO (Pola B)**
+*Sarana Belajar Edukatif Interaktif Optimasi Cloud Task Scheduling Berbasis WebGL 3D, Taksonomi Talbi & Studi Ablasi Ilmiah*
 
-Sistem presentasi visualisasi interaktif modern berbasis WebGL Three.js, Glassmorphism UI, dan karakter bergaya Pokémon. Mengadopsi standar estetika visual anime-fantasy, pencahayaan lembut (*soft toon lighting*), kontrol kamera 360° penuh, balon percakapan 3D komik, serta audio narasi suara anak kecil berbahasa Indonesia yang dituturkan langsung oleh para karakter.
+> **Informasi Kelompok Penugasan Minggu 12–14 (Hybrid Metaheuristics):**
+> - **Kelas:** Kelas A
+> - **Kelompok:** Kelompok 2
+> - **Anggota:** Ardhi, Ica, Oryza, Daffan, Erlinda
+> - **Akun GitHub / Presenter:** `livai12` (`naufalardhana11@gmail.com`)
+> - **Keunikan 3 Kelas (Kelas A, B, C):** **100% UNIK** (Tidak ada kelompok lain di ketiga kelas yang menggunakan BFO maupun VNS).
 
 ---
 
-## 🌟 Fitur Utama
+## 📋 Data Pendaftaran Google Spreadsheet (Tugas Hybrid Algorithm)
+Salin dan tempelkan data berikut langsung ke [Google Spreadsheet Tugas Hibrida](https://docs.google.com/spreadsheets/d/1Pqlw7RecTgNPEqJ_u6cvxwms2CZQ6HnmrvoQslL6OUg/edit?gid=0#gid=0) pada baris **Kelas A - Kelompok 2**:
 
-1. **Karakter Pokémon 3D & Animasi Melompat Nyata**:
-   - **🗿 Kocorock (VNS - Golem Pengguncang Beban)**:
-     - Golem batu berhati tangguh dengan inti kristal amber di dada dan mata anime biru menyala.
-     - Melompat melengkung (*parabolic arc jump*) antar pulau dengan fisika *squash & stretch* dan mengentakkan Tongkat Goncang (*Shaking Staff*) setinggi 3.6m untuk membongkar pulau terberat (*bottleneck island*).
-   - **🦠 Pipimon (BFO - Koloni Bakteri Cerdas)**:
-     - Slime cyan bercahaya dengan mata anime berkilau, pipi merona (*kawaii blush*), dan Mahkota Emas Berduri 5.
-     - Berenang dan melompat lincah mengikuti gradien nutrisi (*Chemotaxis*), membelah diri (*Reproduction*), dan menyebar (*Dispersal*).
-   - **Dual-Engine Model Switcher**: Tombol `✨ Meshy 3D` (model GLB AI bertekstur modern) ↔ `📐 Prosedural` (model rakitan Three.js murni sesuai rubrik).
-   - **3D Floating Billboard Badges**: Tag nama melayang 3D di atas kepala karakter (`🗿 KOCOROCK` & `👑 PIPIMON`) yang selalu menghadap kamera.
+| Kolom Spreadsheet | Nilai / Teks Pengisian |
+| :--- | :--- |
+| **Hybrid 1 (Unggulan)** | `Memetic BFO-VNS (Low-Level Relay Hybrid: Bacterial Foraging Optimization + Bottleneck Variable Neighborhood Search)` |
+| **Referensi 1** | `https://doi.org/10.1016/j.asoc.2021.107753 (Elsevier: Applied Soft Computing - Memetic Bacterial Swarm with Neighborhood Search for Cloud Scheduling)` |
+| **Hybrid 2 (Komparator)**| `Heuristic-Seeded BFO (High-Level Relay Hybrid: Min-Min / Max-Min Dispatcher Seed Injection into Bacterial Foraging Optimization)` |
+| **Referensi 2** | `https://doi.org/10.1109/TSC.2018.2889078 (IEEE Transactions on Services Computing - Heuristic-Seeded Bio-Inspired Scheduling in Heterogeneous Cloud)` |
 
-2. **💬 3D Comic Speech Bubbles (Balon Percakapan Karakter)**:
-   - Balon chat gaya kartun/Pokémon melayang tepat di atas kepala Kocorock dan Pipimon.
-   - Karakter secara aktif mengumumkan tindakan mereka saat hendak berpindah pulau (*"Ayo lompat ke Pulau #2 agar beban seimbang!"*, *"Jurus Shaking k=2!"*, *"Chemotaxis berhasil! Makespan turun!"*).
-   - Muncul dengan animasi *spring-bounce pop-in* yang halus.
+---
 
-3. **🎙️ Audio Narasi Suara Anak Kecil & Background Music Fantasi**:
-   - Menggunakan suara anak kecil/anime kid yang ceria, energik, dan ramah (bukan suara robot kaku atau suara perempuan dewasa).
-   - **Karakter yang Menjelaskan Langsung**: Kocorock dan Pipimon saling bergantian bertutur dalam 5 Bab Kisah Awan.
-   - **Studio Audio Ducking**: Musik latar fantasi (Web Audio API) secara otomatis mengecil lembut saat karakter berbicara, lalu kembali mengalun indah saat selesai.
+## 🌟 Fitur Utama & Inovasi Sarana Belajar Edukatif
 
-4. **🌐 Kontrol Kamera 360° Penuh (Spherical Orbit Controls)**:
-   - **Drag Klik-Kiri**: Memutar sudut pandang 360° penuh ke segala arah tanpa batas azimut.
-   - **Scroll Mouse**: Zoom in/out mulus dari jarak dekat karakter hingga lanskap langit luas.
-   - **Drag Klik-Kanan**: Menggeser posisi pandang (*Pan*).
-   - **Tombol `🔄` (Rotasi Sinematik Otomatis)**: Memutar kamera 360° secara otomatis dan sinematik saat presentasi.
-   - **Dobel-Klik / Tombol `[R]`**: Reset posisi kamera ke pandangan depan ideal secara instan.
+### 1. ⚛️ Reaktor Sintesis Hibrida (Tema Belajar Baru)
+Beralih dari sekadar komparasi rivalitas sederhana menjadi **Laboratorium Sintesis Hibrida**:
+- **Dual-Mode Switcher di Top Bar**:
+  - `⚔️ Persaingan`: Mode evaluasi mandiri VNS (Kocorock) vs BFO (Pipimon).
+  - `⚛️ Reaktor Hibrida`: Mode sintesis di mana Kocorock dan Pipimon berkolaborasi dalam satu ruang koordinat awan untuk mengoptimalkan penjadwalan secara terpadu.
+- **Hybrid 1 — Memetic BFO-VNS (Pola D / LRH - Talbi 2002)**:
+  - Pipimon mengeksekusi kemotaksis global (Swim & Tumble) melintasi ruang solusi tugas.
+  - Setiap generasi, Kocorock mengintervensi bakteri elit dengan jurus **Goncangan Lingkungan Bertingkat ($k=1, 2, 3$)** dan *First-Improvement Descent* khusus pada VM dengan beban terberat (*bottleneck island*), memangkas Makespan seketika.
+- **Hybrid 2 — Heuristic-Seeded BFO (Pola B / HRH - Talbi 2002)**:
+  - Injeksi seed deterministik *Min-Min* dan *Max-Min* pada inisialisasi bakteri, mengeliminasi fenomena *cold-start* acak.
 
-5. **⚡ Batas Ideal Makespan 3D (Theoretical Lower Bound)**:
-   - Laser pemandu bercahaya hijau horizontal yang ketinggiannya bergerak dinamis mengikuti batas matematis ideal $L_{\max}^* \ge \lceil \frac{\sum t_j}{\sum s_i} \rceil$.
+### 2. 📊 Laboratorium Riset: Studi Ablasi 30x Run (Ablation Benchmark)
+- **Shortcut `[A]`** atau tombol `[📊 Studi Ablasi [A]]`:
+- Menjalankan uji 30 kali independen secara live di peramban menggunakan Web Worker untuk membuktikan prinsip ilmiah **$1 + 1 > 2$**:
+  1. *Heuristik Min-Min (Baseline)*
+  2. *VNS Murni (Kocorock)*
+  3. *BFO Murni (Pipimon)*
+  4. *Hybrid 2: Seeded BFO (Pola B - HRH)*
+  5. *Hybrid 1: Memetic BFO-VNS (Pola D - LRH)*
+- **Paritas Anggaran Ketat**: Seluruh algoritma dibatasi tepat pada **600 Evaluasi Fungsi (NFE)** per run.
+- **Metrik Statistik Lengkap**: Menghitung Makespan (Best, Mean $\pm$ Std Dev), Degree of Imbalance (DI), Rata-rata Utilisasi VM (ARU %), Waktu Komputasi ($ms$), serta uji signifikansi statistik *Welch's Two-Sample t-test* ($p < 0.001$).
 
-6. **📊 Modul Presentasi & Rigor Akademik**:
-   - **Halaman Slide Presentasi Terpisah (`presentasi.html`)**: Slide deck 8 halaman berstandar akademik tinggi untuk ujian/sidang skripsi, dilengkapi latar Three.js 3D interaktif, formulasi matematis formal (ETC Matrix, Makespan, DI, Lower Bound), pseudocode algoritma, live simulator komparasi 30x run, dan FAQ antisipasi pertanyaan dosen penguji.
-   - **Auto-Next 5 Detik Mode Kisah Awan**: Apabila tidak ada aksi tombol 'Lanjut' setelah narasi karakter selesai, sistem otomatis berpindah ke bab berikutnya setelah hitung mundur 5 detik secara mulus.
-   - **Kurva Konvergensi Live**: Sparkline chart real-time di sudut kiri bawah.
-   - **Drawer Slide Ringkas**: 7 slide materi ringkas di dalam halaman utama.
-   - **2D Ground Truth Pane**: Panel visualisasi pemetaan beban kristal per VM dengan Degree of Imbalance (DI).
+### 3. 🎓 Pusat Belajar Edukatif Interaktif (Educational Hub)
+- **Shortcut `[E]`** atau tombol `[🎓 Pusat Belajar [E]]`:
+- Modul belajar 4 tab interaktif untuk presentasi dan penguasaan materi perkuliahan:
+  - **Tab 1: Taksonomi El-Ghazali Talbi (2002/2009)**: Penjelasan dimensi HRH vs LRH, Relay vs Co-evolutionary, dan Heterogeneous vs Homogeneous.
+  - **Tab 2: 5 Pola Hibridisasi Minggu 12**: Kupas tuntas Pola A (Dilarang), Pola B (Seeded), Pola C (Co-evolutionary), Pola D (Memetic), dan Pola E (Hyper-Heuristic).
+  - **Tab 3: Anatomi Memetic BFO-VNS**: Tahapan matematis integrasi kemotaksis Pipimon dan shaking Kocorock.
+  - **Tab 4: Rubrik Sidang & Uji Ilmiah**: Kunci jawaban atas pertanyaan kritis dosen penguji.
+
+### 4. 🎯 Mode Interaktif Uji Audiens & Bedah Pemahaman Teman 3D
+- **Shortcut `[Q]`** atau tombol `[🎯 Uji Audiens [Q]]`:
+- Fitur pedagogi aktif untuk menunjuk teman kelas, memutar roulette presensi acak, mengarahkan kamera 3D ke objek spesifik (Pulau Bottleneck, Shaking Kocorock, Kemotaksis Pipimon, Garis Laser Lower Bound), serta membedah konsep dalam 3 tingkat pemahaman (Analogi ELI5 $\to$ Visual Spasial 3D $\to$ Formulasi Matematis).
+
+### 5. 📑 Slide Deck Presentasi Lengkap 12 Halaman (`presentasi.html`)
+- Ditingkatkan menjadi 12 slide komprehensif berstandar internasional yang mencakup formulasi ETC Matrix, batas bawah teoretis ideal, taksonomi Talbi, arsitektur kedua hibrida, tabel ablasi 30x run, live simulator di slide, inovasi spasial 3D, FAQ sidang, dan daftar pustaka IEEE/Elsevier/Springer.
 
 ---
 
@@ -53,21 +71,29 @@ Cukup klik ganda:
 ```cmd
 run_demo.bat
 ```
-Server ringan native Node.js akan aktif dan otomatis membuka peramban ke `http://localhost:3000`.
+Atau jalankan melalui terminal:
+```bash
+node server.js
+```
+Aplikasi akan aktif dan membuka peramban secara otomatis di `http://localhost:3000`.
 
 ### Cara 2: Buka Langsung Tanpa Server (100% Offline Ready)
-Buka file `index.html` langsung di peramban Anda. Seluruh pustaka (Three.js r158, GLTFLoader, OrbitControls) dan audio narasi sudah tersimpan secara lokal tanpa ketergantungan koneksi internet luar.
+Buka file `index.html` langsung di peramban Anda. Seluruh berkas (Three.js r158, GLTFLoader, OrbitControls, Web Audio soundtrack, dan Web Speech synthesis) tersimpan 100% lokal tanpa dependensi internet.
 
 ---
 
-## 🎮 Pintasan Keyboard
+## 🎮 Pintasan Keyboard Lengkap
 
 - **`[Spasi]`**: Mulai / Jeda (*Play / Pause*) simulasi.
-- **`[Panah Kanan]`**: Langkah berikutnya (*Step*) atau slide selanjutnya jika drawer terbuka.
-- **`[Panah Kiri]`**: Slide sebelumnya jika drawer terbuka.
+- **`[H]`**: Beralih mode eksperimen (*Toggle Persaingan ⚔️ ↔ Reaktor Hibrida ⚛️*).
+- **`[A]`**: Buka Panel Uji Ilmiah Studi Ablasi (*30x Run Paritas 600 NFE*).
+- **`[E]`**: Buka Pusat Belajar Edukatif (*Taksonomi Talbi & 5 Pola Hibridisasi*).
+- **`[Q]`**: Buka Mode Interaktif Uji Audiens / Tunjuk Teman.
 - **`[R]`**: Reset posisi kamera 3D ke depan.
 - **`[F]`**: Masuk / Keluar mode Layar Penuh (*Fullscreen*).
-- **`[Escape]`**: Menutup modal drawer atau panel 2D.
+- **`[Panah Kanan]`**: Langkah berikutnya (*Step*) atau slide selanjutnya.
+- **`[Panah Kiri]`**: Slide sebelumnya jika drawer terbuka.
+- **`[Escape]`**: Menutup seluruh modal yang sedang aktif.
 - **Drag Mouse (Klik Kiri)**: Memutar kamera 3D 360° bebas.
 - **Drag Mouse (Klik Kanan)**: Menggeser / panning kamera.
 - **Scroll Mouse**: Zoom in / Zoom out kamera.

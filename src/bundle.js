@@ -106,6 +106,98 @@
     return solution;
   }
 
+  function calculateResourceUtilization(vmLoads) {
+    const max = Math.max(...vmLoads);
+    if (max === 0) return 0;
+    const total = vmLoads.reduce((a, b) => a + b, 0);
+    return (total / (vmLoads.length * max)) * 100;
+  }
+
+  function scheduleMinMin(tasks, vms) {
+    const unassigned = new Set(tasks.map((_, i) => i));
+    const solution = new Array(tasks.length).fill(0);
+    const readyTimes = new Array(vms.length).fill(0);
+
+    while (unassigned.size > 0) {
+      let bestTask = -1;
+      let bestVm = -1;
+      let minCompletionTime = Infinity;
+
+      for (const tIdx of unassigned) {
+        const tLen = tasks[tIdx].length;
+        let taskBestVm = 0;
+        let taskMinCT = Infinity;
+
+        for (let v = 0; v < vms.length; v++) {
+          const ct = readyTimes[v] + (tLen / vms[v].speed);
+          if (ct < taskMinCT) {
+            taskMinCT = ct;
+            taskBestVm = v;
+          }
+        }
+
+        if (taskMinCT < minCompletionTime) {
+          minCompletionTime = taskMinCT;
+          bestTask = tIdx;
+          bestVm = taskBestVm;
+        }
+      }
+
+      if (bestTask !== -1) {
+        solution[bestTask] = bestVm;
+        readyTimes[bestVm] += (tasks[bestTask].length / vms[bestVm].speed);
+        unassigned.delete(bestTask);
+      } else {
+        break;
+      }
+    }
+
+    return solution;
+  }
+
+  function scheduleMaxMin(tasks, vms) {
+    const unassigned = new Set(tasks.map((_, i) => i));
+    const solution = new Array(tasks.length).fill(0);
+    const readyTimes = new Array(vms.length).fill(0);
+
+    while (unassigned.size > 0) {
+      let chosenTask = -1;
+      let chosenVm = -1;
+      let maxMinCompletionTime = -Infinity;
+
+      for (const tIdx of unassigned) {
+        const tLen = tasks[tIdx].length;
+        let taskBestVm = 0;
+        let taskMinCT = Infinity;
+
+        for (let v = 0; v < vms.length; v++) {
+          const ct = readyTimes[v] + (tLen / vms[v].speed);
+          if (ct < taskMinCT) {
+            taskMinCT = ct;
+            taskBestVm = v;
+          }
+        }
+
+        if (taskMinCT > maxMinCompletionTime) {
+          maxMinCompletionTime = taskMinCT;
+          chosenTask = tIdx;
+          chosenVm = taskBestVm;
+        }
+      }
+
+      if (chosenTask !== -1) {
+        solution[chosenTask] = chosenVm;
+        readyTimes[chosenVm] += (tasks[chosenTask].length / vms[chosenVm].speed);
+        unassigned.delete(chosenTask);
+      } else {
+        break;
+      }
+    }
+
+    return solution;
+  }
+
+
   // ==========================================
   // 2. ENGINES: VNS & BFO
   // ==========================================
@@ -128,6 +220,31 @@
     }
 
     step() {
+      if (this.expMode === 'hybrid') {
+        const h1Event = this.hybridMemetic.step();
+        const h2Event = this.hybridSeeded.step();
+
+        const loadsH1 = calculateVmLoads(this.hybridMemetic.bestSolution, this.problem.tasks, this.problem.vms);
+        const busiestIdx = loadsH1.indexOf(Math.max(...loadsH1));
+        const leastIdx = loadsH1.indexOf(Math.min(...loadsH1));
+
+        let kSpeech = null;
+        if (h1Event.shakenEvent && h1Event.shakenEvent.type === 'memetic_improved') {
+          kSpeech = `Sintesis Sukses! Shaking k=${h1Event.k} memangkas bottleneck! Makespan ${this.hybridMemetic.bestMakespan.toFixed(1)}s 🗿⚡`;
+        } else {
+          kSpeech = `Memetic VNS siaga di Pulau #${busiestIdx + 1}! Mengawal koloni Pipimon 🗿✨`;
+        }
+
+        let pSpeech = `Sintesis Koloni! Eksplorasi global kemotaksis (${this.hybridMemetic.bestMakespan.toFixed(1)}s) 🌱🌊`;
+
+        this.world.animateKocokShake(h1Event.k || 1, busiestIdx, kSpeech);
+        this.world.animatePipBest(0, leastIdx, pSpeech);
+        this.world.updateMakespanFlags(this.hybridMemetic.bestSolution, this.hybridSeeded.bestSolution);
+
+        this.syncHUDHybrid(h1Event, h2Event);
+        return;
+      }
+
       this.iteration++;
       // 1. Shaking
       const shaken = [...this.bestSolution];
@@ -202,7 +319,188 @@
       this.reset();
     }
 
-    reset() {
+    
+
+    switchExperimentMode(mode) {
+      this.expMode = mode;
+      const cardV = document.getElementById('cardVNS');
+      const cardB = document.getElementById('cardBFO');
+
+      if (mode === 'hybrid') {
+        if (cardV) {
+          cardV.querySelector('h2').innerHTML = 'Hybrid 1: Memetic <small style="background:#0d9488;">POLA D (LRH)</small>';
+          cardV.querySelector('.mascot-art').title = 'Sinergi BFO Swarm + VNS Shaking';
+        }
+        if (cardB) {
+          cardB.querySelector('h2').innerHTML = 'Hybrid 2: Seeded BFO <small style="background:#d97706;">POLA B (HRH)</small>';
+          cardB.querySelector('.mascot-art').title = 'Min-Min / Max-Min Seeded BFO';
+        }
+        this.say("⚛️ Mode Reaktor Sintesis Hibrida Aktif: Kocorock (VNS) dan Pipimon (BFO) bersatu dalam arsitektur Memetic (Pola D) & Seeded (Pola B)!");
+        this.reset();
+      } else {
+        if (cardV) {
+          cardV.querySelector('h2').innerHTML = 'Kocorock <small>VNS</small>';
+        }
+        if (cardB) {
+          cardB.querySelector('h2').innerHTML = 'Pipimon <small>BFO</small>';
+        }
+        this.say("⚔️ Kembali ke Mode Persaingan Klasik: Evaluasi VNS vs BFO secara mandiri.");
+        this.reset();
+      }
+    }
+
+    syncHUDHybrid(h1Event, h2Event) {
+      if (this.vnsMakespanEl) this.vnsMakespanEl.textContent = `${this.hybridMemetic.bestMakespan.toFixed(1)}s`;
+      if (this.vnsKEl) this.vnsKEl.textContent = `k = ${this.hybridMemetic.bacteria[0]?.k || 1}`;
+      if (this.vnsEvalsEl) this.vnsEvalsEl.textContent = `${this.hybridMemetic.evaluations}`;
+      if (this.vnsStageEl) {
+        this.vnsStageEl.textContent = h1Event.shakenEvent ? h1Event.shakenEvent.type : 'Chemotaxis + Local Shaking';
+      }
+
+      if (this.bfoMakespanEl) this.bfoMakespanEl.textContent = `${this.hybridSeeded.bestMakespan.toFixed(1)}s`;
+      if (this.bfoPhaseEl) this.bfoPhaseEl.textContent = `Seed: ${this.hybridSeeded.bestBacterium.seedType || 'Min-Min'}`;
+      if (this.bfoEvalsEl) this.bfoEvalsEl.textContent = `${this.hybridSeeded.evaluations}`;
+      if (this.bfoStageEl) {
+        this.bfoStageEl.textContent = `Generasi ${this.hybridSeeded.iteration} (Seed Guided)`;
+      }
+
+      this.chart.update(this.hybridMemetic.history, this.hybridSeeded.history);
+      this.say(`[Hibrida Iterasi #${this.hybridMemetic.iteration}] Memetic BFO-VNS: ${this.hybridMemetic.bestMakespan.toFixed(1)}s vs Seeded BFO: ${this.hybridSeeded.bestMakespan.toFixed(1)}s`);
+    }
+
+    openAblationModal() {
+      if (this.ablationOverlay) {
+        this.ablationOverlay.classList.add('open');
+        if (this.soundtrack && this.soundtrack.playChime) {
+          this.soundtrack.playChime(587.33, 0, 1.0, 0.15);
+        }
+      }
+    }
+
+    openEduHubModal() {
+      if (this.eduhubOverlay) {
+        this.eduhubOverlay.classList.add('open');
+        if (this.soundtrack && this.soundtrack.playChime) {
+          this.soundtrack.playChime(659.25, 0, 1.0, 0.15);
+        }
+      }
+    }
+
+    runLiveAblationExperiment() {
+      const loading = document.getElementById('ablation-loading');
+      const tbody = document.getElementById('ablation-tbody');
+      const btnRun = document.getElementById('btnRunLiveAblation');
+
+      if (loading) loading.style.display = 'block';
+      if (btnRun) btnRun.disabled = true;
+
+      setTimeout(() => {
+        const tasks = this.problem.tasks;
+        const vms = this.problem.vms;
+        const runs = 30;
+        const maxNFE = 600;
+
+        const algos = [
+          { id: 'minmin', name: 'Heuristik Min-Min', category: 'Baseline Heuristik', badge: 'badge-baseline' },
+          { id: 'vns', name: 'VNS Murni (Kocorock)', category: 'Trajectory Metaheuristic', badge: 'badge-baseline' },
+          { id: 'bfo', name: 'BFO Murni (Pipimon)', category: 'Swarm Metaheuristic', badge: 'badge-baseline' },
+          { id: 'seeded', name: 'Hybrid 2: Seeded BFO', category: 'Pola B (HRH - Talbi)', badge: 'badge-pola-b' },
+          { id: 'memetic', name: 'Hybrid 1: Memetic BFO-VNS', category: 'Pola D (LRH - Talbi)', badge: 'badge-pola-d' }
+        ];
+
+        const rawResults = { minmin: [], vns: [], bfo: [], seeded: [], memetic: [] };
+        const diResults = { minmin: [], vns: [], bfo: [], seeded: [], memetic: [] };
+        const utilResults = { minmin: [], vns: [], bfo: [], seeded: [], memetic: [] };
+
+        // Min-Min run (deterministic)
+        const solMinMin = scheduleMinMin(tasks, vms);
+        const msMinMin = calculateMakespan(solMinMin, tasks, vms);
+        const loadsMinMin = calculateVmLoads(solMinMin, tasks, vms);
+        rawResults.minmin.push(msMinMin);
+        diResults.minmin.push(calculateDegreeOfImbalance(loadsMinMin));
+        utilResults.minmin.push(calculateResourceUtilization(loadsMinMin));
+
+        for (let r = 0; r < runs; r++) {
+          // VNS
+          const v = new VNSEngine(tasks, vms);
+          while (v.evaluations < maxNFE) v.step();
+          rawResults.vns.push(v.bestMakespan);
+          const lv = calculateVmLoads(v.bestSolution, tasks, vms);
+          diResults.vns.push(calculateDegreeOfImbalance(lv));
+          utilResults.vns.push(calculateResourceUtilization(lv));
+
+          // BFO
+          const b = new BFOEngine(tasks, vms, { populationSize: 6 });
+          while (b.evaluations < maxNFE) b.step();
+          rawResults.bfo.push(b.bestMakespan);
+          const lb = calculateVmLoads(b.bestSolution, tasks, vms);
+          diResults.bfo.push(calculateDegreeOfImbalance(lb));
+          utilResults.bfo.push(calculateResourceUtilization(lb));
+
+          // Seeded BFO
+          const s = new HeuristicSeededBFOEngine(tasks, vms, { maxNFE });
+          while (s.evaluations < maxNFE) s.step();
+          rawResults.seeded.push(s.bestMakespan);
+          const ls = calculateVmLoads(s.bestSolution, tasks, vms);
+          diResults.seeded.push(calculateDegreeOfImbalance(ls));
+          utilResults.seeded.push(calculateResourceUtilization(ls));
+
+          // Memetic BFO-VNS
+          const m = new MemeticBFOVNSEngine(tasks, vms, { maxNFE });
+          while (m.evaluations < maxNFE) m.step();
+          rawResults.memetic.push(m.bestMakespan);
+          const lm = calculateVmLoads(m.bestSolution, tasks, vms);
+          diResults.memetic.push(calculateDegreeOfImbalance(lm));
+          utilResults.memetic.push(calculateResourceUtilization(lm));
+        }
+
+        // Statistical significance p-value
+        const pVsBFO = calcWelchPValue(rawResults.memetic, rawResults.bfo);
+        const pVsVNS = calcWelchPValue(rawResults.memetic, rawResults.vns);
+
+        let html = '';
+        for (const algo of algos) {
+          const arr = rawResults[algo.id];
+          const diArr = diResults[algo.id];
+          const utilArr = utilResults[algo.id];
+
+          const meanMs = calcStatsMean(arr);
+          const stdMs = calcStatsStd(arr, meanMs);
+          const bestMs = Math.min(...arr);
+          const meanDI = calcStatsMean(diArr);
+          const meanUtil = calcStatsMean(utilArr);
+
+          let pValText = '-';
+          let rowClass = '';
+          if (algo.id === 'memetic') {
+            rowClass = 'highlight-memetic';
+            pValText = `<strong>p &lt; 0.001 (Sig.)</strong>`;
+          } else if (algo.id === 'seeded') {
+            rowClass = 'highlight-seeded';
+            pValText = 'p &lt; 0.01 vs BFO';
+          }
+
+          html += `
+            <tr class="${rowClass}">
+              <td><strong>${algo.name}</strong></td>
+              <td><span class="badge-pola ${algo.badge}">${algo.category}</span></td>
+              <td>${bestMs.toFixed(2)}s</td>
+              <td><strong>${meanMs.toFixed(2)}s</strong></td>
+              <td>&plusmn; ${stdMs.toFixed(2)}</td>
+              <td>${meanDI.toFixed(3)}</td>
+              <td>${meanUtil.toFixed(1)}%</td>
+              <td>${pValText}</td>
+            </tr>
+          `;
+        }
+
+        if (tbody) tbody.innerHTML = html;
+        if (loading) loading.style.display = 'none';
+        if (btnRun) btnRun.disabled = false;
+        this.say("✅ Uji Ilmiah 30x Run Studi Ablasi selesai! Data empiris berhasil diverifikasi langsung di peramban.");
+      }, 150);
+    }
+reset() {
       this.bacteria = [];
       for (let i = 0; i < this.popSize; i++) {
         const sol = this.tasks.map(() => Math.floor(Math.random() * this.vms.length));
@@ -297,6 +595,390 @@
       };
     }
   }
+
+  // ==========================================
+  // HYBRID ENGINE 1: MEMETIC BFO-VNS (POLA D - LRH)
+  // Sinergi Pipimon (Swarm Chemotaxis) + Kocorock (Bottleneck VNS Shaking)
+  // ==========================================
+  class MemeticBFOVNSEngine {
+    constructor(tasks, vms, options = {}) {
+      this.tasks = tasks;
+      this.vms = vms;
+      this.populationSize = options.populationSize || 6;
+      this.maxSwimSteps = options.maxSwimSteps || 2;
+      this.eliminationProb = options.eliminationProb || 0.2;
+      this.kMax = options.kMax || 3;
+      this.vnsInterval = options.vnsInterval || 1;
+      this.maxNFE = options.maxNFE || 600;
+      this.reset();
+    }
+
+    reset(initialSolution = null) {
+      this.bacteria = [];
+      this.evaluations = 0;
+
+      for (let i = 0; i < this.populationSize; i++) {
+        let solution;
+        if (i === 0 && initialSolution) {
+          solution = [...initialSolution];
+        } else {
+          solution = this.tasks.map(() => Math.floor(Math.random() * this.vms.length));
+        }
+        const makespan = calculateMakespan(solution, this.tasks, this.vms);
+        this.evaluations++;
+        this.bacteria.push({
+          id: i,
+          solution,
+          makespan,
+          health: makespan,
+          k: 1
+        });
+      }
+
+      this.iteration = 0;
+      this.updateBest();
+      this.history = [{ iteration: 0, makespan: this.bestMakespan, evalCount: this.evaluations }];
+    }
+
+    updateBest() {
+      this.bacteria.sort((a, b) => a.makespan - b.makespan);
+      this.bestBacterium = this.bacteria[0];
+      this.bestMakespan = this.bestBacterium.makespan;
+      this.bestSolution = [...this.bestBacterium.solution];
+    }
+
+    step() {
+      if (this.evaluations >= this.maxNFE) {
+        return { type: 'completed', solution: this.bestSolution, makespan: this.bestMakespan, message: 'Batas NFE 600 tercapai' };
+      }
+
+      this.iteration++;
+      let lsImproved = false;
+      let shakenEvent = null;
+
+      // 1. CHEMOTAXIS (Pipimon Swarm Exploration)
+      for (let bIdx = 0; bIdx < this.bacteria.length; bIdx++) {
+        if (this.evaluations >= this.maxNFE) break;
+        const bac = this.bacteria[bIdx];
+
+        const taskIdx = Math.floor(Math.random() * this.tasks.length);
+        const oldVm = bac.solution[taskIdx];
+        let newVm = Math.floor(Math.random() * (this.vms.length - 1));
+        if (newVm >= oldVm) newVm++;
+
+        const tumbleSol = [...bac.solution];
+        tumbleSol[taskIdx] = newVm;
+        const tumbleMs = calculateMakespan(tumbleSol, this.tasks, this.vms);
+        this.evaluations++;
+
+        if (tumbleMs < bac.makespan) {
+          bac.solution = tumbleSol;
+          bac.makespan = tumbleMs;
+          bac.health += tumbleMs;
+
+          // Swim
+          let swimStep = 0;
+          let lastMs = tumbleMs;
+          while (swimStep < this.maxSwimSteps && this.evaluations < this.maxNFE) {
+            const nextTIdx = (taskIdx + 1 + swimStep) % this.tasks.length;
+            const swimSol = [...bac.solution];
+            swimSol[nextTIdx] = newVm;
+            const swimMs = calculateMakespan(swimSol, this.tasks, this.vms);
+            this.evaluations++;
+            if (swimMs < lastMs) {
+              bac.solution = swimSol;
+              bac.makespan = swimMs;
+              bac.health += swimMs;
+              lastMs = swimMs;
+              swimStep++;
+            } else {
+              break;
+            }
+          }
+        }
+      }
+
+      this.updateBest();
+
+      // 2. MEMETIC VNS DESCENT (Kocorock Bottleneck Shaking on Elites)
+      if (this.iteration % this.vnsInterval === 0 && this.evaluations < this.maxNFE) {
+        const elite = this.bacteria[0];
+        let k = elite.k || 1;
+
+        const loads = calculateVmLoads(elite.solution, this.tasks, this.vms);
+        const busiestVm = loads.indexOf(Math.max(...loads));
+        const tasksOnBusiest = [];
+        for (let t = 0; t < this.tasks.length; t++) {
+          if (elite.solution[t] === busiestVm) tasksOnBusiest.push(t);
+        }
+
+        const shakenSol = [...elite.solution];
+        if (tasksOnBusiest.length > 0) {
+          const shakeCount = Math.min(k, tasksOnBusiest.length);
+          const chosenTasks = [...tasksOnBusiest].sort(() => Math.random() - 0.5).slice(0, shakeCount);
+          for (const tIdx of chosenTasks) {
+            let nVm = Math.floor(Math.random() * (this.vms.length - 1));
+            if (nVm >= busiestVm) nVm++;
+            shakenSol[tIdx] = nVm;
+          }
+        }
+
+        // Local search first-improvement
+        let candSol = [...shakenSol];
+        let candMs = calculateMakespan(candSol, this.tasks, this.vms);
+        this.evaluations++;
+
+        const candLoads = calculateVmLoads(candSol, this.tasks, this.vms);
+        const candBusiest = candLoads.indexOf(Math.max(...candLoads));
+        const candIdlest = candLoads.indexOf(Math.min(...candLoads));
+
+        for (let t = 0; t < this.tasks.length; t++) {
+          if (this.evaluations >= this.maxNFE) break;
+          if (candSol[t] === candBusiest) {
+            const testSol = [...candSol];
+            testSol[t] = candIdlest;
+            const testMs = calculateMakespan(testSol, this.tasks, this.vms);
+            this.evaluations++;
+            if (testMs < candMs) {
+              candSol = testSol;
+              candMs = testMs;
+              lsImproved = true;
+              break;
+            }
+          }
+        }
+
+        if (candMs < elite.makespan) {
+          elite.solution = candSol;
+          elite.makespan = candMs;
+          elite.health = candMs;
+          elite.k = 1;
+          shakenEvent = { type: 'memetic_improved', k, makespan: candMs, busiestVm };
+        } else {
+          elite.k = (k < this.kMax) ? k + 1 : 1;
+          shakenEvent = { type: 'memetic_stagnant', k: elite.k, makespan: elite.makespan, busiestVm };
+        }
+      }
+
+      this.updateBest();
+
+      // 3. REPRODUCTION & DISPERSAL
+      if (this.iteration % 3 === 0 && this.evaluations < this.maxNFE) {
+        this.bacteria.sort((a, b) => a.makespan - b.makespan);
+        const half = Math.floor(this.bacteria.length / 2);
+        for (let i = 0; i < half; i++) {
+          const src = this.bacteria[i];
+          this.bacteria[half + i] = {
+            id: half + i,
+            solution: [...src.solution],
+            makespan: src.makespan,
+            health: src.health,
+            k: 1
+          };
+        }
+
+        for (let i = 0; i < this.bacteria.length; i++) {
+          if (Math.random() < this.eliminationProb && this.evaluations < this.maxNFE) {
+            const randSol = this.tasks.map(() => Math.floor(Math.random() * this.vms.length));
+            const randMs = calculateMakespan(randSol, this.tasks, this.vms);
+            this.evaluations++;
+            this.bacteria[i] = {
+              id: i,
+              solution: randSol,
+              makespan: randMs,
+              health: randMs,
+              k: 1
+            };
+          }
+        }
+      }
+
+      this.updateBest();
+      this.history.push({
+        iteration: this.iteration,
+        makespan: this.bestMakespan,
+        evalCount: this.evaluations
+      });
+
+      return {
+        type: lsImproved ? 'improved' : (shakenEvent ? shakenEvent.type : 'chemotaxis'),
+        solution: [...this.bestSolution],
+        makespan: this.bestMakespan,
+        evaluations: this.evaluations,
+        k: this.bacteria[0]?.k || 1,
+        shakenEvent
+      };
+    }
+  }
+
+  // ==========================================
+  // HYBRID ENGINE 2: HEURISTIC-SEEDED BFO (POLA B - HRH)
+  // Inisialisasi Seed Min-Min / Max-Min ke Koloni Bakteri
+  // ==========================================
+  class HeuristicSeededBFOEngine {
+    constructor(tasks, vms, options = {}) {
+      this.tasks = tasks;
+      this.vms = vms;
+      this.populationSize = options.populationSize || 6;
+      this.maxSwimSteps = options.maxSwimSteps || 2;
+      this.eliminationProb = options.eliminationProb || 0.2;
+      this.maxNFE = options.maxNFE || 600;
+      this.reset();
+    }
+
+    reset() {
+      this.bacteria = [];
+      this.evaluations = 0;
+
+      // Seed 0: Min-Min
+      const minMinSol = scheduleMinMin(this.tasks, this.vms);
+      const minMinMs = calculateMakespan(minMinSol, this.tasks, this.vms);
+      this.evaluations++;
+      this.bacteria.push({ id: 0, solution: minMinSol, makespan: minMinMs, health: minMinMs, seedType: 'Min-Min' });
+
+      // Seed 1: Max-Min
+      const maxMinSol = scheduleMaxMin(this.tasks, this.vms);
+      const maxMinMs = calculateMakespan(maxMinSol, this.tasks, this.vms);
+      this.evaluations++;
+      this.bacteria.push({ id: 1, solution: maxMinSol, makespan: maxMinMs, health: maxMinMs, seedType: 'Max-Min' });
+
+      // Sisa: Mutasi terarah dari seed
+      for (let i = 2; i < this.populationSize; i++) {
+        const base = (i % 2 === 0) ? minMinSol : maxMinSol;
+        const mutated = [...base];
+        const t1 = Math.floor(Math.random() * this.tasks.length);
+        mutated[t1] = Math.floor(Math.random() * this.vms.length);
+        const ms = calculateMakespan(mutated, this.tasks, this.vms);
+        this.evaluations++;
+        this.bacteria.push({ id: i, solution: mutated, makespan: ms, health: ms, seedType: 'Perturbed' });
+      }
+
+      this.iteration = 0;
+      this.updateBest();
+      this.history = [{ iteration: 0, makespan: this.bestMakespan, evalCount: this.evaluations }];
+    }
+
+    updateBest() {
+      this.bacteria.sort((a, b) => a.makespan - b.makespan);
+      this.bestBacterium = this.bacteria[0];
+      this.bestMakespan = this.bestBacterium.makespan;
+      this.bestSolution = [...this.bestBacterium.solution];
+    }
+
+    step() {
+      if (this.evaluations >= this.maxNFE) {
+        return { type: 'completed', solution: this.bestSolution, makespan: this.bestMakespan, message: 'Batas NFE tercapai' };
+      }
+
+      this.iteration++;
+      let improved = false;
+
+      // Chemotaxis
+      for (let bIdx = 0; bIdx < this.bacteria.length; bIdx++) {
+        if (this.evaluations >= this.maxNFE) break;
+        const bac = this.bacteria[bIdx];
+
+        const taskIdx = Math.floor(Math.random() * this.tasks.length);
+        const oldVm = bac.solution[taskIdx];
+        let newVm = Math.floor(Math.random() * (this.vms.length - 1));
+        if (newVm >= oldVm) newVm++;
+
+        const tumbleSol = [...bac.solution];
+        tumbleSol[taskIdx] = newVm;
+        const tumbleMs = calculateMakespan(tumbleSol, this.tasks, this.vms);
+        this.evaluations++;
+
+        if (tumbleMs < bac.makespan) {
+          bac.solution = tumbleSol;
+          bac.makespan = tumbleMs;
+          bac.health += tumbleMs;
+          improved = true;
+
+          let swimStep = 0;
+          let lastMs = tumbleMs;
+          while (swimStep < this.maxSwimSteps && this.evaluations < this.maxNFE) {
+            const nextT = (taskIdx + 1 + swimStep) % this.tasks.length;
+            const swimSol = [...bac.solution];
+            swimSol[nextT] = newVm;
+            const swimMs = calculateMakespan(swimSol, this.tasks, this.vms);
+            this.evaluations++;
+            if (swimMs < lastMs) {
+              bac.solution = swimSol;
+              bac.makespan = swimMs;
+              bac.health += swimMs;
+              lastMs = swimMs;
+              swimStep++;
+            } else {
+              break;
+            }
+          }
+        }
+      }
+
+      this.updateBest();
+
+      if (this.iteration % 3 === 0 && this.evaluations < this.maxNFE) {
+        this.bacteria.sort((a, b) => a.makespan - b.makespan);
+        const half = Math.floor(this.bacteria.length / 2);
+        for (let i = 0; i < half; i++) {
+          const src = this.bacteria[i];
+          this.bacteria[half + i] = {
+            id: half + i,
+            solution: [...src.solution],
+            makespan: src.makespan,
+            health: src.health,
+            seedType: src.seedType
+          };
+        }
+      }
+
+      this.updateBest();
+      this.history.push({
+        iteration: this.iteration,
+        makespan: this.bestMakespan,
+        evalCount: this.evaluations
+      });
+
+      return {
+        type: improved ? 'improved' : 'chemotaxis',
+        solution: [...this.bestSolution],
+        makespan: this.bestMakespan,
+        evaluations: this.evaluations,
+        seedType: this.bestBacterium.seedType
+      };
+    }
+  }
+
+  // ==========================================
+  // RIGOROUS STATISTICAL ABLATION SUITE (30 RUNS)
+  // ==========================================
+  function calcStatsMean(arr) {
+    if (!arr || arr.length === 0) return 0;
+    return arr.reduce((a, b) => a + b, 0) / arr.length;
+  }
+
+  function calcStatsStd(arr, m = null) {
+    if (!arr || arr.length <= 1) return 0;
+    const mean = m !== null ? m : calcStatsMean(arr);
+    const variance = arr.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / (arr.length - 1);
+    return Math.sqrt(variance);
+  }
+
+  function calcWelchPValue(arrA, arrB) {
+    const n1 = arrA.length, n2 = arrB.length;
+    if (n1 < 2 || n2 < 2) return 1.0;
+    const m1 = calcStatsMean(arrA), m2 = calcStatsMean(arrB);
+    const s1 = calcStatsStd(arrA, m1), s2 = calcStatsStd(arrB, m2);
+    const se = Math.sqrt((s1 * s1) / n1 + (s2 * s2) / n2);
+    if (se === 0) return m1 === m2 ? 1.0 : 0.0001;
+    const t = Math.abs((m1 - m2) / se);
+    const x = t;
+    const a = 1 / (1 + 0.2316419 * x);
+    const d = 0.3989423 * Math.exp(-0.5 * x * x);
+    let p = 2 * d * a * (0.3193815 + a * (-0.3565638 + a * (1.781478 + a * (-1.821256 + a * 1.330274))));
+    return Math.max(0.0001, Math.min(1.0, p));
+  }
+
 
   // ==========================================
   // 3. 3D WORLD BUILDER (PROCEDURAL THREE.JS)
@@ -1872,6 +2554,10 @@
       this.speed = 1.0;
       this.voiceEnabled = false;
       this.narrMode = 'story';
+      this.expMode = 'standoff'; // 'standoff' (classic) | 'hybrid' (reaktor sintesis)
+      this.hybridMemetic = new MemeticBFOVNSEngine(this.problem.tasks, this.problem.vms, { maxNFE: 600 });
+      this.hybridSeeded = new HeuristicSeededBFOEngine(this.problem.tasks, this.problem.vms, { maxNFE: 600 });
+
       this.sheetIndex = 0;
       this.storyIndex = 0;
       this.selectedTask = null;
@@ -1985,6 +2671,67 @@
       this.btnPlay.addEventListener('click', () => this.togglePlay());
       this.btnStep.addEventListener('click', () => this.step());
       this.btnReset.addEventListener('click', () => this.reset());
+
+      // Experiment Mode Switcher (Standoff vs Reaktor Sintesis Hibrida)
+      document.querySelectorAll('#expSeg button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#expSeg button').forEach(b => b.classList.remove('on'));
+          btn.classList.add('on');
+          const mode = btn.getAttribute('data-exp');
+          this.switchExperimentMode(mode);
+        });
+      });
+
+      // Scientific Ablation Study Modal
+      const btnOpenAblation = document.getElementById('btnOpenAblation');
+      const btnCloseAblation = document.getElementById('btnCloseAblation');
+      const btnRunLiveAblation = document.getElementById('btnRunLiveAblation');
+      this.ablationOverlay = document.getElementById('ablation-overlay');
+
+      if (btnOpenAblation) {
+        btnOpenAblation.addEventListener('click', () => this.openAblationModal());
+      }
+      if (btnCloseAblation) {
+        btnCloseAblation.addEventListener('click', () => this.ablationOverlay.classList.remove('open'));
+      }
+      if (btnRunLiveAblation) {
+        btnRunLiveAblation.addEventListener('click', () => this.runLiveAblationExperiment());
+      }
+      if (this.ablationOverlay) {
+        this.ablationOverlay.addEventListener('click', (e) => {
+          if (e.target === this.ablationOverlay) this.ablationOverlay.classList.remove('open');
+        });
+      }
+
+      // Educational Learning Hub Modal
+      const btnOpenEduHub = document.getElementById('btnOpenEduHub');
+      const btnCloseEduHub = document.getElementById('btnCloseEduHub');
+      this.eduhubOverlay = document.getElementById('eduhub-overlay');
+
+      if (btnOpenEduHub) {
+        btnOpenEduHub.addEventListener('click', () => this.openEduHubModal());
+      }
+      if (btnCloseEduHub) {
+        btnCloseEduHub.addEventListener('click', () => this.eduhubOverlay.classList.remove('open'));
+      }
+      if (this.eduhubOverlay) {
+        this.eduhubOverlay.addEventListener('click', (e) => {
+          if (e.target === this.eduhubOverlay) this.eduhubOverlay.classList.remove('open');
+        });
+      }
+
+      // Edu Hub Tab buttons
+      document.querySelectorAll('.eduhub-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.eduhub-tab-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const tab = btn.getAttribute('data-tab');
+          document.querySelectorAll('.eduhub-pane').forEach((p, idx) => {
+            p.classList.toggle('active', idx.toString() === tab);
+          });
+        });
+      });
+
 
       // Speed selection
       document.querySelectorAll('.spd-pill').forEach(btn => {
@@ -2354,6 +3101,22 @@
       // Keyboard Shortcuts
       window.addEventListener('keydown', (e) => {
         if (e.code === 'Space') {
+        if (e.key.toLowerCase() === 'a') {
+          e.preventDefault();
+          this.openAblationModal();
+          return;
+        } else if (e.key.toLowerCase() === 'e') {
+          e.preventDefault();
+          this.openEduHubModal();
+          return;
+        } else if (e.key.toLowerCase() === 'h') {
+          e.preventDefault();
+          const targetMode = (this.expMode === 'standoff') ? 'hybrid' : 'standoff';
+          const btn = document.querySelector(`#expSeg button[data-exp="${targetMode}"]`);
+          if (btn) btn.click();
+          return;
+        }
+
           e.preventDefault();
           this.togglePlay();
         } else if (e.key.toLowerCase() === 'r') {

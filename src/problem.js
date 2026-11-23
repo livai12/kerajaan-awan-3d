@@ -96,7 +96,18 @@ export function calculateDegreeOfImbalance(vmLoads) {
   return (max - min) / avg;
 }
 
-// ==================== BASELINES ====================
+/**
+ * Utilisasi Rata-rata Sumber Daya (Average Resource Utilization / ARU dalam %)
+ * ARU = (Total Load / (m * Makespan)) * 100%
+ */
+export function calculateResourceUtilization(vmLoads) {
+  const max = Math.max(...vmLoads);
+  if (max === 0) return 0;
+  const total = vmLoads.reduce((a, b) => a + b, 0);
+  return (total / (vmLoads.length * max)) * 100;
+}
+
+// ==================== BASELINES & HEURISTICS ====================
 
 export function scheduleRandom(tasks, vms) {
   return tasks.map(() => Math.floor(Math.random() * vms.length));
@@ -131,6 +142,100 @@ export function scheduleGreedy(tasks, vms) {
 
     solution[item.idx] = bestVm;
     vmLoads[bestVm] += (item.length / vms[bestVm].speed);
+  }
+
+  return solution;
+}
+
+/**
+ * Heuristik Klasik Min-Min
+ * Untuk setiap task yang belum dijadwalkan, hitung minimum completion time di seluruh VM.
+ * Pilih task dengan minimum completion time terkecil, tempatkan pada VM bersangkutan.
+ */
+export function scheduleMinMin(tasks, vms) {
+  const unassigned = new Set(tasks.map((_, i) => i));
+  const solution = new Array(tasks.length).fill(0);
+  const readyTimes = new Array(vms.length).fill(0);
+
+  while (unassigned.size > 0) {
+    let bestTask = -1;
+    let bestVm = -1;
+    let minCompletionTime = Infinity;
+
+    for (const tIdx of unassigned) {
+      const tLen = tasks[tIdx].length;
+      let taskBestVm = 0;
+      let taskMinCT = Infinity;
+
+      for (let v = 0; v < vms.length; v++) {
+        const ct = readyTimes[v] + (tLen / vms[v].speed);
+        if (ct < taskMinCT) {
+          taskMinCT = ct;
+          taskBestVm = v;
+        }
+      }
+
+      if (taskMinCT < minCompletionTime) {
+        minCompletionTime = taskMinCT;
+        bestTask = tIdx;
+        bestVm = taskBestVm;
+      }
+    }
+
+    if (bestTask !== -1) {
+      solution[bestTask] = bestVm;
+      readyTimes[bestVm] += (tasks[bestTask].length / vms[bestVm].speed);
+      unassigned.delete(bestTask);
+    } else {
+      break;
+    }
+  }
+
+  return solution;
+}
+
+/**
+ * Heuristik Klasik Max-Min
+ * Mirip Min-Min, namun memilih task dengan minimum completion time TERBESAR
+ * (memprioritaskan tugas besar terlebih dahulu untuk mengurangi Makespan pada heterogenitas tinggi).
+ */
+export function scheduleMaxMin(tasks, vms) {
+  const unassigned = new Set(tasks.map((_, i) => i));
+  const solution = new Array(tasks.length).fill(0);
+  const readyTimes = new Array(vms.length).fill(0);
+
+  while (unassigned.size > 0) {
+    let chosenTask = -1;
+    let chosenVm = -1;
+    let maxMinCompletionTime = -Infinity;
+
+    for (const tIdx of unassigned) {
+      const tLen = tasks[tIdx].length;
+      let taskBestVm = 0;
+      let taskMinCT = Infinity;
+
+      for (let v = 0; v < vms.length; v++) {
+        const ct = readyTimes[v] + (tLen / vms[v].speed);
+        if (ct < taskMinCT) {
+          taskMinCT = ct;
+          taskBestVm = v;
+        }
+      }
+
+      if (taskMinCT > maxMinCompletionTime) {
+        maxMinCompletionTime = taskMinCT;
+        chosenTask = tIdx;
+        chosenVm = taskBestVm;
+      }
+    }
+
+    if (chosenTask !== -1) {
+      solution[chosenTask] = chosenVm;
+      readyTimes[chosenVm] += (tasks[chosenTask].length / vms[chosenVm].speed);
+      unassigned.delete(chosenTask);
+    } else {
+      break;
+    }
   }
 
   return solution;
