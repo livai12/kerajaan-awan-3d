@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 440" width="100%" height="100%">
+  <defs>
+    <linearGradient id="etcDarkBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090d16"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+
+    <marker id="arrowEtcBlue" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M 0 0 L 8 4 L 0 8 Z" fill="#38bdf8"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="920" height="440" rx="16" fill="url(#etcDarkBg)" stroke="#1e293b" stroke-width="2"/>
+
+  <!-- Top Title Banner -->
+  <g transform="translate(30, 24)">
+    <rect width="270" height="24" rx="6" fill="rgba(56, 189, 248, 0.12)" stroke="#0284c7" stroke-width="1"/>
+    <text x="12" y="16" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#38bdf8">MATRIKS ETC &amp; ALOKASI TUGAS HETEROGEN</text>
+    <text x="0" y="44" font-family="'Fraunces', serif" font-size="20" font-weight="700" fill="#ffffff" font-style="italic">Model Matematika Expected Time to Compute (ETC Matrix) &amp; Batas Ideal</text>
+  </g>
+
+  <!-- Column 1: Task Queue (T_j) -->
+  <g transform="translate(30, 95)">
+    <rect width="210" height="315" rx="14" fill="#0b1329" stroke="#334155" stroke-width="1.5"/>
+    <rect width="210" height="38" rx="14" fill="#1e293b"/>
+    <text x="14" y="24" font-family="'Inter', sans-serif" font-size="12" font-weight="700" fill="#ffffff">Antrean Tugas (Task Queue)</text>
+
+    <g transform="translate(14, 52)">
+      <rect width="182" height="48" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="1.2"/>
+      <text x="10" y="20" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#38bdf8">t_1: 4500 Mega-Instruksi</text>
+      <text x="10" y="36" font-family="'JetBrains Mono', monospace" font-size="9.5" fill="#94a3b8">ETC(VM1)=45s • ETC(VM3)=22.5s</text>
+
+      <rect y="58" width="182" height="48" rx="8" fill="#1e293b" stroke="#a855f7" stroke-width="1.2"/>
+      <text x="10" y="78" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#c084fc">t_2: 1200 Mega-Instruksi</text>
+      <text x="10" y="94" font-family="'JetBrains Mono', monospace" font-size="9.5" fill="#94a3b8">ETC(VM1)=12s • ETC(VM3)=6.0s</text>
+
+      <rect y="116" width="182" height="48" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="1.2"/>
+      <text x="10" y="136" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#34d399">t_3: 3100 Mega-Instruksi</text>
+      <text x="10" y="152" font-family="'JetBrains Mono', monospace" font-size="9.5" fill="#94a3b8">ETC(VM1)=31s • ETC(VM3)=15.5s</text>
+
+      <rect y="174" width="182" height="48" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="1.2"/>
+      <text x="10" y="194" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#fbbf24">t_n: 2000 Mega-Instruksi</text>
+      <text x="10" y="210" font-family="'JetBrains Mono', monospace" font-size="9.5" fill="#94a3b8">ETC(VM1)=20s • ETC(VM3)=10.0s</text>
+    </g>
+  </g>
+
+  <!-- Arrow Col 1 -> Col 2 -->
+  <path d="M 240 250 L 290 250" fill="none" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrowEtcBlue)"/>
+
+  <!-- Column 2: ETC Calculation Engine -->
+  <g transform="translate(300, 95)">
+    <rect width="320" height="315" rx="14" fill="#082f49" stroke="#0284c7" stroke-width="2"/>
+    <rect width="320" height="38" rx="14" fill="rgba(2, 132, 199, 0.3)"/>
+    <text x="16" y="24" font-family="'Inter', sans-serif" font-size="12.5" font-weight="800" fill="#ffffff">Matriks Expected Time to Compute (ETC)</text>
+
+    <g transform="translate(18, 54)">
+      <!-- Formula Card 1 -->
+      <rect width="284" height="65" rx="8" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2"/>
+      <text x="12" y="22" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#38bdf8">Formulasi Waktu Komputasi:</text>
+      <text x="12" y="44" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="700" fill="#ffffff">ETC(i, j) = Length(t_j) / Speed(v_i)</text>
+
+      <!-- Formula Card 2 -->
+      <rect y="75" width="284" height="65" rx="8" fill="#0f172a" stroke="#10b981" stroke-width="1.2"/>
+      <text x="12" y="97" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#34d399">Beban Total per Mesin (L_i):</text>
+      <text x="12" y="119" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="700" fill="#ffffff">L_i = &sum;_{j &isin; Alloc(i)} ETC(i, j)</text>
+
+      <!-- Formula Card 3 -->
+      <rect y="150" width="284" height="85" rx="8" fill="#0f172a" stroke="#f59e0b" stroke-width="1.2"/>
+      <text x="12" y="172" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#fbbf24">Fungsi Objektif Sistem:</text>
+      <text x="12" y="194" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="700" fill="#fef08a">min Makespan = max_{i} (L_i)</text>
+      <text x="12" y="214" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" fill="#94a3b8">DI = (L_max - L_min) / L_avg</text>
+    </g>
+  </g>
+
+  <!-- Arrow Col 2 -> Col 3 -->
+  <path d="M 620 250 L 670 250" fill="none" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrowEtcBlue)"/>
+
+  <!-- Column 3: Heterogeneous Virtual Machines -->
+  <g transform="translate(680, 95)">
+    <rect width="210" height="315" rx="14" fill="#0b1329" stroke="#334155" stroke-width="1.5"/>
+    <rect width="210" height="38" rx="14" fill="#1e293b"/>
+    <text x="14" y="24" font-family="'Inter', sans-serif" font-size="12" font-weight="700" fill="#ffffff">Node Virtual Machine</text>
+
+    <g transform="translate(14, 52)">
+      <!-- VM 1 -->
+      <rect width="182" height="60" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="1.2"/>
+      <text x="10" y="20" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#38bdf8">Node 1: Alpha (1000 MIPS)</text>
+      <text x="10" y="36" font-family="'Inter', sans-serif" font-size="9.5" fill="#94a3b8">Kecepatan Relatif: 1.0x</text>
+      <rect x="10" y="44" width="162" height="6" rx="3" fill="#334155"/>
+      <rect x="10" y="44" width="150" height="6" rx="3" fill="#38bdf8"/>
+
+      <!-- VM 2 -->
+      <rect y="70" width="182" height="60" rx="8" fill="#1e293b" stroke="#a855f7" stroke-width="1.2"/>
+      <text x="10" y="90" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#c084fc">Node 2: Beta (1500 MIPS)</text>
+      <text x="10" y="106" font-family="'Inter', sans-serif" font-size="9.5" fill="#94a3b8">Kecepatan Relatif: 1.5x</text>
+      <rect x="10" y="114" width="162" height="6" rx="3" fill="#334155"/>
+      <rect x="10" y="114" width="155" height="6" rx="3" fill="#a855f7"/>
+
+      <!-- VM 3 -->
+      <rect y="140" width="182" height="60" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="1.2"/>
+      <text x="10" y="160" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#fbbf24">Node 3: Gamma (2000 MIPS)</text>
+      <text x="10" y="176" font-family="'Inter', sans-serif" font-size="9.5" fill="#94a3b8">Kecepatan Relatif: 2.0x (Mainframe)</text>
+      <rect x="10" y="184" width="162" height="6" rx="3" fill="#334155"/>
+      <rect x="10" y="184" width="158" height="6" rx="3" fill="#f59e0b"/>
+
+      <!-- Lower Bound Target -->
+      <rect y="210" width="182" height="38" rx="8" fill="rgba(16, 185, 129, 0.15)" stroke="#10b981" stroke-width="1"/>
+      <text x="10" y="226" font-family="'Inter', sans-serif" font-size="9.5" font-weight="700" fill="#34d399">Theoretical Lower Bound Target:</text>
+      <text x="10" y="240" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="800" fill="#ffffff">Makespan Optimal ~ 103.3s</text>
+    </g>
+  </g>
+</svg>

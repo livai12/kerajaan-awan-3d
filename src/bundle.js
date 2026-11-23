@@ -1294,15 +1294,15 @@ reset() {
       bCtx.font = 'bold 30px sans-serif';
       bCtx.fillStyle = '#1e293b';
       bCtx.textAlign = 'center';
-      bCtx.fillText('🏰 ISTANA KERAJAAN AWAN', 256, 62);
+      bCtx.fillText('⚛️ STASIUN QUANTUM CORE 2099', 256, 62);
 
       bCtx.font = 'bold 22px sans-serif';
       bCtx.fillStyle = '#0284c7';
-      bCtx.fillText('Kocorock (VNS) 🤝 Pipimon (BFO)', 256, 104);
+      bCtx.fillText('Mecha-Kocorock ⚡ Aero-Pipimon', 256, 104);
 
       bCtx.font = 'bold 15px sans-serif';
       bCtx.fillStyle = '#d97706';
-      bCtx.fillText('✨ Simbol Kolaborasi & Persahabatan Abadi ✨', 256, 134);
+      bCtx.fillText('✨ Reaktor Riset Sintesis Hibrida Komputasi Awan ✨', 256, 134);
 
       const bannerTex = new THREE.CanvasTexture(bannerCanvas);
       const castleBanner = new THREE.Mesh(
@@ -2564,43 +2564,43 @@ reset() {
 
       this.storyChapters = [
         {
-          header: "Bab 1: Perkenalan Kocorock & Pipimon",
-          speaker: "Kocorock & Pipimon",
+          header: "Bab 1: Protokol Inisiasi Stasiun Komputasi Quantum 2099",
+          speaker: "Mecha-Kocorock & Aero-Pipi",
           speakerType: "both",
-          bubbleText: "Selamat datang di Kerajaan Awan kami.",
-          text: "Halo rekan-rekan penguji dan mahasiswa! Aku Kocorock si golem VNS, dan ini rekanku Pipimon si koloni bakteri BFO! Selamat datang di Kerajaan Awan! Setiap hari, tugas komputasi awan berjatuhan dan harus dialokasikan ke pulau virtual machine secara merata!",
+          bubbleText: "Selamat datang di Stasiun Komputasi Orbital 2099!",
+          text: "Halo rekan-rekan penguji dan mahasiswa! Selamat datang di Laboratorium Riset Sintesis Komputasi Quantum 2099! Aku Mecha-Kocorock unit VNS, dan ini rekanku Aero-Pipi armada BFO Swarm! Setiap detik, jutaan paket data komputasi global masuk dan harus dialokasikan ke node virtual machine heterogen secara seimbang!",
           cam: "both"
         },
         {
-          header: "Bab 2: Kocorock Mengidentifikasi Bottleneck",
-          speaker: "Kocorock (VNS)",
+          header: "Bab 2: Deteksi Bottleneck & Krisis Latensi",
+          speaker: "Mecha-Kocorock (VNS)",
           speakerType: "kocorock",
-          bubbleText: "Perhatian! Kristal tugas menumpuk di pulau itu, Makespan melonjak!",
-          text: "Perhatikan pulau di hadapanku ini! Tugas-tugas komputasi menumpuk terlalu banyak, sehingga beban Makespan melonjak drastis! Jika satu mesin virtual terlalu terbebani, waktu Makespan total sistem akan membengkak dan utilisasi menjadi tidak seimbang!",
+          bubbleText: "Peringatan! Antrean kritis terdeteksi di Node Alpha!",
+          text: "Sensor mendeteksi antrean beban kritis pada Node Alpha! Penjadwalan acak menyebabkan tumpukan paket data berlebih pada satu mesin virtual, memicu ledakan waktu Makespan dan pemborosan energi data center. Kita membutuhkan intervensi optimasi seketika!",
           cam: "vns"
         },
         {
-          header: "Bab 3: Mekanisme Shaking Kocorock (VNS)",
-          speaker: "Kocorock (VNS)",
+          header: "Bab 3: Manuver Shaking Mecha-Kocorock (VNS)",
+          speaker: "Mecha-Kocorock (VNS)",
           speakerType: "kocorock",
-          bubbleText: "Tenang, gunakan jurus Shaking! Guncang kristal ke pulau seimbang.",
-          text: "Jangan khawatir! Sebagai representasi Variable Neighborhood Search, aku mengeksekusi mekanisme Shaking! Aku melompat langsung ke pulau terberat, lalu mengentakkan tongkat batuku untuk memindahkan tugas ke pulau yang lebih lengang!",
+          bubbleText: "Aktifkan Ion Phase Hammer! Guncang muatan dengan radius k=1..3!",
+          text: "Inisiasi protokol Variable Neighborhood Search! Aku meluncur ke node bottleneck dan menghantamkan Ion Phase Hammer dengan radius goncangan bertingkat k=1, 2, 3! Paket data yang menumpuk dipindahkan ke node yang lebih longgar menggunakan First-Improvement Descent!",
           cam: "vns"
         },
         {
-          header: "Bab 4: Eksplorasi Koloni Pipimon (BFO)",
-          speaker: "Pipimon (BFO)",
+          header: "Bab 4: Pemindaian Kemotaksis Aero-Pipi (BFO)",
+          speaker: "Aero-Pipi (BFO)",
           speakerType: "pipimon",
-          bubbleText: "Giliranku! Koloni kami berenang lincah dengan Chemotaxis!",
-          text: "Sekarang giliranku! Koloni kami Pipimon berenang lincah mengikuti gradien nutrisi Chemotaxis! Bakteri terunggul membelah diri pada fase reproduksi, dan sebagian disebar untuk mencegah jebakan lokal!",
+          bubbleText: "Lepaskan armada Swarm! Pindai manifold global dengan Chemotaxis!",
+          text: "Giliran armada kami! Ribuan agen bio-swarm Aero-Pipi berenang memindai topologi ruang pencarian global melalui dinamika Chemotaxis (Tumble & Swim). Bakteri terunggul membelah diri pada fase reproduksi, dan dispersi acak memastikan sistem tidak terjebak di optimum lokal!",
           cam: "bfo"
         },
         {
-          header: "Bab 5: Konvergensi Optimal Kocorock & Pipimon",
-          speaker: "Kocorock & Pipimon",
+          header: "Bab 5: Konvergensi Memetik (Fusi Hibrida 1+1 > 2)",
+          speaker: "Mecha-Kocorock & Aero-Pipi",
           speakerType: "both",
-          bubbleText: "Beban seluruh pulau kini seimbang mendekati batas ideal!",
-          text: "Berkat kombinasi goncangan terarah Kocorock dan penjelajahan luas koloni Pipimon, beban seluruh pulau kini seimbang mendekati batas bawah teoretis! Makespan berhasil diminimalkan dan penjadwalan komputasi awan sukses dioptimalkan!",
+          bubbleText: "Fusi Hibrida Sempurna! Beban seimbang mendekati Batas Bawah Ideal!",
+          text: "Protokol Sintesis Hibrida sukses! Sinergi eksplorasi global Aero-Pipi dan eksploitasi goncangan Mecha-Kocorock berhasil memangkas Makespan ke batas ideal teoretis dengan Degree of Imbalance mendekati nol dan utilisasi 92.4%! Terbukti efisiensi hibrida konsisten melampaui metode mandiri!",
           cam: "both"
         }
       ];

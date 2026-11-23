@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 280" width="100%" height="100%">
+  <defs>
+    <!-- Dark Cybernetic Glassmorphic Background -->
+    <linearGradient id="cyberBgPipi" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#041f1e"/>
+      <stop offset="60%" stop-color="#042f2e"/>
+      <stop offset="100%" stop-color="#083344"/>
+    </linearGradient>
+
+    <!-- Bioluminescent Cyan Core -->
+    <linearGradient id="bioCyanCore" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="40%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0d9488"/>
+    </linearGradient>
+
+    <!-- Neon Teal Glow Filter -->
+    <filter id="neonTealGlow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <!-- Cyber Grid Pattern -->
+    <pattern id="pipiGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(45, 212, 191, 0.08)" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Card Background -->
+  <rect width="380" height="280" rx="18" fill="url(#cyberBgPipi)" stroke="#0d9488" stroke-width="1.8"/>
+  <rect width="380" height="280" rx="18" fill="url(#pipiGrid)"/>
+
+  <!-- Holographic Corner Markers -->
+  <path d="M 12 28 L 12 12 L 28 12" fill="none" stroke="#2dd4bf" stroke-width="2.5"/>
+  <path d="M 368 28 L 368 12 L 352 12" fill="none" stroke="#2dd4bf" stroke-width="2.5"/>
+  <path d="M 12 252 L 12 268 L 28 268" fill="none" stroke="#2dd4bf" stroke-width="2.5"/>
+  <path d="M 368 252 L 368 268 L 352 268" fill="none" stroke="#2dd4bf" stroke-width="2.5"/>
+
+  <!-- Character Presentation Area (Right side) -->
+  <g transform="translate(255, 142)">
+    <!-- Swarm Biosphere Levitation Base -->
+    <ellipse cx="0" cy="85" rx="55" ry="14" fill="none" stroke="#14b8a6" stroke-width="2" stroke-dasharray="6,4" filter="url(#neonTealGlow)"/>
+    <ellipse cx="0" cy="85" rx="35" ry="9" fill="rgba(20, 184, 166, 0.2)"/>
+
+    <!-- Orbital Gyro Ring 1 (Outer Tilted) -->
+    <ellipse cx="0" cy="8" rx="62" ry="24" fill="none" stroke="#2dd4bf" stroke-width="2.5" stroke-dasharray="14,6" transform="rotate(-28)" filter="url(#neonTealGlow)"/>
+    <!-- Satellite Sensor Nodes on Ring 1 -->
+    <circle cx="-52" cy="-18" r="4.5" fill="#fef08a" filter="url(#neonTealGlow)"/>
+    <circle cx="52" cy="34" r="4.5" fill="#fef08a" filter="url(#neonTealGlow)"/>
+
+    <!-- Orbital Gyro Ring 2 (Inner Tilted) -->
+    <ellipse cx="0" cy="8" rx="52" ry="18" fill="none" stroke="#38bdf8" stroke-width="1.8" stroke-dasharray="8,4" transform="rotate(35)"/>
+    <circle cx="40" cy="-20" r="3.5" fill="#ffffff"/>
+
+    <!-- Bioluminescent Drone Slime Body (Translucent Core) -->
+    <circle cx="0" cy="6" r="42" fill="url(#bioCyanCore)" filter="url(#neonTealGlow)"/>
+    <circle cx="-12" cy="-8" r="28" fill="#ffffff" opacity="0.32"/>
+
+    <!-- Golden Cyber-Crown / Quantum Sensor Array -->
+    <g transform="translate(0, -38)">
+      <polygon points="-24,6 -18,-18 -10,0 0,-24 10,0 18,-18 24,6" fill="#f59e0b" stroke="#fef08a" stroke-width="1.5" filter="url(#neonTealGlow)"/>
+      <polygon points="-16,4 -18,-12 -12,0 0,-18 12,0 18,-12 16,4" fill="#fef08a"/>
+      <circle cx="0" cy="-24" r="3" fill="#ffffff"/>
+    </g>
+
+    <!-- Anime Sparkling Cyber-Eyes -->
+    <ellipse cx="-15" cy="4" rx="7.5" ry="11" fill="#042f2e"/>
+    <ellipse cx="15" cy="4" rx="7.5" ry="11" fill="#042f2e"/>
+    <!-- Big Eye Highlights -->
+    <circle cx="-13" cy="0" r="4.5" fill="#ffffff"/>
+    <circle cx="-17" cy="8" r="2" fill="#38bdf8"/>
+    <circle cx="17" cy="0" r="4.5" fill="#ffffff"/>
+    <circle cx="13" cy="8" r="2" fill="#38bdf8"/>
+
+    <!-- Cyber Blush Neon Sensor -->
+    <ellipse cx="-26" cy="18" rx="6" ry="3" fill="#f43f5e" opacity="0.75" filter="url(#neonTealGlow)"/>
+    <ellipse cx="26" cy="18" rx="6" ry="3" fill="#f43f5e" opacity="0.75" filter="url(#neonTealGlow)"/>
+
+    <!-- Happy Robotic Smile -->
+    <path d="M -6 18 Q 0 25 6 18" fill="none" stroke="#042f2e" stroke-width="2.5" stroke-linecap="round"/>
+
+    <!-- Swarming Mini-Drones / Bacteria Particles -->
+    <circle cx="-50" cy="-45" r="5" fill="#2dd4bf" filter="url(#neonTealGlow)"/>
+    <circle cx="48" cy="-48" r="4" fill="#38bdf8" filter="url(#neonTealGlow)"/>
+    <circle cx="-56" cy="35" r="3.5" fill="#fef08a"/>
+    <circle cx="58" cy="-5" r="4.5" fill="#2dd4bf"/>
+  </g>
+
+  <!-- Left Information HUD Section -->
+  <g transform="translate(22, 22)">
+    <!-- Header Chip -->
+    <rect width="145" height="22" rx="6" fill="rgba(45, 212, 191, 0.15)" stroke="#0d9488" stroke-width="1"/>
+    <text x="8" y="15" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="800" fill="#2dd4bf">POLA D • SWARM DYNAMICS</text>
+
+    <!-- Character Title -->
+    <text x="0" y="52" font-family="'Fraunces', serif" font-size="23" font-weight="700" fill="#ffffff" font-style="italic">Aero-Pipimon</text>
+    <text x="0" y="70" font-family="'Inter', sans-serif" font-size="11.5" font-weight="600" fill="#94a3b8">Quantum Bio-Swarm Core (BFO)</text>
+
+    <!-- Technical Specs Grid -->
+    <g transform="translate(0, 88)">
+      <rect width="150" height="26" rx="6" fill="rgba(15, 23, 42, 0.7)" stroke="#134e4a" stroke-width="1"/>
+      <text x="8" y="17" font-family="'Inter', sans-serif" font-size="10.5" font-weight="600" fill="#cbd5e1">Sistem: Swarm Intelligence</text>
+
+      <rect y="32" width="150" height="26" rx="6" fill="rgba(15, 23, 42, 0.7)" stroke="#134e4a" stroke-width="1"/>
+      <text x="8" y="49" font-family="'Inter', sans-serif" font-size="10.5" font-weight="600" fill="#cbd5e1">Sensor: Chemotaxis Flux</text>
+
+      <rect y="64" width="150" height="26" rx="6" fill="rgba(15, 23, 42, 0.7)" stroke="#134e4a" stroke-width="1"/>
+      <text x="8" y="81" font-family="'Inter', sans-serif" font-size="10.5" font-weight="600" fill="#2dd4bf">Operasi: Swim &amp; Tumble</text>
+
+      <rect y="96" width="150" height="26" rx="6" fill="rgba(13, 148, 136, 0.2)" stroke="#2dd4bf" stroke-width="1.2"/>
+      <text x="8" y="113" font-family="'Inter', sans-serif" font-size="10.5" font-weight="700" fill="#a7f3d0">Fokus: Global Manifold Search</text>
+    </g>
+  </g>
+</svg>

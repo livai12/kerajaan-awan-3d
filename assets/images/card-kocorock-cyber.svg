@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 280" width="100%" height="100%">
+  <defs>
+    <!-- Dark Cybernetic Glassmorphic Background -->
+    <linearGradient id="cyberBgKocok" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090d16"/>
+      <stop offset="60%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e1b4b"/>
+    </linearGradient>
+
+    <!-- Obsidian Armor Gradient -->
+    <linearGradient id="mechArmor" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="40%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#090d16"/>
+    </linearGradient>
+
+    <!-- Golden Plasma Energy -->
+    <linearGradient id="plasmaGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+
+    <!-- Neon Glow Filter -->
+    <filter id="neonAmberGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <!-- Cyber Grid Pattern -->
+    <pattern id="kocokGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(245, 158, 11, 0.08)" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Card Background -->
+  <rect width="380" height="280" rx="18" fill="url(#cyberBgKocok)" stroke="#f59e0b" stroke-width="1.8"/>
+  <rect width="380" height="280" rx="18" fill="url(#kocokGrid)"/>
+
+  <!-- Holographic Corner Markers -->
+  <path d="M 12 28 L 12 12 L 28 12" fill="none" stroke="#f59e0b" stroke-width="2.5"/>
+  <path d="M 368 28 L 368 12 L 352 12" fill="none" stroke="#f59e0b" stroke-width="2.5"/>
+  <path d="M 12 252 L 12 268 L 28 268" fill="none" stroke="#f59e0b" stroke-width="2.5"/>
+  <path d="M 368 252 L 368 268 L 352 268" fill="none" stroke="#f59e0b" stroke-width="2.5"/>
+
+  <!-- Character Presentation Area (Right side) -->
+  <g transform="translate(255, 142)">
+    <!-- Energy Pedestal Ring (Hex Pod) -->
+    <ellipse cx="0" cy="85" rx="55" ry="14" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="6,4" filter="url(#neonAmberGlow)"/>
+    <ellipse cx="0" cy="85" rx="35" ry="9" fill="rgba(245, 158, 11, 0.15)"/>
+
+    <!-- Quantum Phase Hammer (3.6m Heavy Weapon) -->
+    <g transform="translate(46, -30)">
+      <!-- Cybernetic Shaft -->
+      <rect x="-3" y="-70" width="7" height="180" rx="3" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+      <line x1="0" y1="-60" x2="0" y2="100" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2"/>
+      <!-- Glowing Power Rings on Shaft -->
+      <rect x="-6" y="-50" width="13" height="6" rx="2" fill="#f59e0b" filter="url(#neonAmberGlow)"/>
+      <rect x="-6" y="-10" width="13" height="6" rx="2" fill="#f59e0b" filter="url(#neonAmberGlow)"/>
+      <rect x="-6" y="40" width="13" height="6" rx="2" fill="#f59e0b" filter="url(#neonAmberGlow)"/>
+      <!-- Hammer Head / Chrono-Resonance Unit -->
+      <polygon points="-22,-82 22,-82 26,-62 -26,-62" fill="url(#mechArmor)" stroke="#f59e0b" stroke-width="2"/>
+      <rect x="-14" y="-80" width="28" height="15" rx="3" fill="url(#plasmaGold)" filter="url(#neonAmberGlow)"/>
+      <!-- Plasma Shockwave Rings -->
+      <ellipse cx="0" cy="-72" rx="28" ry="8" fill="none" stroke="#fef08a" stroke-width="1.5" stroke-dasharray="4,3" transform="rotate(-12)"/>
+    </g>
+
+    <!-- Mech Heavy Greaves / Legs -->
+    <polygon points="-32,48 -10,48 -8,82 -35,82" fill="url(#mechArmor)" stroke="#f59e0b" stroke-width="1.2"/>
+    <polygon points="10,48 32,48 35,82 8,82" fill="url(#mechArmor)" stroke="#f59e0b" stroke-width="1.2"/>
+    <!-- Leg Joint Glow -->
+    <circle cx="-21" cy="62" r="3" fill="#f59e0b" filter="url(#neonAmberGlow)"/>
+    <circle cx="21" cy="62" r="3" fill="#f59e0b" filter="url(#neonAmberGlow)"/>
+
+    <!-- Mech Armored Torso -->
+    <polygon points="-44,-24 44,-24 36,48 -36,48" fill="url(#mechArmor)" stroke="#475569" stroke-width="1.5"/>
+    <!-- Shoulder Armor Plates -->
+    <polygon points="-58,-28 -40,-28 -34,-6 -54,6" fill="#0f172a" stroke="#f59e0b" stroke-width="1.5"/>
+    <polygon points="58,-28 40,-28 34,-6 54,6" fill="#0f172a" stroke="#f59e0b" stroke-width="1.5"/>
+
+    <!-- Chest Quantum Arc Reactor -->
+    <polygon points="0,-12 18,8 0,28 -18,8" fill="url(#plasmaGold)" filter="url(#neonAmberGlow)"/>
+    <polygon points="0,-6 10,8 0,22 -10,8" fill="#ffffff"/>
+
+    <!-- Mech Cyber Head & Visor -->
+    <polygon points="-28,-68 28,-68 24,-28 -24,-28" fill="url(#mechArmor)" stroke="#64748b" stroke-width="1.5"/>
+    <!-- Cyber Horns / Antenna Sensors -->
+    <polygon points="-24,-68 -30,-88 -20,-72" fill="#f59e0b"/>
+    <polygon points="24,-68 30,-88 20,-72" fill="#f59e0b"/>
+
+    <!-- Holographic Blue/Cyan Optics Visor -->
+    <rect x="-20" y="-52" width="40" height="10" rx="3" fill="#0284c7" filter="url(#neonAmberGlow)"/>
+    <rect x="-18" y="-50" width="36" height="6" rx="2" fill="#38bdf8"/>
+    <circle cx="-12" cy="-47" r="2" fill="#ffffff"/>
+    <circle cx="12" cy="-47" r="2" fill="#ffffff"/>
+
+    <!-- Left Arm & Fist -->
+    <rect x="-56" y="-10" width="16" height="42" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="1" transform="rotate(18 -48 9)"/>
+    <circle cx="-56" cy="36" r="10" fill="#0f172a" stroke="#f59e0b" stroke-width="1.5"/>
+
+    <!-- Right Arm holding Hammer -->
+    <rect x="40" y="-10" width="16" height="40" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="1" transform="rotate(-18 48 9)"/>
+    <circle cx="48" cy="30" r="10" fill="#0f172a" stroke="#f59e0b" stroke-width="1.5"/>
+  </g>
+
+  <!-- Left Information HUD Section -->
+  <g transform="translate(22, 22)">
+    <!-- Header Chip -->
+    <rect width="145" height="22" rx="6" fill="rgba(245, 158, 11, 0.15)" stroke="#f59e0b" stroke-width="1"/>
+    <text x="8" y="15" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="800" fill="#fbbf24">POLA D • LOCAL DESCENT</text>
+
+    <!-- Character Title -->
+    <text x="0" y="52" font-family="'Fraunces', serif" font-size="23" font-weight="700" fill="#ffffff" font-style="italic">Mecha-Kocorock</text>
+    <text x="0" y="70" font-family="'Inter', sans-serif" font-size="11.5" font-weight="600" fill="#94a3b8">Titan Chrono-Mech (VNS Unit)</text>
+
+    <!-- Technical Specs Grid -->
+    <g transform="translate(0, 88)">
+      <rect width="150" height="26" rx="6" fill="rgba(15, 23, 42, 0.7)" stroke="#334155" stroke-width="1"/>
+      <text x="8" y="17" font-family="'Inter', sans-serif" font-size="10.5" font-weight="600" fill="#cbd5e1">Sistem: Trajectory VNS</text>
+
+      <rect y="32" width="150" height="26" rx="6" fill="rgba(15, 23, 42, 0.7)" stroke="#334155" stroke-width="1"/>
+      <text x="8" y="49" font-family="'Inter', sans-serif" font-size="10.5" font-weight="600" fill="#cbd5e1">Senjata: Phase Hammer</text>
+
+      <rect y="64" width="150" height="26" rx="6" fill="rgba(15, 23, 42, 0.7)" stroke="#334155" stroke-width="1"/>
+      <text x="8" y="81" font-family="'Inter', sans-serif" font-size="10.5" font-weight="600" fill="#fbbf24">Radius: k = 1..3 Perturbation</text>
+
+      <rect y="96" width="150" height="26" rx="6" fill="rgba(245, 158, 11, 0.2)" stroke="#f59e0b" stroke-width="1.2"/>
+      <text x="8" y="113" font-family="'Inter', sans-serif" font-size="10.5" font-weight="700" fill="#fef08a">Fokus: Bottleneck Shaking</text>
+    </g>
+  </g>
+</svg>
