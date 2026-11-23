@@ -5381,10 +5381,10 @@ reset() {
         // Ensure characters approach player if they haven't yet, then show tour invitation
         if (this.world && typeof this.world.npcApproachPlayer === 'function') {
           this.world.npcApproachPlayer(() => {
-            this.showTourInvitation();
+            this.showTourInvitation({ speakTTS: false });
           });
         } else {
-          this.showTourInvitation();
+          this.showTourInvitation({ speakTTS: false });
         }
       };
 
@@ -5392,8 +5392,12 @@ reset() {
         btnSkip.onclick = () => finishPrologue();
       }
 
-      const prologueParts = [
+      const storyParts = [
+        // ==========================================
+        // PROLOG: MARKAS PALUNG ABYSSAL (11.000m)
+        // ==========================================
         {
+          badgeText: 'Prolog • 1/3 (Narator)',
           audio: 'audio/prologue_01_narrator.mp3',
           speaker: '🎙️ Narator Palung Abyssal',
           avatar: '🌊',
@@ -5405,6 +5409,7 @@ reset() {
           }
         },
         {
+          badgeText: 'Prolog • 2/3 (Kocorock)',
           audio: 'audio/prologue_02_kocorock.mp3',
           speaker: '🌋 Magma-Kocorock (VNS Master)',
           avatar: '🌋',
@@ -5419,6 +5424,7 @@ reset() {
           }
         },
         {
+          badgeText: 'Prolog • 3/3 (Pipimon)',
           audio: 'audio/prologue_03_pipimon.mp3',
           speaker: '💧 Aqua-Pipimon (BFO Leader)',
           avatar: '💧',
@@ -5427,24 +5433,70 @@ reset() {
           text: '"[tertawa kecil] Dan aku, Aqua Pipimon! Pemimpin koloni bio-swarm tetesan air samudra. Lihat, ada penjelajah baru yang tiba di hadapan kita!"',
           onStart: () => {
             this.say("💧 [Aqua-Pipimon]: Dan aku, Aqua Pipimon! Pemimpin koloni bio-swarm tetesan air samudra.");
-            // When Pipimon says "Lihat, ada penjelajah baru...", trigger dynamic approach!
+            // When Pipimon says "Lihat, ada penjelajah baru...", character starts leaping forward!
             setTimeout(() => {
               if (!isFinished && this.world && typeof this.world.npcApproachPlayer === 'function') {
                 this.world.npcApproachPlayer();
               }
-            }, 3200);
+            }, 3000);
+          }
+        },
+
+        // ==========================================
+        // SCENE 1: KARAKTER MENAWARKAN TUR EDUKATIF
+        // ==========================================
+        {
+          badgeText: 'Scene 1 • 1/3 (Sapaan Pipimon)',
+          audio: 'audio/scene1_01_pipimon.mp3',
+          speaker: '💧 Aqua-Pipimon (BFO Leader)',
+          avatar: '💧',
+          avatarBg: 'linear-gradient(135deg, #06b6d4 0%, #38bdf8 100%)',
+          speakerColor: '#38bdf8',
+          text: '"Pipi-pipi! Hai kamu yang ada di sana! Selamat datang di markas kami! Jangan takut dengan lava pijar di sekelilingmu ya!"',
+          onStart: () => {
+            this.say("💧 [Aqua-Pipimon]: Pipi-pipi! Hai kamu yang ada di sana! Selamat datang di markas kami!");
+          }
+        },
+        {
+          badgeText: 'Scene 1 • 2/3 (Misi Kocorock)',
+          audio: 'audio/scene1_02_kocorock.mp3',
+          speaker: '🌋 Magma-Kocorock (VNS Master)',
+          avatar: '🌋',
+          avatarBg: 'linear-gradient(135deg, #ea580c 0%, #f59e0b 100%)',
+          speakerColor: '#f59e0b',
+          text: '"Kami berdua ditugaskan untuk memecahkan krisis komputasi terberat di abad ini. Bagaimana membagi ribuan tugas ke mesin virtual heterogen tanpa ada mesin yang meledak karena kelebihan beban!"',
+          onStart: () => {
+            this.say("🌋 [Magma-Kocorock]: Kami berdua ditugaskan untuk memecahkan krisis komputasi terberat di abad ini...");
+          }
+        },
+        {
+          badgeText: 'Scene 1 • 3/3 (Ajakan Tur Teater)',
+          audio: 'audio/scene1_03_pipimon.mp3',
+          speaker: '💧 Aqua-Pipimon (BFO Leader)',
+          avatar: '💧',
+          avatarBg: 'linear-gradient(135deg, #06b6d4 0%, #38bdf8 100%)',
+          speakerColor: '#38bdf8',
+          text: '"Maukah kamu ikut tur pembelajaran eksklusif bersama kami? [bisikan] Kami punya ruang teater holografik raksasa di dalam! Di sana, kami berdua akan menjadi gurumu, lengkap dengan layar bioskop interaktif dan mini game seru! Ayo, tekan tombol Ikuti Tur sekarang!"',
+          onStart: () => {
+            this.say("💧 [Aqua-Pipimon]: Maukah kamu ikut tur pembelajaran eksklusif bersama kami? Kami punya ruang teater holografik raksasa di dalam!");
+            // As Pipimon says "Ayo, tekan tombol Ikuti Tur sekarang!", pop up the modal ready to be clicked!
+            setTimeout(() => {
+              if (!isFinished) {
+                this.showTourInvitation({ speakTTS: false });
+              }
+            }, 10000);
           }
         }
       ];
 
       const playPart = (idx) => {
         if (isFinished) return;
-        if (idx >= prologueParts.length) {
+        if (idx >= storyParts.length) {
           finishPrologue();
           return;
         }
 
-        const part = prologueParts[idx];
+        const part = storyParts[idx];
         if (speakerEl) {
           speakerEl.textContent = part.speaker;
           speakerEl.style.color = part.speakerColor;
@@ -5454,7 +5506,7 @@ reset() {
           avatarEl.style.background = part.avatarBg;
         }
         if (textEl) textEl.innerHTML = part.text;
-        if (stepEl) stepEl.textContent = `Bagian ${idx + 1} dari ${prologueParts.length}`;
+        if (stepEl) stepEl.textContent = part.badgeText;
 
         if (part.onStart) part.onStart();
 
@@ -5485,7 +5537,7 @@ reset() {
       playPart(0);
     }
 
-    showTourInvitation() {
+    showTourInvitation(options = {}) {
       const modalTour = document.getElementById('tour-invitation-modal');
       if (modalTour) {
         modalTour.style.display = 'block';
@@ -5498,8 +5550,10 @@ reset() {
         });
       }
 
-      const inviteText = "[cheerful] Pipi-pipi! Selamat datang di markas Abyssal Grid Three-D! Maukah kamu ikut tur pembelajaran eksklusif bersama kami ke Ruang Teater Holografik?";
-      this.speakElevenlabsText(inviteText, 'pipimon');
+      if (options && options.speakTTS) {
+        const inviteText = "[cheerful] Pipi-pipi! Selamat datang di markas Abyssal Grid Three-D! Maukah kamu ikut tur pembelajaran eksklusif bersama kami ke Ruang Teater Holografik?";
+        this.speakElevenlabsText(inviteText, 'pipimon');
+      }
     }
 
     startCinematicCutscene() {
