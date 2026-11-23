@@ -5558,37 +5558,77 @@ reset() {
 
     startCinematicCutscene() {
       const cutscene = document.getElementById('cutscene-overlay');
-      if (cutscene) {
-        cutscene.style.display = 'flex';
-        cutscene.style.opacity = '1';
+      const btnSkip = document.getElementById('btnSkipCutscene');
 
-        // Play deep cinematic warp bass sweep if AudioContext exists
-        if (this.soundtrack && this.soundtrack.ctx) {
-          try {
-            const ctx = this.soundtrack.ctx;
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(65, ctx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(260, ctx.currentTime + 1.2);
-            gain.gain.setValueAtTime(0.25, ctx.currentTime);
-            gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 1.4);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start();
-            osc.stop(ctx.currentTime + 1.5);
-          } catch (e) {}
+      if (!cutscene) {
+        this.openTheaterClassroom({ playWelcomeAudio: true });
+        return;
+      }
+
+      cutscene.style.display = 'flex';
+      cutscene.style.pointerEvents = 'auto';
+      requestAnimationFrame(() => {
+        cutscene.style.opacity = '1';
+      });
+
+      // Play deep cinematic warp bass sweep if AudioContext exists
+      if (this.soundtrack && this.soundtrack.ctx) {
+        try {
+          const ctx = this.soundtrack.ctx;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(65, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(260, ctx.currentTime + 1.2);
+          gain.gain.setValueAtTime(0.25, ctx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 1.4);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 1.5);
+        } catch (e) {}
+      }
+
+      let isCutsceneFinished = false;
+      let cutsceneAudio = null;
+
+      const finishCutscene = () => {
+        if (isCutsceneFinished) return;
+        isCutsceneFinished = true;
+        if (cutsceneAudio) {
+          cutsceneAudio.pause();
+          cutsceneAudio = null;
         }
 
+        cutscene.style.opacity = '0';
+        cutscene.style.pointerEvents = 'none';
         setTimeout(() => {
-          cutscene.style.opacity = '0';
-          setTimeout(() => {
-            cutscene.style.display = 'none';
-            this.openTheaterClassroom();
-          }, 600);
-        }, 1600);
-      } else {
-        this.openTheaterClassroom();
+          cutscene.style.display = 'none';
+          this.openTheaterClassroom({ playWelcomeAudio: true });
+        }, 600);
+      };
+
+      if (btnSkip) {
+        btnSkip.onclick = () => finishCutscene();
+      }
+
+      // Play Scene 2 teleport narration audio (ElevenLabs)
+      try {
+        const aud = new Audio('audio/scene2_01_teleport_narrator.mp3');
+        cutsceneAudio = aud;
+        aud.onended = () => {
+          if (!isCutsceneFinished) {
+            setTimeout(finishCutscene, 400);
+          }
+        };
+        aud.onerror = () => {
+          setTimeout(finishCutscene, 5500);
+        };
+        aud.play().catch(e => {
+          setTimeout(finishCutscene, 5500);
+        });
+      } catch (err) {
+        setTimeout(finishCutscene, 5500);
       }
     }
 
@@ -5599,6 +5639,7 @@ reset() {
       this.isTheaterOpen = false;
       this.theaterSlideIndex = 0;
       this.theaterVoiceEnabled = true;
+      this.currentTheaterAudio = null;
 
       const btnOpen = document.getElementById('btnOpenTheater');
       const btnClose = document.getElementById('btnCloseTheater');
@@ -5625,6 +5666,9 @@ reset() {
           if (this.theaterVoiceEnabled) {
             this.speakCurrentTheaterSlide();
           } else {
+            if (this.currentTheaterAudio) {
+              this.currentTheaterAudio.pause();
+            }
             if ('speechSynthesis' in window) window.speechSynthesis.cancel();
           }
         });
@@ -5641,18 +5685,57 @@ reset() {
       }
     }
 
-    openTheaterClassroom() {
+    openTheaterClassroom(options = {}) {
       this.isTheaterOpen = true;
       const overlay = document.getElementById('theater-overlay');
       if (overlay) {
         overlay.style.display = 'flex';
       }
-      this.showTheaterSlide(this.theaterSlideIndex);
       this.say("🏛️ Memasuki Ruang Teater Holografik Abyssal Grid 3D.");
+
+      if (options && options.playWelcomeAudio) {
+        // Show Slide 1 visually on screen
+        this.showTheaterSlide(0, { skipVoice: true });
+
+        // Display Scene 2 Kocorock's welcome speech in the subtitle box
+        const speakerEl = document.getElementById('theater-speaker-pill');
+        const subtitleEl = document.getElementById('theater-subtitle-box');
+
+        if (speakerEl) {
+          speakerEl.textContent = '🌋 Dosen Magma-Kocorock';
+          speakerEl.style.background = 'linear-gradient(135deg, #ea580c 0%, #f59e0b 100%)';
+          speakerEl.style.color = '#ffffff';
+        }
+
+        const welcomeText = '[booming] [proud] Selamat datang di Ruang Teater Holografik Abyssal! Perhatikan layar raksasa di tengah panggung ini. Aku dan Pipimon akan berdiri di samping layar untuk memandu setiap konsep penting.';
+        if (subtitleEl) {
+          subtitleEl.innerHTML = welcomeText;
+        }
+
+        this.say("🌋 [Dosen Magma-Kocorock]: Selamat datang di Ruang Teater Holografik Abyssal! Perhatikan layar raksasa di tengah panggung ini.");
+
+        try {
+          const welcomeAud = new Audio('audio/scene2_02_theater_kocorock.mp3');
+          this.currentTheaterAudio = welcomeAud;
+          welcomeAud.onended = () => {
+            // When welcome greeting ends, automatically show Slide 1 narration
+            this.showTheaterSlide(0);
+          };
+          welcomeAud.play().catch(e => {
+            console.warn("Could not autoplay welcome audio:", e);
+          });
+        } catch (e) {}
+      } else {
+        this.showTheaterSlide(this.theaterSlideIndex);
+      }
     }
 
     closeTheaterClassroom() {
       this.isTheaterOpen = false;
+      if (this.currentTheaterAudio) {
+        this.currentTheaterAudio.pause();
+        this.currentTheaterAudio = null;
+      }
       const overlay = document.getElementById('theater-overlay');
       if (overlay) {
         overlay.style.display = 'none';
@@ -5675,8 +5758,15 @@ reset() {
       }
     }
 
-    showTheaterSlide(idx) {
+    showTheaterSlide(idx, options = {}) {
       if (!this.theaterSlides || idx < 0 || idx >= this.theaterSlides.length) return;
+      
+      // Stop any welcome or ongoing audio
+      if (this.currentTheaterAudio) {
+        this.currentTheaterAudio.pause();
+        this.currentTheaterAudio = null;
+      }
+
       this.theaterSlideIndex = idx;
       const s = this.theaterSlides[idx];
 
@@ -5717,7 +5807,7 @@ reset() {
         subtitleEl.innerHTML = s.elevenlabsScript;
       }
 
-      if (this.theaterVoiceEnabled) {
+      if (this.theaterVoiceEnabled && !(options && options.skipVoice)) {
         this.speakCurrentTheaterSlide();
       }
     }
