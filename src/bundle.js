@@ -1191,6 +1191,8 @@ reset() {
       this.createBasaltPathways();
       this.createExplorerTorch();
       this.initFPSControls();
+      if (this.controls) this.controls.enabled = false;
+      if (this.explorerTorch) this.explorerTorch.visible = true;
       this.animate();
     }
 
@@ -2921,6 +2923,7 @@ reset() {
 
     animate() {
       requestAnimationFrame(() => this.animate());
+      try {
       const t = performance.now() * 0.002;
 
       // 1. Gentle Floating Bob of Floating Realms
@@ -2952,23 +2955,36 @@ reset() {
 
       const isJumping = (mesh) => this.activeJumps && this.activeJumps.some(j => j.mesh === mesh);
 
-      // 2. Animate Pips: squishy hopping bounce & tail wag when idle
-      this.pips.forEach((p, idx) => {
-        p.userData.tail.rotation.z = Math.sin(t * 3.5 + idx) * 0.45;
-        if (!isJumping(p)) {
-          p.position.y = 1.1 + Math.abs(Math.sin(t * 2.5 + idx)) * 0.35;
+      // 2. Animate Pips: squishy hopping bounce & mini pip flock (Safe against undefined tail!)
+      if (this.pips && this.pips.length > 0) {
+        const leader = this.pips[0];
+        if (leader.userData && leader.userData.tail) {
+          leader.userData.tail.rotation.z = Math.sin(t * 3.5) * 0.45;
         }
-      });
+        if (!isJumping(leader)) {
+          leader.position.y = 2.0 + Math.abs(Math.sin(t * 2.5)) * 0.12;
+        }
+        // Mini pips orbit around leader
+        for (let i = 1; i < this.pips.length; i++) {
+          const mp = this.pips[i];
+          if (mp.userData && mp.userData.angle !== undefined) {
+            mp.userData.angle += 0.025;
+            mp.position.x = leader.position.x + Math.cos(mp.userData.angle) * mp.userData.radius;
+            mp.position.z = leader.position.z + Math.sin(mp.userData.angle) * mp.userData.radius;
+            mp.position.y = leader.position.y + 0.2 + Math.sin(t * 4.0 + i) * 0.2;
+          }
+        }
+      }
 
-      // 3. Characters gentle breathing / idle bounce
+      // 3. Characters gentle breathing / idle bounce on Dais
       if (this.meshyKocok && !isJumping(this.meshyKocok)) {
-        this.meshyKocok.position.y = 1.2 + Math.sin(t * 1.5) * 0.1;
+        this.meshyKocok.position.y = 2.0 + Math.sin(t * 1.5) * 0.08;
       }
       if (this.kocok && !isJumping(this.kocok)) {
-        this.kocok.position.y = 1.2 + Math.sin(t * 1.5) * 0.1;
+        this.kocok.position.y = 2.0 + Math.sin(t * 1.5) * 0.08;
       }
       if (this.meshyPip && !isJumping(this.meshyPip)) {
-        this.meshyPip.position.y = 1.1 + Math.sin(t * 2.0) * 0.15;
+        this.meshyPip.position.y = 2.0 + Math.sin(t * 2.0) * 0.12;
       }
 
       // Active Pokemon Jump Tweens (Squash, Stretch, & Impact Bounce)
@@ -3141,6 +3157,12 @@ reset() {
       this.updateSpeechBubbles();
 
       this.renderer.render(this.scene, this.camera);
+      } catch (err) {
+        console.error('Animation loop error:', err);
+        if (this.renderer && this.scene && this.camera) {
+          this.renderer.render(this.scene, this.camera);
+        }
+      }
     }
   }
 
