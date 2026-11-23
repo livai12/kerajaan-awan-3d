@@ -64,10 +64,11 @@ Beralih dari sekadar komparasi rivalitas sederhana menjadi **Laboratorium Sintes
   - **Tombol Uji vs 5 AI**: Menantang solusi pemain langsung berhadapan dengan Min-Min, VNS, BFO, PSO-MinMin, dan Memetic BFO-VNS dengan sistem penilaian Rank S / A / B / C.
   - **Petunjuk Pedagogis Cerdas**: Kocorock memberikan saran *Shaking Relocate* untuk memangkas bottleneck, dan Pipimon memberikan saran *Chemotaxis Nutrient Gradient*.
 
-### 5. 🌋 Aset Visual Baru: Volcanic Basalt Forge & Magma Ocean
+### 5. 🌋 Aset Visual Baru: Istana Api dari Neraka & Audio Horor Tegang
+- **Istana Api dari Neraka (Nether Magma Citadel)**: Benteng raksasa batu obsidian hitam legam di cakrawala dengan pilar basalt heksagonal, air terjun lahar pijar membara (*cascading lavafalls*), gerbang mulut iblis bertaring (*Hell's Maw Arched Gate*) yang memancarkan pusaran portal api merah membara, menara neraka utama berkepala **Mata Api Neraka (*Giant Flaming Eye of Netherfire*)** yang berputar dan berdenyut, menara kembar api & belerang, serta 6 tungku obor perapian neraka.
 - **Kocorock (Magma Obsidian Golem)**: Zirah lempengan batu obsidian gelap dengan retakan magma pijar menyala, inti dada emas membara, dan kapak tempur volkanik (*Volcanic Battle Axe*).
 - **Pipimon (Aqua Pixel Water Droplet)**: Karakter tetesan air biru cyan berkilau (*glossy droplet*) dengan mata kawaii pixel-shaded dan koloni tetesan air.
-- **Pulau Basalt Bertingkat & Lautan Magma**: Lantai lautan lahar membara (*Molten Lava Sea*) dengan partikel bara api volkanik yang melayang ke atas, pilar basalt heksagonal bertingkat, serta patung ksatria raksasa bersenjatakan kapak di cakrawala.
+- **Musik Latar Horor & Tegang (Nether Suspense Soundtrack)**: Desain audio Web Audio API sintetis baru bertema horor volkanik—menghadirkan dengungan sub-bass getaran tektonik kawah lahar (*subterranean rumble 34Hz–49Hz*), progresi akor minor disonan & *Devil's Tritone* (D minor $\to$ Eb dim7 $\to$ G minor $\to$ C# dim7 $\to$ A Phrygian), detak jantung berdebar (*heartbeat thud pulse*), dan lonceng minor katedral gotik yang meningkatkan ketegangan dan fokus audiens saat simulasi.
 
 ### 6. 🎯 Mode Interaktif Uji Audiens & Bedah Pemahaman Teman 3D
 - **Shortcut `[Q]`** atau tombol `[🎯 Uji Audiens [Q]]`:

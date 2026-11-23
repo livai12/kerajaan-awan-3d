@@ -1356,149 +1356,185 @@ reset() {
 
         createBigFriendshipCastle() {
       this.bigCastle = new THREE.Group();
-      // Center position directly behind the island rocks
+      // Center position directly behind the volcano islands
       this.bigCastle.position.set(0, 6.5, -34);
 
-      // 1. Massive Floating Island
-      const isleMat = new THREE.MeshToonMaterial({ color: 0x5eead4 });
-      const isle = new THREE.Mesh(new THREE.CylinderGeometry(14, 11, 3.2, 24), isleMat);
-      
-      const rockMat = new THREE.MeshToonMaterial({ color: 0x334155 });
-      const rock = new THREE.Mesh(new THREE.ConeGeometry(11, 14, 16).rotateX(Math.PI), rockMat);
-      rock.position.y = -8.5;
+      // --- 1. JAGGED OBSIDIAN NETHER CRAG BASE (Istana Api dari Neraka) ---
+      const obsidianBaseMat = new THREE.MeshToonMaterial({ color: 0x0c0a09, roughness: 0.95 });
+      const basaltCragMat = new THREE.MeshToonMaterial({ color: 0x18181b, roughness: 0.9 });
+      const magmaLavaMat = new THREE.MeshToonMaterial({ color: 0xff3b00, emissive: 0xea580c, emissiveIntensity: 1.25 });
+
+      // Massive Hexagonal Charred Basalt Foundation
+      const isle = new THREE.Mesh(new THREE.CylinderGeometry(15, 12, 3.8, 6), obsidianBaseMat);
+      const rock = new THREE.Mesh(new THREE.ConeGeometry(12, 16, 6).rotateX(Math.PI), basaltCragMat);
+      rock.position.y = -9.2;
       this.bigCastle.add(isle);
       this.bigCastle.add(rock);
 
-      // Fluffy clouds hugging the castle island base
-      const cloudMat = new THREE.MeshToonMaterial({ color: 0xffffff, transparent: true, opacity: 0.92 });
-      for (let i = 0; i < 8; i++) {
-        const ang = (i / 8) * Math.PI * 2;
-        const cSphere = new THREE.Mesh(new THREE.SphereGeometry(2.4 + (i % 2) * 0.8, 12, 12), cloudMat);
-        cSphere.position.set(Math.cos(ang) * 12.5, -1.2, Math.sin(ang) * 10);
-        this.bigCastle.add(cSphere);
-      }
+      // Cascading Molten Lava Falls pouring from the fortress into the magma ocean
+      this.hellLavaFalls = [];
+      const lavaFallOffsets = [-7, -2.5, 2.5, 7];
+      lavaFallOffsets.forEach((xPos, idx) => {
+        const fallGeo = new THREE.CylinderGeometry(0.7 + (idx % 2) * 0.3, 1.3, 20, 6);
+        const fallMat = new THREE.MeshBasicMaterial({ color: 0xff4500, transparent: true, opacity: 0.92 });
+        const fall = new THREE.Mesh(fallGeo, fallMat);
+        fall.position.set(xPos, -9.5, 5.2 - Math.abs(xPos) * 0.15);
+        this.bigCastle.add(fall);
+        this.hellLavaFalls.push(fall);
+      });
 
-      // Cascading crystal waterfalls flowing from island edge into the clouds
-      const waterMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.75 });
-      const wf1 = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.4, 18, 8), waterMat);
-      wf1.position.set(-6, -9.5, 5);
-      const wf2 = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 1.2, 16, 8), waterMat);
-      wf2.position.set(7, -8.5, 4);
-      this.bigCastle.add(wf1);
-      this.bigCastle.add(wf2);
+      // --- 2. MAIN CHARRED HELLFIRE KEEP (Benteng Neraka) ---
+      const keepMat = new THREE.MeshToonMaterial({ color: 0x18181b, roughness: 0.85 });
+      const trimMat = new THREE.MeshToonMaterial({ color: 0x27272a, roughness: 0.75 });
+      const lavaTrimMat = new THREE.MeshToonMaterial({ color: 0xff5722, emissive: 0xea580c, emissiveIntensity: 1.1 });
 
-      // 2. Main Castle Citadel (Istana Utama)
-      const stoneMat = new THREE.MeshToonMaterial({ color: 0xf8fafc });
-      const trimMat = new THREE.MeshToonMaterial({ color: 0xe2e8f0 });
-      const goldMat = new THREE.MeshToonMaterial({ color: 0xf59e0b });
-
-      // Base Castle Keep
-      const keep = new THREE.Mesh(new THREE.BoxGeometry(11, 7.5, 7.5), stoneMat);
-      keep.position.y = 5.2;
+      const keep = new THREE.Mesh(new THREE.BoxGeometry(12, 8.5, 8.5), keepMat);
+      keep.position.y = 5.8;
       this.bigCastle.add(keep);
 
-      // Grand Arched Gate with glowing warm amber portal
-      const gateFrame = new THREE.Mesh(new THREE.BoxGeometry(3.2, 4.4, 0.6), trimMat);
-      gateFrame.position.set(0, 3.8, 3.9);
-      const gatePortal = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 3.6), new THREE.MeshBasicMaterial({ color: 0xfef08a, side: THREE.DoubleSide }));
-      gatePortal.position.set(0, 3.6, 4.22);
+      // Glowing Magma Fissures across the fortress front
+      const magmaSeamH = new THREE.Mesh(new THREE.BoxGeometry(11.6, 0.22, 8.6), lavaTrimMat);
+      magmaSeamH.position.y = 6.2;
+      this.bigCastle.add(magmaSeamH);
+
+      // Jagged Demon Skull Arched Gate (Gerbang Mulut Iblis)
+      const gateFrame = new THREE.Mesh(new THREE.BoxGeometry(3.6, 5.2, 0.8), trimMat);
+      gateFrame.position.set(0, 4.2, 4.4);
+      // Swirling blazing infernal fire portal
+      const gatePortal = new THREE.Mesh(
+        new THREE.PlaneGeometry(2.8, 4.4),
+        new THREE.MeshBasicMaterial({ color: 0xdc2626, side: THREE.DoubleSide })
+      );
+      gatePortal.position.set(0, 4.0, 4.82);
       this.bigCastle.add(gateFrame);
       this.bigCastle.add(gatePortal);
 
-      // Arched Castle Windows with glowing lights
-      const winMat = new THREE.MeshBasicMaterial({ color: 0x67e8f9 });
-      for (let w = -3.2; w <= 3.2; w += 3.2) {
+      // Glowing Blood-Orange Fiery Gothic Windows
+      const winMat = new THREE.MeshBasicMaterial({ color: 0xff5722 });
+      for (let w = -3.8; w <= 3.8; w += 3.8) {
         if (Math.abs(w) > 0.5) {
-          const win = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.8), winMat);
-          win.position.set(w, 6.2, 3.8);
+          const win = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 2.2), winMat);
+          win.position.set(w, 7.2, 4.3);
           this.bigCastle.add(win);
         }
       }
 
-      // Central Grand Spire Tower
-      const centerTower = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.8, 9, 16), stoneMat);
-      centerTower.position.y = 13.0;
-      const goldenDome = new THREE.Mesh(new THREE.SphereGeometry(2.8, 16, 16), goldMat);
-      goldenDome.position.y = 17.5;
-      goldenDome.scale.set(1, 1.35, 1);
-      const topNeedle = new THREE.Mesh(new THREE.ConeGeometry(0.5, 4.0, 8), goldMat);
-      topNeedle.position.y = 22.0;
-      const celestialGem = new THREE.Mesh(new THREE.OctahedronGeometry(0.7), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
-      celestialGem.position.y = 24.2;
-
+      // --- 3. CENTRAL DEMON SPIRE & EYE OF NETHERFIRE ---
+      const centerTower = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 3.2, 11, 8), keepMat);
+      centerTower.position.y = 15.0;
       this.bigCastle.add(centerTower);
-      this.bigCastle.add(goldenDome);
-      this.bigCastle.add(topNeedle);
-      this.bigCastle.add(celestialGem);
 
-      // 3. Menara Kembar Persahabatan (Twin Towers of Friendship)
-      // Left Tower (Kocorock's VNS Tower - Amber/Stone Theme)
-      const towerL = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.9, 11, 12), new THREE.MeshToonMaterial({ color: 0x64748b }));
-      towerL.position.set(-6.5, 7.0, 1.5);
-      const roofL = new THREE.Mesh(new THREE.ConeGeometry(2.2, 4.2, 12), new THREE.MeshToonMaterial({ color: 0xd97706 }));
-      roofL.position.set(-6.5, 14.5, 1.5);
-      const flagPoleL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.4, 6), new THREE.MeshBasicMaterial({ color: 0xffffff }));
-      flagPoleL.position.set(-6.5, 17.2, 1.5);
-      const flagL = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.8), new THREE.MeshBasicMaterial({ color: 0xf59e0b, side: THREE.DoubleSide }));
-      flagL.position.set(-5.7, 17.6, 1.5);
+      // Spiky Demonic Battlements
+      for (let b = 0; b < 6; b++) {
+        const spike = new THREE.Mesh(new THREE.ConeGeometry(0.35, 1.6, 4), keepMat);
+        const ang = (b / 6) * Math.PI * 2;
+        spike.position.set(Math.cos(ang) * 2.5, 20.8, Math.sin(ang) * 2.5);
+        this.bigCastle.add(spike);
+      }
+
+      // Giant Flaming Eye of Hellfire / Netherfire Orb (Mata Api Neraka)
+      const fireOrbMat = new THREE.MeshToonMaterial({
+        color: 0xff3b00,
+        emissive: 0xff4500,
+        emissiveIntensity: 1.6
+      });
+      this.hellfireEye = new THREE.Mesh(new THREE.SphereGeometry(2.6, 16, 16), fireOrbMat);
+      this.hellfireEye.position.y = 23.5;
+      this.bigCastle.add(this.hellfireEye);
+
+      // 4 Curved Demon Horns surrounding the Eye of Hellfire
+      const hornOffsets = [
+        [-1.8, 23.5, 0, 0.45],
+        [1.8, 23.5, 0, -0.45],
+        [0, 23.5, -1.8, -0.45],
+        [0, 23.5, 1.8, 0.45]
+      ];
+      hornOffsets.forEach(h => {
+        const horn = new THREE.Mesh(new THREE.ConeGeometry(0.4, 3.6, 6), obsidianBaseMat);
+        horn.position.set(h[0], h[1], h[2]);
+        if (h[0] !== 0) horn.rotation.z = h[3];
+        else horn.rotation.x = h[3];
+        this.bigCastle.add(horn);
+      });
+
+      // --- 4. TWIN NETHER SPIRES (MENARA KEMBAR API & BELERANG) ---
+      // Left Spire: Menara Magma Kocorock (Charred Obsidian & Flaming Braziers)
+      const towerL = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 2.2, 13, 8), keepMat);
+      towerL.position.set(-7.5, 8.0, 1.8);
+      const roofL = new THREE.Mesh(new THREE.ConeGeometry(2.4, 5.0, 6), new THREE.MeshToonMaterial({ color: 0x991b1b }));
+      roofL.position.set(-7.5, 16.5, 1.8);
       this.bigCastle.add(towerL);
       this.bigCastle.add(roofL);
-      this.bigCastle.add(flagPoleL);
-      this.bigCastle.add(flagL);
 
-      // Right Tower (Pipimon's BFO Tower - Cyan/Water Theme)
-      const towerR = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.9, 11, 12), new THREE.MeshToonMaterial({ color: 0xe0f2fe }));
-      towerR.position.set(6.5, 7.0, 1.5);
-      const roofR = new THREE.Mesh(new THREE.ConeGeometry(2.2, 4.2, 12), new THREE.MeshToonMaterial({ color: 0x0284c7 }));
-      roofR.position.set(6.5, 14.5, 1.5);
-      const flagPoleR = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.4, 6), new THREE.MeshBasicMaterial({ color: 0xffffff }));
-      flagPoleR.position.set(6.5, 17.2, 1.5);
-      const flagR = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.8), new THREE.MeshBasicMaterial({ color: 0x06b6d4, side: THREE.DoubleSide }));
-      flagR.position.set(7.3, 17.6, 1.5);
+      // Right Spire: Menara Belerang Pipimon (Volcanic Spire & Cyan Hellfire)
+      const towerR = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 2.2, 13, 8), keepMat);
+      towerR.position.set(7.5, 8.0, 1.8);
+      const roofR = new THREE.Mesh(new THREE.ConeGeometry(2.4, 5.0, 6), new THREE.MeshToonMaterial({ color: 0x0e7490 }));
+      roofR.position.set(7.5, 16.5, 1.8);
       this.bigCastle.add(towerR);
       this.bigCastle.add(roofR);
-      this.bigCastle.add(flagPoleR);
-      this.bigCastle.add(flagR);
 
-      // Connecting Sky Bridge of Friendship
-      const bridge = new THREE.Mesh(new THREE.BoxGeometry(15, 0.8, 2.2), stoneMat);
-      bridge.position.set(0, 7.0, 1.5);
+      // Spiked Connecting Bastion Bridge
+      const bridge = new THREE.Mesh(new THREE.BoxGeometry(17, 1.0, 2.5), keepMat);
+      bridge.position.set(0, 8.0, 1.8);
       this.bigCastle.add(bridge);
 
-      // 4. Large Friendship Banner / Crest Billboard
+      // 6 Burning Nether Braziers on Citadel Ramparts
+      this.hellBraziers = [];
+      const citadelBrazierPos = [
+        [-6.5, 8.8, 3.2], [6.5, 8.8, 3.2],
+        [-3.2, 10.4, 4.4], [3.2, 10.4, 4.4],
+        [-7.5, 19.2, 1.8], [7.5, 19.2, 1.8]
+      ];
+      citadelBrazierPos.forEach(pos => {
+        const bz = new THREE.Group();
+        bz.position.set(pos[0], pos[1], pos[2]);
+        const stand = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.25, 0.5, 6), obsidianBaseMat);
+        bz.add(stand);
+        const fl = new THREE.Mesh(
+          new THREE.OctahedronGeometry(0.35, 1),
+          new THREE.MeshToonMaterial({ color: 0xfef08a, emissive: 0xff3b00, emissiveIntensity: 1.4 })
+        );
+        fl.position.y = 0.45;
+        bz.add(fl);
+        this.bigCastle.add(bz);
+        this.hellBraziers.push(fl);
+      });
+
+      // --- 5. DEMONIC VOLCANIC BANNER BILLBOARD ---
       const bannerCanvas = document.createElement('canvas');
       bannerCanvas.width = 512;
       bannerCanvas.height = 160;
       const bCtx = bannerCanvas.getContext('2d');
 
-      // Rounded pill with soft golden glow
-      bCtx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      // Dark obsidian badge with fiery border
+      bCtx.fillStyle = 'rgba(15, 10, 8, 0.95)';
       if (bCtx.roundRect) bCtx.roundRect(10, 10, 492, 140, 26);
       else bCtx.rect(10, 10, 492, 140);
       bCtx.fill();
-      bCtx.strokeStyle = '#f59e0b';
-      bCtx.lineWidth = 5;
+      bCtx.strokeStyle = '#dc2626';
+      bCtx.lineWidth = 6;
       bCtx.stroke();
 
       bCtx.font = 'bold 30px sans-serif';
-      bCtx.fillStyle = '#1e293b';
+      bCtx.fillStyle = '#fef08a';
       bCtx.textAlign = 'center';
-      bCtx.fillText('⚛️ STASIUN QUANTUM CORE 2099', 256, 62);
+      bCtx.fillText('🏰 BENTENG API DARI NERAKA 🌋', 256, 58);
 
-      bCtx.font = 'bold 22px sans-serif';
-      bCtx.fillStyle = '#0284c7';
-      bCtx.fillText('Mecha-Kocorock ⚡ Aero-Pipimon', 256, 104);
+      bCtx.font = 'bold 20px sans-serif';
+      bCtx.fillStyle = '#ff7849';
+      bCtx.fillText('Nether Magma Citadel • Sinergi BFO & VNS', 256, 98);
 
-      bCtx.font = 'bold 15px sans-serif';
-      bCtx.fillStyle = '#d97706';
-      bCtx.fillText('✨ Reaktor Riset Sintesis Hibrida Komputasi Awan ✨', 256, 134);
+      bCtx.font = 'bold 14px sans-serif';
+      bCtx.fillStyle = '#ea580c';
+      bCtx.fillText('🔥 Reaktor Riset Sintesis Komputasi Awan Paling Ekstrem 🔥', 256, 132);
 
       const bannerTex = new THREE.CanvasTexture(bannerCanvas);
       const castleBanner = new THREE.Mesh(
         new THREE.PlaneGeometry(8.5, 2.7),
         new THREE.MeshBasicMaterial({ map: bannerTex, transparent: true, side: THREE.DoubleSide })
       );
-      castleBanner.position.set(0, 10.4, 4.4);
+      castleBanner.position.set(0, 11.2, 4.6);
       this.bigCastle.add(castleBanner);
 
       this.rootGroup.add(this.bigCastle);
@@ -1509,22 +1545,28 @@ reset() {
         const g = new THREE.Group();
         g.position.set(x, y, z);
 
-        const isle = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 3.5, 1.5, 12), new THREE.MeshToonMaterial({ color: 0x72d936 }));
-        const rock = new THREE.Mesh(new THREE.ConeGeometry(3.5, 5, 8).rotateX(Math.PI), new THREE.MeshToonMaterial({ color: 0x475569 }));
+        // Distant Charred Basalt Islands
+        const isle = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 3.5, 1.5, 8), new THREE.MeshToonMaterial({ color: 0x1c1917, roughness: 0.9 }));
+        const rock = new THREE.Mesh(new THREE.ConeGeometry(3.5, 5, 6).rotateX(Math.PI), new THREE.MeshToonMaterial({ color: 0x0c0a09 }));
         rock.position.y = -3.2;
         g.add(isle); g.add(rock);
 
+        // Nether Spires
         for (let i = 0; i < 3; i++) {
-          const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.7, 3 + i, 8), new THREE.MeshToonMaterial({ color: 0xffffff }));
-          const roof = new THREE.Mesh(new THREE.ConeGeometry(0.85, 1.6, 8), new THREE.MeshToonMaterial({ color: 0x0284c7 }));
+          const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.7, 3 + i, 6), new THREE.MeshToonMaterial({ color: 0x27272a }));
+          const roof = new THREE.Mesh(new THREE.ConeGeometry(0.85, 1.8, 6), new THREE.MeshToonMaterial({ color: 0x991b1b }));
           tower.position.set(-1.2 + i * 1.2, 1.5 + (i * 0.5), -0.5);
           roof.position.set(-1.2 + i * 1.2, 3.8 + (i * 1.0), -0.5);
           g.add(tower); g.add(roof);
         }
 
-        const water = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.7, 8, 8), new THREE.MeshBasicMaterial({ color: 0x67e8f9, transparent: true, opacity: 0.8 }));
-        water.position.set(1.5, -4, 1.2);
-        g.add(water);
+        // Distant Cascading Lava Fall
+        const lavaFall = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.4, 0.7, 8, 6),
+          new THREE.MeshBasicMaterial({ color: 0xff4500, transparent: true, opacity: 0.92 })
+        );
+        lavaFall.position.set(1.5, -4, 1.2);
+        g.add(lavaFall);
 
         this.rootGroup.add(g);
       };
@@ -2611,9 +2653,26 @@ reset() {
         });
       }
 
-      // Castle gentle floating breathing animation
+      // 8. Animate Istana Api dari Neraka (Nether Citadel Fire, Eye of Hell & Lava Falls)
       if (this.bigCastle) {
         this.bigCastle.position.y = 6.5 + Math.sin(t * 0.7) * 0.22;
+      }
+      if (this.hellfireEye) {
+        this.hellfireEye.rotation.y += 0.02;
+        this.hellfireEye.material.emissiveIntensity = 1.3 + Math.sin(t * 4.0) * 0.35;
+        const s = 1.0 + Math.sin(t * 3.5) * 0.08;
+        this.hellfireEye.scale.set(s, s * 1.05, s);
+      }
+      if (this.hellBraziers) {
+        this.hellBraziers.forEach((flame, idx) => {
+          const fScale = 1.0 + Math.sin(t * 9.0 + idx) * 0.2;
+          flame.scale.set(fScale, fScale * 1.15, fScale);
+        });
+      }
+      if (this.hellLavaFalls) {
+        this.hellLavaFalls.forEach((fall, idx) => {
+          fall.material.opacity = 0.85 + Math.sin(t * 5.0 + idx) * 0.12;
+        });
       }
 
       // 7. Floating Airship & Banners
@@ -2731,8 +2790,8 @@ reset() {
       this.ctx = null;
       this.isPlaying = false;
       this.timer = null;
-      this.idleVolume = 0.30; // Clearly audible, warm, lush ambient presence when idle
-      this.duckVolume = 0.08; // Gentle background bed while characters speak
+      this.idleVolume = 0.32; // Clearly audible, menacing dark infernal ambient presence
+      this.duckVolume = 0.09; // Tense background bed while characters speak
       this.chordStep = 0;
     }
 
@@ -2746,16 +2805,16 @@ reset() {
           this.masterGain = this.ctx.createGain();
           this.masterGain.gain.setValueAtTime(this.idleVolume, this.ctx.currentTime);
 
-          // Ethereal Delay / Space Reverb Bus for Cloud Kingdom atmosphere
+          // Dark Nether Echo / Cavernous Reverb Delay Bus
           this.delayNode = this.ctx.createDelay();
-          this.delayNode.delayTime.value = 0.38;
+          this.delayNode.delayTime.value = 0.44; // Slower, eerie cavern echo
 
           this.feedbackGain = this.ctx.createGain();
-          this.feedbackGain.gain.value = 0.35;
+          this.feedbackGain.gain.value = 0.42;
 
           this.delayFilter = this.ctx.createBiquadFilter();
           this.delayFilter.type = 'lowpass';
-          this.delayFilter.frequency.value = 1600;
+          this.delayFilter.frequency.value = 1100;
 
           // Connect Delay Loop
           this.delayNode.connect(this.delayFilter);
@@ -2763,11 +2822,11 @@ reset() {
           this.feedbackGain.connect(this.delayNode);
           this.delayFilter.connect(this.masterGain);
 
-          // Warm Master Filter (smooth analog feel, eliminates digital harshness)
+          // Dark Atmospheric Master Filter (Low, warm, ominous volcanic rumble)
           this.masterFilter = this.ctx.createBiquadFilter();
           this.masterFilter.type = 'lowpass';
-          this.masterFilter.frequency.value = 4800;
-          this.masterFilter.Q.value = 0.7;
+          this.masterFilter.frequency.value = 3200;
+          this.masterFilter.Q.value = 1.1; // Resonant spooky edge
 
           this.masterGain.connect(this.masterFilter);
           this.masterFilter.connect(this.ctx.destination);
@@ -2820,30 +2879,32 @@ reset() {
       this.masterGain.gain.setTargetAtTime(this.idleVolume, this.ctx.currentTime, 0.45);
     }
 
-    // Warm Ambient Pad Layer (Dual-Oscillator Sine + Triangle with 800Hz lowpass filter)
+    // Ominous Dark Drone / Hellfire Pad (Detuned Sawtooth + Sine with Resonant Horror Filter)
     playPad(frequencies, duration = 3.8) {
       if (!this.ctx || !this.isPlaying) return;
       const now = this.ctx.currentTime;
 
-      frequencies.forEach((freq) => {
+      frequencies.forEach((freq, idx) => {
         const osc1 = this.ctx.createOscillator();
         const osc2 = this.ctx.createOscillator();
         const padFilter = this.ctx.createBiquadFilter();
         const gain = this.ctx.createGain();
 
-        osc1.type = 'sine';
+        // Dark Sawtooth + Triangle for menacing infernal grit
+        osc1.type = 'sawtooth';
         osc1.frequency.setValueAtTime(freq, now);
 
         osc2.type = 'triangle';
-        osc2.frequency.setValueAtTime(freq * 1.002, now); // Subtle celestial detune shimmer
+        osc2.frequency.setValueAtTime(freq * 0.996, now); // Sinister slow pitch detune
 
         padFilter.type = 'lowpass';
-        padFilter.frequency.setValueAtTime(800, now);
+        padFilter.frequency.setValueAtTime(520, now);
+        padFilter.Q.value = 1.8; // Eerie hollow resonance
 
-        // Smooth swell & crossfade
+        // Creepy swell & lingering fade
         gain.gain.setValueAtTime(0.0001, now);
-        gain.gain.linearRampToValueAtTime(0.075, now + 0.6);
-        gain.gain.setValueAtTime(0.075, now + duration - 1.0);
+        gain.gain.linearRampToValueAtTime(0.065, now + 0.8);
+        gain.gain.setValueAtTime(0.065, now + duration - 0.9);
         gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
         osc1.connect(padFilter);
@@ -2858,29 +2919,62 @@ reset() {
       });
     }
 
-    // Deep Gentle Sub/Mid Bass Root
-    playBass(freq, duration = 3.4) {
+    // Deep Sub-Bass Volcano Rumble (Ultra-low frequency drone 34Hz - 49Hz)
+    playBass(freq, duration = 3.5) {
       if (!this.ctx || !this.isPlaying) return;
       const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const subOsc = this.ctx.createOscillator();
+      const filter = this.ctx.createBiquadFilter();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now);
+
+      subOsc.type = 'sine';
+      subOsc.frequency.setValueAtTime(freq * 0.5, now); // Sub-bass earthquake rumble
+
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(140, now);
+
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.linearRampToValueAtTime(0.18, now + 0.4);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+      osc.connect(filter);
+      subOsc.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.masterGain);
+
+      osc.start(now);
+      subOsc.start(now);
+      osc.stop(now + duration + 0.1);
+      subOsc.stop(now + duration + 0.1);
+    }
+
+    // Tense Heartbeat / Subterranean Thud (Slow, creeping pulse of impending doom)
+    playHeartbeat(delaySeconds = 0) {
+      if (!this.ctx || !this.isPlaying) return;
+      const now = this.ctx.currentTime + delaySeconds;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
 
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, now);
+      osc.frequency.setValueAtTime(58, now);
+      osc.frequency.exponentialRampToValueAtTime(28, now + 0.18); // Pitch drop thud
 
-      gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.linearRampToValueAtTime(0.14, now + 0.3);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+      gain.gain.setValueAtTime(0.16, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
 
       osc.connect(gain);
       gain.connect(this.masterGain);
 
       osc.start(now);
-      osc.stop(now + duration + 0.1);
+      osc.stop(now + 0.25);
     }
 
-    // Sparkling Music Box / Harp Chime
-    playChime(freq, delaySeconds = 0, duration = 2.4, gainVal = 0.11) {
+    // Creepy Dissonant Bell / Minor Chime (Gothic Cathedral / Nether Bells)
+    playChime(freq, delaySeconds = 0, duration = 2.8, gainVal = 0.09) {
       if (!this.ctx || !this.isPlaying) return;
       const now = this.ctx.currentTime + delaySeconds;
 
@@ -2891,12 +2985,12 @@ reset() {
       osc1.type = 'sine';
       osc1.frequency.setValueAtTime(freq, now);
 
-      // Soft harmonic sparkle (2nd overtone)
+      // Tritone / diminished harmonic tension overtone (devil's interval)
       osc2.type = 'sine';
-      osc2.frequency.setValueAtTime(freq * 2.0, now);
+      osc2.frequency.setValueAtTime(freq * 1.4142, now); // Sqrt(2) tritone overtone
 
       chimeGain.gain.setValueAtTime(0.0001, now);
-      chimeGain.gain.exponentialRampToValueAtTime(gainVal, now + 0.02);
+      chimeGain.gain.exponentialRampToValueAtTime(gainVal, now + 0.03);
       chimeGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
       osc1.connect(chimeGain);
@@ -2911,54 +3005,73 @@ reset() {
       osc2.stop(now + duration + 0.1);
     }
 
+    playCrystalPlace(vmIdx = 0) {
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const freqs = [185.00, 220.00, 277.18]; // Dark volcanic minor notes
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freqs[vmIdx % freqs.length], now);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+      osc.start(now);
+      osc.stop(now + 0.25);
+    }
+
+    // Sinister, Suspenseful Nether Magma Progression (Minor Chords & Devil's Tritones)
     playChordSequence() {
       if (!this.isPlaying) return;
 
-      // Nostalgic Ghibli / Pokemon Route Sky Fantasy Progression
-      const chordSheet = [
-        // 1. Cmaj9 (Fresh morning sky)
-        { bass: 65.41, pad: [261.63, 329.63, 392.00, 493.88], chimes: [523.25, 659.25, 783.99, 987.77] },
-        // 2. Am9 (Gentle breeze over the islands)
-        { bass: 55.00, pad: [220.00, 261.63, 329.63, 392.00], chimes: [659.25, 783.99, 880.00, 1046.50] },
-        // 3. Fmaj7#11 (Wondrous floating kingdom)
-        { bass: 87.31, pad: [261.63, 329.63, 370.00, 440.00], chimes: [740.00, 880.00, 987.77, 1318.51] },
-        // 4. Gsus4 -> G9 (Optimistic horizon)
-        { bass: 98.00, pad: [293.66, 392.00, 440.00, 523.25], chimes: [783.99, 880.00, 987.77, 1174.66] },
-        // 5. Em7 (Peaceful clouds)
-        { bass: 82.41, pad: [246.94, 329.63, 392.00, 493.88], chimes: [659.25, 783.99, 987.77, 1174.66] },
-        // 6. Dm9 (Whimsical adventure)
-        { bass: 73.42, pad: [220.00, 261.63, 293.66, 349.23], chimes: [587.33, 698.46, 880.00, 1046.50] }
+      const infernalSheet = [
+        // 1. D minor (Ominous Abyss / Hell's Gate Opening)
+        { bass: 36.71, pad: [146.83, 174.61, 220.00, 261.63], chimes: [293.66, 349.23, 440.00, 523.25] },
+        // 2. Eb diminished 7 (Creeping Dread & Devil's Tritone - Maximum Suspense)
+        { bass: 38.89, pad: [155.56, 185.00, 220.00, 246.94], chimes: [311.13, 370.00, 440.00, 493.88] },
+        // 3. G minor (Maj7) (Dark Volcanic Lamentation)
+        { bass: 49.00, pad: [196.00, 233.08, 293.66, 370.00], chimes: [392.00, 466.16, 587.33, 740.00] },
+        // 4. C# diminished 7 (The Devil's Chord - Heart-pounding Tension)
+        { bass: 34.65, pad: [138.59, 164.81, 196.00, 233.08], chimes: [277.18, 329.63, 392.00, 466.16] },
+        // 5. Bb minor / D (Suffocating Volcanic Ash & Boiling Brimstone)
+        { bass: 46.25, pad: [185.00, 233.08, 277.18, 349.23], chimes: [370.00, 466.16, 554.37, 698.46] },
+        // 6. A Phrygian Dominant (Wrath of the Nether Realm)
+        { bass: 43.65, pad: [174.61, 220.00, 277.18, 329.63], chimes: [349.23, 440.00, 554.37, 659.25] }
       ];
 
-      const currentChord = chordSheet[this.chordStep % chordSheet.length];
+      const current = infernalSheet[this.chordStep % infernalSheet.length];
       this.chordStep++;
 
-      // 1. Play warm sub-bass
-      this.playBass(currentChord.bass, 3.4);
+      // 1. Heavy subterranean volcanic sub-bass rumble
+      this.playBass(current.bass, 3.6);
 
-      // 2. Play warm ambient chord pad
-      this.playPad(currentChord.pad, 3.8);
+      // 2. Dark menacing horror ambient pad
+      this.playPad(current.pad, 3.9);
 
-      // 3. Play light fairy bell arpeggios
-      currentChord.chimes.forEach((f, idx) => {
-        const offset = 0.25 + idx * 0.42 + (Math.random() * 0.08);
-        this.playChime(f, offset, 2.2, 0.11);
+      // 3. Tense subterranean heartbeat pulses (suspense ticking)
+      this.playHeartbeat(0.1);
+      this.playHeartbeat(0.9);
+      this.playHeartbeat(1.7);
+      this.playHeartbeat(2.5);
+
+      // 4. Eerie dissonant gothic minor bells
+      current.chimes.forEach((f, idx) => {
+        const offset = 0.35 + idx * 0.55 + (Math.random() * 0.1);
+        this.playChime(f, offset, 2.6, 0.08);
       });
 
-      // Occasional extra sweet high bell at beat 2.1s
-      if (Math.random() > 0.35) {
-        const highBell = currentChord.chimes[Math.floor(Math.random() * currentChord.chimes.length)] * 1.5;
-        this.playChime(highBell, 2.1, 2.4, 0.08);
+      // Occasional chilling high dissonant bell strike
+      if (Math.random() > 0.4) {
+        const scaryBell = current.chimes[1] * 1.5;
+        this.playChime(scaryBell, 2.0, 3.0, 0.07);
       }
 
-      // Seamless crossfade into the next chord
+      // Seamless crossfade into the next dark chord
       this.timer = setTimeout(() => this.playChordSequence(), 3200);
     }
   }
 
-  // ==========================================
-  // 6. MASTER APPLICATION ORCHESTRATOR
-  // ==========================================
   class AppMaster {
     constructor() {
       this.problem = createProblem(12, 3);
