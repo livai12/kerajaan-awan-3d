@@ -3375,6 +3375,11 @@
     // NPC INTERACTION & MOVEMENT TOWARD POV
     // ==========================================
     npcApproachPlayer(onComplete) {
+      if (this.hasNpcApproached) {
+        if (onComplete) onComplete();
+        return;
+      }
+      this.hasNpcApproached = true;
       const pip = this.leaderPip || (this.pips && this.pips[0]);
       const kocok = this.kocok;
       if (!pip || !kocok) {
@@ -3401,6 +3406,7 @@
     }
 
     resetNpcPosition(onComplete) {
+      this.hasNpcApproached = false;
       const pip = this.leaderPip || (this.pips && this.pips[0]);
       const kocok = this.kocok;
       if (pip) {
@@ -5438,7 +5444,7 @@
               if (!isFinished && this.world && typeof this.world.npcApproachPlayer === 'function') {
                 this.world.npcApproachPlayer();
               }
-            }, 3000);
+            }, 5500);
           }
         },
 
@@ -5484,7 +5490,7 @@
               if (!isFinished) {
                 this.showTourInvitation({ speakTTS: false });
               }
-            }, 10000);
+            }, 13500);
           }
         }
       ];
@@ -5721,8 +5727,12 @@
             // When welcome greeting ends, automatically show Slide 1 narration
             this.showTheaterSlide(0);
           };
+          welcomeAud.onerror = () => {
+            this.showTheaterSlide(0);
+          };
           welcomeAud.play().catch(e => {
             console.warn("Could not autoplay welcome audio:", e);
+            this.showTheaterSlide(0);
           });
         } catch (e) { }
       } else {
@@ -5814,7 +5824,8 @@
 
     speakCurrentTheaterSlide() {
       if (!this.theaterSlides || !this.theaterVoiceEnabled) return;
-      const s = this.theaterSlides[this.theaterSlideIndex];
+      const currentSlideIdx = this.theaterSlideIndex;
+      const s = this.theaterSlides[currentSlideIdx];
       if (!s) return;
 
       // Stop any existing theater audio or speech
@@ -5832,7 +5843,7 @@
       // Check if this slide has real ElevenLabs audio parts
       if (s.audioParts && s.audioParts.length > 0) {
         const playPart = (i) => {
-          if (!this.isTheaterOpen || !this.theaterVoiceEnabled || i >= s.audioParts.length) return;
+          if (!this.isTheaterOpen || !this.theaterVoiceEnabled || this.theaterSlideIndex !== currentSlideIdx || i >= s.audioParts.length) return;
           const p = s.audioParts[i];
 
           // Update Speaker badge
@@ -5862,22 +5873,28 @@
             this.currentTheaterAudio = aud;
 
             aud.onended = () => {
-              if (this.isTheaterOpen && this.theaterVoiceEnabled) {
-                setTimeout(() => playPart(i + 1), 400);
+              if (this.isTheaterOpen && this.theaterVoiceEnabled && this.theaterSlideIndex === currentSlideIdx) {
+                setTimeout(() => playPart(i + 1), 350);
               }
             };
 
             aud.onerror = () => {
               console.warn("Could not load slide audio:", p.audio, "falling back to speech synthesis");
-              this.speakElevenlabsText(p.spokenText || p.elevenlabsScript, p.speakerType);
+              if (this.theaterSlideIndex === currentSlideIdx) {
+                this.speakElevenlabsText(p.spokenText || p.elevenlabsScript, p.speakerType);
+              }
             };
 
             aud.play().catch(e => {
               console.warn("Autoplay audio blocked or error:", e);
-              this.speakElevenlabsText(p.spokenText || p.elevenlabsScript, p.speakerType);
+              if (this.theaterSlideIndex === currentSlideIdx) {
+                this.speakElevenlabsText(p.spokenText || p.elevenlabsScript, p.speakerType);
+              }
             });
           } catch (e) {
-            this.speakElevenlabsText(p.spokenText || p.elevenlabsScript, p.speakerType);
+            if (this.theaterSlideIndex === currentSlideIdx) {
+              this.speakElevenlabsText(p.spokenText || p.elevenlabsScript, p.speakerType);
+            }
           }
         };
 
