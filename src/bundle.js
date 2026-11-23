@@ -6136,8 +6136,24 @@
           title: "Bab 5: Reaktor Sintesis Hibrida Memetic BFO-VNS (1 + 1 > 2)",
           speakerName: "🎙️ Kolaborasi Dosen Magma & Aqua",
           speakerType: "both",
-          elevenlabsScript: "[dramatic] [epic] Dan inilah mahakarya penelitian kita! Reaktor Sintesis Hibrida Memetic BFO-VNS! [joyful] Kolaborasi eksplorasi global Pipimon dan eksploitasi lokal Kocorock memangkas Makespan hingga tiga puluh empat koma delapan persen!",
-          spokenText: "Dan inilah mahakarya penelitian kita! Reaktor Sintesis Hibrida Memetic BFO-VNS! Kolaborasi eksplorasi global Pipimon dan eksploitasi lokal Kocorock memangkas Makespan hingga tiga puluh empat koma delapan persen!",
+          audioParts: [
+            {
+              audio: 'audio/bab5_01_kocorock.mp3',
+              speakerName: '🌋 Dosen Magma-Kocorock',
+              speakerType: 'kocorock',
+              elevenlabsScript: '[dramatic] [epic] Dan inilah mahakarya penelitian kita: Reaktor Sintesis Hibrida Memetic BFO-VNS! VNS mandiri cepat namun mudah terjebak. BFO mandiri luas namun lambat konvergen di tahap akhir.',
+              spokenText: 'Dan inilah mahakarya penelitian kita: Reaktor Sintesis Hibrida Memetic BFO-VNS! VNS mandiri cepat namun mudah terjebak. BFO mandiri luas namun lambat konvergen di tahap akhir.'
+            },
+            {
+              audio: 'audio/bab5_02_pipimon.mp3',
+              speakerName: '💧 Dosen Aqua-Pipimon',
+              speakerType: 'pipimon',
+              elevenlabsScript: '[joyful] Saat kami berdua bergabung, armada BFO memandu koloni menemukan lembah optimal global, lalu kapak VNS Kocorock mengasah solusi hingga titik Makespan terendah teoretis! Terbukti secara ilmiah: satu tambah satu lebih besar dari dua!',
+              spokenText: 'Saat kami berdua bergabung, armada BFO memandu koloni menemukan lembah optimal global, lalu kapak VNS Kocorock mengasah solusi hingga titik Makespan terendah teoretis! Terbukti secara ilmiah: satu tambah satu lebih besar dari dua!'
+            }
+          ],
+          elevenlabsScript: "[dramatic] [epic] Dan inilah mahakarya penelitian kita: Reaktor Sintesis Hibrida Memetic BFO-VNS! [joyful] Kolaborasi eksplorasi global Pipimon dan eksploitasi lokal Kocorock memangkas Makespan hingga tiga puluh empat koma delapan persen!",
+          spokenText: "Dan inilah mahakarya penelitian kita: Reaktor Sintesis Hibrida Memetic BFO-VNS! Kolaborasi eksplorasi global Pipimon dan eksploitasi lokal Kocorock memangkas Makespan hingga tiga puluh empat koma delapan persen!",
           contentHtml: `
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:center;">
               <div>
