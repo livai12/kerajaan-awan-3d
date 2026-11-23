@@ -6195,8 +6195,24 @@
         },
         {
           title: "Bab 6: Mini-Game Interaktif - Cloud Dispatcher Challenge",
-          speakerName: "🎙️ Dosen Magma-Kocorock & Aqua-Pipimon",
+          speakerName: "🎙️ Dosen Aqua-Pipimon & Magma-Kocorock",
           speakerType: "both",
+          audioParts: [
+            {
+              audio: 'audio/bab6_01_pipimon.mp3',
+              speakerName: '💧 Dosen Aqua-Pipimon',
+              speakerType: 'pipimon',
+              elevenlabsScript: '[playful] [excited] Nah, sekarang giliranmu menguji kemampuan logika! Kami sudah menyiapkan Cloud Dispatcher Challenge langsung di layar bioskop ini!',
+              spokenText: 'Nah, sekarang giliranmu menguji kemampuan logika! Kami sudah menyiapkan Cloud Dispatcher Challenge langsung di layar bioskop ini!'
+            },
+            {
+              audio: 'audio/bab6_02_kocorock.mp3',
+              speakerName: '🌋 Dosen Magma-Kocorock',
+              speakerType: 'kocorock',
+              elevenlabsScript: '[challenging] [grinning] Coba klik tombol preset atau geser tugas ke tiga VM yang tersedia. Bisakah kamu menyeimbangkan beban dan mengalahkan rekor Makespan algoritma hibrida kami? Buktikan kemampuan logikamu sekarang!',
+              spokenText: 'Coba klik tombol preset atau geser tugas ke tiga VM yang tersedia. Bisakah kamu menyeimbangkan beban dan mengalahkan rekor Makespan algoritma hibrida kami? Buktikan kemampuan logikamu sekarang!'
+            }
+          ],
           elevenlabsScript: "[playful] [excited] Nah, sekarang giliranmu menguji kemampuan logika! [challenging] Coba klik preset atau buka Cloud Dispatcher Challenge untuk menyeimbangkan beban 10 tugas ke 3 mesin virtual!",
           spokenText: "Nah, sekarang giliranmu menguji kemampuan logika! Coba klik preset atau buka Cloud Dispatcher Challenge untuk menyeimbangkan beban 10 tugas ke 3 mesin virtual!",
           contentHtml: `
@@ -6268,6 +6284,22 @@
           title: "Bab 7: Hasil Benchmark 30x Run & Kesimpulan Ilmiah",
           speakerName: "🎙️ Kolaborasi Dosen Magma-Kocorock & Aqua-Pipimon",
           speakerType: "both",
+          audioParts: [
+            {
+              audio: 'audio/bab7_01_kocorock.mp3',
+              speakerName: '🌋 Dosen Magma-Kocorock',
+              speakerType: 'kocorock',
+              elevenlabsScript: '[academic] [authoritative] Sebagai penutup akademik, pengujian ketat tiga puluh kali run independen dengan enam ratus evaluasi setara membuktikan: Algoritma Hibrida Memetic berhasil memangkas Makespan hingga tiga puluh empat koma delapan persen dibanding metode tunggal!',
+              spokenText: 'Sebagai penutup akademik, pengujian ketat tiga puluh kali run independen dengan enam ratus evaluasi setara membuktikan: Algoritma Hibrida Memetic berhasil memangkas Makespan hingga tiga puluh empat koma delapan persen dibanding metode tunggal!'
+            },
+            {
+              audio: 'audio/bab7_02_pipimon.mp3',
+              speakerName: '💧 Dosen Aqua-Pipimon',
+              speakerType: 'pipimon',
+              elevenlabsScript: '[proud] [warm] Tingkat utilisasi CPU mencapai sembilan puluh dua koma empat persen dengan Degree of Imbalance mendekati nol! [cheerful] Terima kasih sudah mengikuti tur edukasi di markas Abyssal Grid Three-D! Kamu bisa menekan tombol Tutup Teater untuk kembali menjelajah kastil sesuka hatimu!',
+              spokenText: 'Tingkat utilisasi CPU mencapai sembilan puluh dua koma empat persen dengan Degree of Imbalance mendekati nol! Terima kasih sudah mengikuti tur edukasi di markas Abyssal Grid Three-D! Kamu bisa menekan tombol Tutup Teater untuk kembali menjelajah kastil sesuka hatimu!'
+            }
+          ],
           elevenlabsScript: "[authoritative] [proud] Sebagai kesimpulan akademik: pengujian ketat tiga puluh kali run independen membuktikan keunggulan mutlak Algoritma Hibrida Memetic BFO-VNS! [cheerful] Terima kasih sudah mengikuti tur edukasi di markas Abyssal Grid Three-D!",
           spokenText: "Sebagai kesimpulan akademik: pengujian ketat tiga puluh kali run independen membuktikan keunggulan mutlak Algoritma Hibrida Memetic BFO-VNS! Terima kasih sudah mengikuti tur edukasi di markas Abyssal Grid Three-D!",
           contentHtml: `
