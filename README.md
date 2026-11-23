@@ -74,19 +74,21 @@ Beralih dari sekadar komparasi rivalitas sederhana menjadi **Laboratorium Sintes
 - **Shortcut `[Q]`** atau tombol `[🎯 Uji Audiens [Q]]`:
 - Fitur pedagogi aktif untuk menunjuk teman kelas, memutar roulette presensi acak, mengarahkan kamera 3D ke objek spesifik (Pulau Bottleneck, Shaking Kocorock, Kemotaksis Pipimon, Garis Laser Lower Bound), serta membedah konsep dalam 3 tingkat pemahaman (Analogi ELI5 $\to$ Visual Spasial 3D $\to$ Formulasi Matematis).
 
-### 7. 🚶 Mode Jelajah First-Person POV (FPS Walkthrough)
-- **Shortcut `[V]`** atau tombol `[🚶 Jelajah POV [V]]`:
-- Mengubah navigasi 3D orbital biasa menjadi **pengalaman first-person interaktif** di mana pengguna / mahasiswa dapat berjalan mengelilingi kerajaan volkanik dan jembatan magma layaknya karakter di game eksplorasi:
-  - **Kontrol Keyboard & Mouse:**
-    - `W, A, S, D` / Tombol Panah: Berjalan maju, mundur, kiri, kanan melintasi jalur pulau.
+### 7. 🏰 Jelajah Kastil Sintesis Hibrida First-Person POV (Default Start)
+- **Pengalaman Langsung dari Awal (Default POV)**: Pengguna langsung **masuk ke dalam Aula Utama Kastil Sintesis Hibrida** sejak halaman pertama kali dibuka, membawa obor volkanik tangan dan dapat berjalan bebas menyusuri lorong katedral basalt 58 meter:
+  - **Kolonade Pilar Basalt & Kanal Magma/Air**: Lorong megah diapit 12 pilar basalt gotik dengan obor api aktif, kanal lahar membara di sayap kiri (ranah VNS), dan kanal air sian bercahaya di sayap kanan (ranah BFO).
+  - **Kuil Komputasi Cloud (VM 1, VM 2, VM 3)**: Di sepanjang lorong terdapat kuil penempatan tugas komputasi heterogen (3500 MIPS, 2000 MIPS, 1000 MIPS) lengkap dengan kristal tugas melayang dan sinar laser Batas Bawah Teoretis ($LB_{ideal}$).
+  - **Singgasana Aliansi Hibrida di Ujung Kastil**: Di ujung lorong menaiki 4 anak tangga batu, berdiri **Magma-Kocorock (VNS Master)** dan **Aqua-Pipimon (BFO Leader)** berdampingan di depan **Reaktor Sintesis Hibrida (Memetic BFO-VNS)**:
+    - Kocorock mengangkat Kapak Volkaniknya memancarkan berkas energi magma ke reaktor.
+    - Pipimon mengangkat tangannya memancarkan pusaran energi air sian ke reaktor.
+    - Menvisualisasikan prinsip hibrida: Eksplorasi Global (BFO) $	o$ Eksploitasi Lokal Bottleneck (VNS) menghasilkan Makespan optimal ($1 + 1 > 2$).
+  - **Kontrol Navigasi & HUD Game**:
+    - `W, A, S, D` / Tombol Panah: Berjalan maju, mundur, kiri, kanan.
     - `Shift`: Lari cepat (*sprint*).
     - `Spasi`: Melompat (*jump with gravity physics*).
-    - `Mouse Look`: Mengarahkan pandangan 360° secara presisi (dilengkapi *Pointer Lock API* dengan klik kanvas, serta *mouse-drag fallback*).
-    - `V` atau `Esc`: Keluar dari POV dan kembali ke mode orbital overview.
-  - **Obor Volkanik Tangan (*Handheld Explorer Torch*):** Dilengkapi obor api beranimasi dinamis di sudut pandang kamera yang memancarkan pencahayaan dinamis ke lingkungan sekitarnya.
-  - **Jalan Setapak Basalt & Jembatan Magma:** Jalur basalt heksagonal bertepi magma menyala yang menghubungkan Pulau VNS (Kiri), Pulau BFO (Kanan), Altar Patung Ksatria, serta Tanjakan naik menuju Benteng Api dari Neraka.
-  - **Deteksi Jarak & Kartu Inspeksi Otomatis (*Proximity HUD*):** Ketika pemain mendekati pulau VM, Magma-Kocorock, Aqua-Pipimon, Patung Ksatria, atau Istana Neraka (< 7 meter), kartu informasi interaktif di HUD otomatis muncul menjelaskan spesifikasi komputasi MIPS atau peran algoritma hibridanya.
-  - **Efek Suara Langkah Kaki (*Procedural Basalt Footsteps*):** Sintesis audio langkah kaki berirama saat berjalan di atas batu basalt.
+    - `Mouse Look`: Mengarahkan pandangan 360° secara presisi (*Pointer Lock API* pada klik kanvas).
+    - `V` atau tombol toolbar: Beralih mulus antara Jelajah POV Kastil dan Tinjauan Orbit 360°.
+  - **Toolbar Responsif Ramah Layar**: Penataan ulang bilah navigasi atas yang ramping, ringkas, dan pas 100% pada semua resolusi layar monitor dan laptop tanpa terpotong.
 
 ### 8. 📑 Slide Deck Presentasi Lengkap 12 Halaman (`presentasi.html`)
 - Ditingkatkan menjadi 12 slide komprehensif berstandar internasional yang mencakup formulasi ETC Matrix, batas bawah teoretis ideal, taksonomi Talbi, arsitektur kedua hibrida, tabel ablasi 30x run, live simulator di slide, inovasi spasial 3D, FAQ sidang, dan daftar pustaka IEEE/Elsevier/Springer.

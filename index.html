@@ -85,11 +85,17 @@
       right: 0;
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 12px 20px;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 6px 14px;
       pointer-events: none;
-      z-index: 10;
+      z-index: 50;
+      max-width: 100vw;
+      box-sizing: border-box;
+      overflow-x: auto;
+      scrollbar-width: none;
     }
+    .top::-webkit-scrollbar { display: none; }
     .top > * { pointer-events: auto; }
 
     .brand {
@@ -267,10 +273,13 @@
       gap: 4px;
     }
     #chart {
-      width: 200px;
-      height: 68px;
-      border-radius: 12px;
+      width: 180px;
+      height: 56px;
+      border-radius: 10px;
       display: block;
+      background: rgba(15, 23, 42, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
     }
     .chartkey {
       font-size: 10px;
@@ -1303,9 +1312,9 @@
   <canvas id="gl"></canvas>
 
   <!-- 360 Camera Hint Pill -->
-  <div id="orbit-hint" style="position:fixed; top:72px; left:50%; transform:translateX(-50%); z-index:30; background:rgba(255,255,255,0.85); backdrop-filter:blur(8px); padding:5px 14px; border-radius:20px; font-size:11px; font-weight:600; color:#1e293b; border:1px solid rgba(255,255,255,0.95); box-shadow:0 4px 14px rgba(0,0,0,0.06); pointer-events:none; transition:opacity 0.6s ease; display:flex; align-items:center; gap:6px;">
-    <svg viewBox="0 0 24 24" style="width:14px; height:14px;"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-    <span><b>Kamera 360°:</b> Drag mouse untuk putar 360° • Scroll untuk zoom • Klik kanan untuk geser (pan) • Dobel-klik untuk reset</span>
+  <div id="orbit-hint" style="display:none; position:fixed; top:64px; left:50%; transform:translateX(-50%); z-index:30; background:rgba(15, 23, 42, 0.88); backdrop-filter:blur(10px); padding:5px 14px; border-radius:20px; font-size:11px; font-weight:600; color:#cbd5e1; border:1px solid rgba(255,255,255,0.15); box-shadow:0 4px 14px rgba(0,0,0,0.3); pointer-events:none; transition:opacity 0.6s ease; align-items:center; gap:6px;">
+    <svg viewBox="0 0 24 24" style="width:14px; height:14px; stroke:#38bdf8; fill:none;"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+    <span><b>Kamera 360°:</b> Drag mouse untuk putar • Scroll zoom • Tekan [V] untuk kembali masuk ke Kastil</span>
   </div>
 
   <!-- 3D Character Speech Bubbles (Comic & Pokemon Style) -->
@@ -1331,124 +1340,58 @@
 
   <!-- TOP BAR -->
   <div class="top">
-    <div class="brand">
-      <span class="name" style="color:#38bdf8;">Cloud Hybrid Synthesis Lab</span>
-      <span class="sub" style="color:#94a3b8;">Memetic BFO-VNS (Pola D) &amp; Seeded-BFO (Pola B) • Heterogeneous Cloud Scheduling</span>
+    <!-- Brand Title -->
+    <div class="brand" style="padding:5px 12px; border-radius:12px; margin-right:4px;">
+      <span class="name" style="font-size:14px; font-weight:800; color:#38bdf8; display:flex; align-items:center; gap:5px;">
+        <span>⚡</span> <span>Cloud Hybrid Lab</span>
+      </span>
     </div>
 
-    <!-- Algorithm View Switcher -->
-    <div class="seg" id="viewSeg">
-      <button class="on" data-view="both" title="Lihat Kedua Algoritma">
-        <svg viewBox="0 0 24 24"><circle cx="7" cy="12" r="4"></circle><circle cx="17" cy="12" r="4"></circle></svg>
-        <span>Keduanya</span>
-      </button>
-      <button data-view="vns" title="Fokus ke Kocorock (VNS Golem)">
-        <span style="font-size:9.5px; font-weight:800; background:var(--ember-bg); color:var(--ember); padding:1px 5px; border-radius:4px;">VNS</span>
-        <span>Kocorock</span>
-      </button>
-      <button data-view="bfo" title="Fokus ke Pipimon (BFO Slime)">
-        <span style="font-size:9.5px; font-weight:800; background:var(--jade-bg); color:var(--jade); padding:1px 5px; border-radius:4px;">BFO</span>
-        <span>Pipimon</span>
-      </button>
-    </div>
-
-    <!-- Model Mode Switcher: Meshy AI vs Prosedural -->
-    
-    <!-- Mode Eksperimen: Persaingan Klasik vs Reaktor Sintesis Hibrida -->
+    <!-- Mode Eksperimen: Persaingan vs Reaktor Hibrida -->
     <div class="seg" id="expSeg" style="display:flex;">
       <button class="on" data-exp="standoff" title="Mode Persaingan Klasik (VNS vs BFO)">
         <span>⚔️ Persaingan</span>
       </button>
-      <button data-exp="hybrid" title="Mode Riset Edukatif: Reaktor Sintesis Hibrida (Memetic BFO-VNS & Seeded-BFO) [H]">
-        <span style="color:#0284c7;">⚛️ Reaktor Hibrida</span>
+      <button data-exp="hybrid" title="Mode Riset Edukatif: Reaktor Sintesis Hibrida [H]">
+        <span style="color:#0284c7; font-weight:700;">⚛️ Reaktor Hibrida</span>
       </button>
     </div>
 
-    <!-- Quick Buttons for Scientific Rigor & Lecture Material -->
-    <button id="btnOpenAblation" style="height:36px; padding:0 14px; border-radius:12px; display:inline-flex; align-items:center; gap:6px; font-weight:700; font-size:12px; color:#0f766e; white-space:nowrap; background:linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%); border:1px solid #5eead4; box-shadow:0 2px 10px rgba(13,148,136,0.15); cursor:pointer;" title="Buka Panel Uji Ilmiah Studi Ablasi 30x Run [A]">
-      <span style="font-size:13px;">📊</span>
-      <span>Studi Ablasi [A]</span>
-    </button>
-
-    <button id="btnOpenEduHub" style="height:36px; padding:0 14px; border-radius:12px; display:inline-flex; align-items:center; gap:6px; font-weight:700; font-size:12px; color:#4338ca; white-space:nowrap; background:linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); border:1px solid #a5b4fc; box-shadow:0 2px 10px rgba(99,102,241,0.15); cursor:pointer;" title="Buka Pusat Belajar: Taksonomi Talbi & 5 Pola Hibridisasi [E]">
-      <span style="font-size:13px;">🎓</span>
-      <span>Pusat Belajar [E]</span>
-    </button>
-
-    <button id="btnOpenPOV" style="height:36px; padding:0 14px; border-radius:12px; display:inline-flex; align-items:center; gap:6px; font-weight:700; font-size:12px; color:#b45309; white-space:nowrap; background:linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border:1px solid #f59e0b; box-shadow:0 2px 10px rgba(245,158,11,0.2); cursor:pointer;" title="Mode Jelajah First-Person POV (W,A,S,D + Mouse) [V]">
-      <span style="font-size:14px;">🚶</span>
-      <span>Jelajah POV [V]</span>
-    </button>
-
-    <button id="btnOpenGame" style="height:36px; padding:0 14px; border-radius:12px; display:inline-flex; align-items:center; gap:6px; font-weight:700; font-size:12px; color:#c2410c; white-space:nowrap; background:linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%); border:1px solid #f97316; box-shadow:0 2px 10px rgba(234,88,12,0.25); cursor:pointer;" title="Buka Game Edukatif: Cloud Dispatcher Challenge [G]">
-      <span style="font-size:13px;">🎮</span>
-      <span>Game Edukatif [G]</span>
-    </button>
-
-    <div class="seg" id="modelSeg" style="display:flex;">
-      <button class="on" data-model="meshy" title="Model Karakter Meshy AI (GLB)">
-        <svg viewBox="0 0 24 24" style="width:13px; height:13px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-        <span>Meshy 3D</span>
+    <!-- Action Buttons (Responsive Pills fitting cleanly on screen) -->
+    <div style="display:flex; align-items:center; gap:5px; flex-shrink:0;">
+      <button id="btnOpenPOV" style="height:32px; padding:0 12px; border-radius:10px; display:inline-flex; align-items:center; gap:5px; font-weight:700; font-size:11.5px; color:#b45309; white-space:nowrap; background:linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border:1px solid #f59e0b; box-shadow:0 2px 8px rgba(245,158,11,0.25); cursor:pointer;" title="Mode Jelajah First-Person POV Kastil [V]">
+        <span>🚶 POV Kastil [V]</span>
       </button>
-      <button data-model="procedural" title="Model Karakter Kode Prosedural (Three.js)">
-        <svg viewBox="0 0 24 24" style="width:13px; height:13px;"><path d="M2 22h20M4 22V6l8 16M12 22V12l8 10"></path></svg>
-        <span>Prosedural</span>
+
+      <button id="btnOpenGame" style="height:32px; padding:0 12px; border-radius:10px; display:inline-flex; align-items:center; gap:5px; font-weight:700; font-size:11.5px; color:#c2410c; white-space:nowrap; background:linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%); border:1px solid #f97316; box-shadow:0 2px 8px rgba(234,88,12,0.2); cursor:pointer;" title="Buka Game Edukatif: Cloud Dispatcher Challenge [G]">
+        <span>🎮 Game [G]</span>
+      </button>
+
+      <button id="btnOpenAblation" style="height:32px; padding:0 12px; border-radius:10px; display:inline-flex; align-items:center; gap:5px; font-weight:700; font-size:11.5px; color:#0f766e; white-space:nowrap; background:linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%); border:1px solid #5eead4; box-shadow:0 2px 8px rgba(13,148,136,0.15); cursor:pointer;" title="Buka Panel Uji Ilmiah Studi Ablasi 30x Run [A]">
+        <span>📊 Ablasi [A]</span>
+      </button>
+
+      <button id="btnOpenEduHub" style="height:32px; padding:0 12px; border-radius:10px; display:inline-flex; align-items:center; gap:5px; font-weight:700; font-size:11.5px; color:#4338ca; white-space:nowrap; background:linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); border:1px solid #a5b4fc; box-shadow:0 2px 8px rgba(99,102,241,0.15); cursor:pointer;" title="Buka Pusat Belajar: Taksonomi Talbi & 5 Pola Hibridisasi [E]">
+        <span>🎓 Edu Hub [E]</span>
+      </button>
+
+      <button id="btnAudienceQuiz" style="height:32px; padding:0 12px; border-radius:10px; display:inline-flex; align-items:center; gap:5px; font-weight:700; font-size:11.5px; color:#92400e; white-space:nowrap; background:linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border:1px solid #fcd34d; box-shadow:0 2px 8px rgba(245,158,11,0.18); cursor:pointer;" title="Mode Interaktif: Uji Audiens & Bedah Konsep [Q]">
+        <span>🎯 Drill [Q]</span>
+      </button>
+
+      <!-- Utility Icons -->
+      <button class="round" id="btnMusic" title="Musik Latar Horor/Tegang (On/Off)" style="width:32px; height:32px;">
+        <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+      </button>
+
+      <a href="presentasi.html" id="btnGoPresentasi" class="round" title="Slide Presentasi Lengkap" style="width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none; color:inherit;">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M8 12h8M8 8h8M8 16h4"></path></svg>
+      </a>
+
+      <button class="round" id="btnFullscreen" title="Layar Penuh [F]" style="width:32px; height:32px;">
+        <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
       </button>
     </div>
-
-    <!-- View Mode Switcher: 3D vs 2D -->
-    <button class="round" id="btnToggle2D" title="Buka/Tutup Tampilan 2D Ground Truth">
-      <svg viewBox="0 0 24 24"><path d="M3 3v18h18"></path><rect x="7" y="10" width="3" height="8"></rect><rect x="13" y="6" width="3" height="12"></rect><rect x="19" y="12" width="3" height="6"></rect></svg>
-    </button>
-
-    <!-- 360 Cinematic Orbit Toggle -->
-    <button class="round" id="btnOrbit360" title="Rotasi Otomatis 360° (Cinematic Orbit)">
-      <svg viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
-    </button>
-
-    <!-- Cinematic Storyteller Mode -->
-    <button id="btnStoryTour" style="height:36px; padding:0 16px; border-radius:12px; display:inline-flex; align-items:center; gap:8px; font-weight:700; font-size:12.5px; color:#0f172a; white-space:nowrap; background:#ffffff; border:1px solid var(--line); box-shadow:0 2px 8px rgba(30,60,80,0.08); cursor:pointer; transition:all 0.2s;" title="Putar Kisah Dongeng Kerajaan Awan (Cinematic Story)">
-      <svg viewBox="0 0 24 24" style="width:14px; height:14px; fill:currentColor; stroke:none;"><polygon points="6 4 18 12 6 20 6 4"></polygon></svg>
-      <span>Kisah Awan</span>
-    </button>
-
-    <!-- Slide Presentation Page (Technical Slide Deck) -->
-    <a href="presentasi.html" id="btnGoPresentasi" style="height:36px; padding:0 16px; border-radius:12px; display:inline-flex; align-items:center; gap:8px; font-weight:700; font-size:12.5px; color:#0369a1; white-space:nowrap; text-decoration:none; background:linear-gradient(135deg, #e0f2fe 0%, #bfdbfe 100%); border:1px solid #93c5fd; box-shadow:0 2px 10px rgba(59,130,246,0.18); cursor:pointer; transition:all 0.2s;" title="Buka Halaman Slide Presentasi Teknis (Untuk Sidang & Ujian)">
-      <svg viewBox="0 0 24 24" style="width:15px; height:15px; fill:none; stroke:#0284c7; stroke-width:2;"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M8 12h8M8 8h8M8 16h4"></path></svg>
-      <span>Slide Presentasi</span>
-    </a>
-
-        <!-- Interactive Peer Spot-Check / Uji Audiens Mode -->
-    <button id="btnAudienceQuiz" style="height:36px; padding:0 16px; border-radius:12px; display:inline-flex; align-items:center; gap:8px; font-weight:700; font-size:12.5px; color:#92400e; white-space:nowrap; background:linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border:1px solid #fcd34d; box-shadow:0 2px 10px rgba(245,158,11,0.18); cursor:pointer; transition:all 0.2s;" title="Mode Interaktif: Uji Audiens / Tunjuk Teman & Bedah Konsep [Q]">
-      <span style="font-size:14px;">🎯</span>
-      <span>Uji Audiens [Q]</span>
-    </button>
-
-    <!-- Background Fantasy Music Toggle -->
-    <button class="round" id="btnMusic" title="Backsound Musik Fantasi Kerajaan Awan (On/Off)">
-      <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
-    </button>
-
-    <!-- Slide Presentation / Walkthrough -->
-    <button class="round" id="btnTour" title="Buka Materi Presentasi & Slide">
-      <svg viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path><path d="M6 6h10"></path><path d="M6 10h10"></path></svg>
-    </button>
-
-    <!-- Narration Audio Voice Toggle (Web Speech) -->
-    <button class="round" id="btnVoice" title="Suara Narasi Awan (Speech Synthesis)">
-      <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
-    </button>
-
-    <!-- Fullscreen Toggle -->
-    <!-- First-Person POV Walkthrough Toggle -->
-    <button class="round" id="btnTogglePOV" title="Jelajah Kerajaan First-Person POV [V]" style="color:#d97706;">
-      <svg viewBox="0 0 24 24" style="stroke:currentColor; fill:none; stroke-width:2;"><circle cx="12" cy="5" r="2.5"></circle><path d="M9 22v-6l-2-2v-4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4l-2 2v6"></path><path d="M6 12l3-1"></path><path d="M18 12l-3-1"></path></svg>
-    </button>
-
-    <!-- Fullscreen Toggle -->
-    <button class="round" id="btnFullscreen" title="Layar Penuh [F]">
-      <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
-    </button>
   </div>
 
   <!-- MASCOT CARD LEFT: MECHA-KOCOROCK (VNS) -->
@@ -2445,7 +2388,7 @@
 
 
   <!-- FIRST-PERSON POV HUD OVERLAY -->
-  <div id="pov-hud" style="display:none; position:fixed; inset:0; pointer-events:none; z-index:45;">
+  <div id="pov-hud" style="display:block; position:fixed; inset:0; pointer-events:none; z-index:45;">
     <!-- Crosshair Reticle -->
     <div id="pov-crosshair" style="position:absolute; top:50%; left:50%; width:18px; height:18px; transform:translate(-50%, -50%); border:1.5px solid rgba(255,255,255,0.7); border-radius:50%; box-shadow:0 0 8px rgba(0,0,0,0.6);">
       <div style="position:absolute; top:50%; left:50%; width:4px; height:4px; transform:translate(-50%, -50%); background:#f59e0b; border-radius:50%;"></div>

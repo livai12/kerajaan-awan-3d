@@ -1166,13 +1166,13 @@ reset() {
       this.targetPos = new THREE.Vector3(0, 1.5, 0);
       this.activeJumps = []; // Pokemon-style dynamic jump tweens
 
-      // First-Person POV Controller State
-      this.cameraMode = 'orbit'; // 'orbit' | 'fps'
+      // First-Person POV Controller State (START DIRECTLY INSIDE CASTLE!)
+      this.cameraMode = 'fps'; // Start directly in FPS Walkthrough mode!
       this.fpsPlayer = {
-        position: new THREE.Vector3(0, 1.2, 12),
+        position: new THREE.Vector3(0, 0, 18), // Inside Grand Hallway entrance facing down toward Throne
         velocity: new THREE.Vector3(0, 0, 0),
-        yaw: 0,
-        pitch: -0.05,
+        yaw: 0, // Facing North toward the Grand Hybrid Altar at z = -28.5
+        pitch: -0.02,
         speed: 9.5,
         eyeHeight: 1.85,
         isGrounded: true,
@@ -1187,6 +1187,7 @@ reset() {
       this.buildIslands();
       this.buildCharacters();
       this.initOrbit();
+      this.createGrandHybridCitadel();
       this.createBasaltPathways();
       this.createExplorerTorch();
       this.initFPSControls();
@@ -1375,190 +1376,223 @@ reset() {
       this.rootGroup.add(this.idealBeamGroup);
     }
 
-        createBigFriendshipCastle() {
-      this.bigCastle = new THREE.Group();
-      // Center position directly behind the volcano islands
-      this.bigCastle.position.set(0, 6.5, -34);
+        createGrandHybridCitadel() {
+      this.citadel = new THREE.Group();
 
-      // --- 1. JAGGED OBSIDIAN NETHER CRAG BASE (Istana Api dari Neraka) ---
-      const obsidianBaseMat = new THREE.MeshToonMaterial({ color: 0x0c0a09, roughness: 0.95 });
-      const basaltCragMat = new THREE.MeshToonMaterial({ color: 0x18181b, roughness: 0.9 });
-      const magmaLavaMat = new THREE.MeshToonMaterial({ color: 0xff3b00, emissive: 0xea580c, emissiveIntensity: 1.25 });
+      // Materials
+      const floorMat = new THREE.MeshStandardMaterial({ color: 0x141416, roughness: 0.82, metalness: 0.25 });
+      const pillarMat = new THREE.MeshStandardMaterial({ color: 0x1f1f23, roughness: 0.75, metalness: 0.35 });
+      const archMat = new THREE.MeshStandardMaterial({ color: 0x27272a, roughness: 0.8 });
+      const wallMat = new THREE.MeshStandardMaterial({ color: 0x0f0f12, roughness: 0.92 });
+      const lavaMat = new THREE.MeshBasicMaterial({ color: 0xff3b00 });
+      const waterMat = new THREE.MeshBasicMaterial({ color: 0x00d2ff });
+      const goldAltarMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.28, metalness: 0.85, emissive: 0x78350f, emissiveIntensity: 0.45 });
+      const stoneStepMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.85 });
 
-      // Massive Hexagonal Charred Basalt Foundation
-      const isle = new THREE.Mesh(new THREE.CylinderGeometry(15, 12, 3.8, 6), obsidianBaseMat);
-      const rock = new THREE.Mesh(new THREE.ConeGeometry(12, 16, 6).rotateX(Math.PI), basaltCragMat);
-      rock.position.y = -9.2;
-      this.bigCastle.add(isle);
-      this.bigCastle.add(rock);
+      // 1. GRAND HALL FLOOR (Spans z = 24 to -34, x = -13 to +13)
+      const hallFloor = new THREE.Mesh(new THREE.BoxGeometry(26, 0.6, 60), floorMat);
+      hallFloor.position.set(0, -0.3, -5);
+      hallFloor.receiveShadow = true;
+      this.citadel.add(hallFloor);
 
-      // Cascading Molten Lava Falls pouring from the fortress into the magma ocean
-      this.hellLavaFalls = [];
-      const lavaFallOffsets = [-7, -2.5, 2.5, 7];
-      lavaFallOffsets.forEach((xPos, idx) => {
-        const fallGeo = new THREE.CylinderGeometry(0.7 + (idx % 2) * 0.3, 1.3, 20, 6);
-        const fallMat = new THREE.MeshBasicMaterial({ color: 0xff4500, transparent: true, opacity: 0.92 });
-        const fall = new THREE.Mesh(fallGeo, fallMat);
-        fall.position.set(xPos, -9.5, 5.2 - Math.abs(xPos) * 0.15);
-        this.bigCastle.add(fall);
-        this.hellLavaFalls.push(fall);
-      });
-
-      // --- 2. MAIN CHARRED HELLFIRE KEEP (Benteng Neraka) ---
-      const keepMat = new THREE.MeshToonMaterial({ color: 0x18181b, roughness: 0.85 });
-      const trimMat = new THREE.MeshToonMaterial({ color: 0x27272a, roughness: 0.75 });
-      const lavaTrimMat = new THREE.MeshToonMaterial({ color: 0xff5722, emissive: 0xea580c, emissiveIntensity: 1.1 });
-
-      const keep = new THREE.Mesh(new THREE.BoxGeometry(12, 8.5, 8.5), keepMat);
-      keep.position.y = 5.8;
-      this.bigCastle.add(keep);
-
-      // Glowing Magma Fissures across the fortress front
-      const magmaSeamH = new THREE.Mesh(new THREE.BoxGeometry(11.6, 0.22, 8.6), lavaTrimMat);
-      magmaSeamH.position.y = 6.2;
-      this.bigCastle.add(magmaSeamH);
-
-      // Jagged Demon Skull Arched Gate (Gerbang Mulut Iblis)
-      const gateFrame = new THREE.Mesh(new THREE.BoxGeometry(3.6, 5.2, 0.8), trimMat);
-      gateFrame.position.set(0, 4.2, 4.4);
-      // Swirling blazing infernal fire portal
-      const gatePortal = new THREE.Mesh(
-        new THREE.PlaneGeometry(2.8, 4.4),
-        new THREE.MeshBasicMaterial({ color: 0xdc2626, side: THREE.DoubleSide })
+      // Central Ceremonial Runic Carpet / Magma Walkway
+      const runicCarpet = new THREE.Mesh(
+        new THREE.BoxGeometry(5.4, 0.08, 48),
+        new THREE.MeshStandardMaterial({ color: 0x1c1917, roughness: 0.6, emissive: 0xea580c, emissiveIntensity: 0.35 })
       );
-      gatePortal.position.set(0, 4.0, 4.82);
-      this.bigCastle.add(gateFrame);
-      this.bigCastle.add(gatePortal);
+      runicCarpet.position.set(0, 0.04, -2);
+      runicCarpet.receiveShadow = true;
+      this.citadel.add(runicCarpet);
 
-      // Glowing Blood-Orange Fiery Gothic Windows
-      const winMat = new THREE.MeshBasicMaterial({ color: 0xff5722 });
-      for (let w = -3.8; w <= 3.8; w += 3.8) {
-        if (Math.abs(w) > 0.5) {
-          const win = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 2.2), winMat);
-          win.position.set(w, 7.2, 4.3);
-          this.bigCastle.add(win);
-        }
-      }
+      // Glowing lava seams along central carpet edges
+      const seamL = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.1, 48), new THREE.MeshBasicMaterial({ color: 0xff5722 }));
+      seamL.position.set(-2.7, 0.08, -2);
+      const seamR = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.1, 48), new THREE.MeshBasicMaterial({ color: 0xff5722 }));
+      seamR.position.set(2.7, 0.08, -2);
+      this.citadel.add(seamL); this.citadel.add(seamR);
 
-      // --- 3. CENTRAL DEMON SPIRE & EYE OF NETHERFIRE ---
-      const centerTower = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 3.2, 11, 8), keepMat);
-      centerTower.position.y = 15.0;
-      this.bigCastle.add(centerTower);
+      // 2. SUNKEN SIDE CANALS
+      // Left: Volcanic Magma Canal (VNS domain)
+      const lavaCanal = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.3, 44), lavaMat);
+      lavaCanal.position.set(-8.5, -0.05, -3);
+      this.citadel.add(lavaCanal);
 
-      // Spiky Demonic Battlements
-      for (let b = 0; b < 6; b++) {
-        const spike = new THREE.Mesh(new THREE.ConeGeometry(0.35, 1.6, 4), keepMat);
-        const ang = (b / 6) * Math.PI * 2;
-        spike.position.set(Math.cos(ang) * 2.5, 20.8, Math.sin(ang) * 2.5);
-        this.bigCastle.add(spike);
-      }
+      // Right: Luminescent Cyan Water Canal (BFO domain)
+      const waterCanal = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.3, 44), waterMat);
+      waterCanal.position.set(8.5, -0.05, -3);
+      this.citadel.add(waterCanal);
 
-      // Giant Flaming Eye of Hellfire / Netherfire Orb (Mata Api Neraka)
-      const fireOrbMat = new THREE.MeshToonMaterial({
-        color: 0xff3b00,
-        emissive: 0xff4500,
-        emissiveIntensity: 1.6
+      // 3. COLONNADES OF GOTHIC PILLARS & ARCHES
+      const pillarZ = [18, 10, 2, -6, -14, -22];
+      this.citadelTorches = [];
+
+      pillarZ.forEach((zPos, idx) => {
+        // Left Pillar (Fire Theme)
+        const pL = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.85, 11, 6), pillarMat);
+        pL.position.set(-6.0, 5.5, zPos);
+        pL.castShadow = true;
+        pL.receiveShadow = true;
+        this.citadel.add(pL);
+
+        // Right Pillar (Water Theme)
+        const pR = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.85, 11, 6), pillarMat);
+        pR.position.set(6.0, 5.5, zPos);
+        pR.castShadow = true;
+        pR.receiveShadow = true;
+        this.citadel.add(pR);
+
+        // Overhead Gothic Rib Arch spanning across hall
+        const arch = new THREE.Mesh(new THREE.BoxGeometry(13.5, 0.6, 0.8), archMat);
+        arch.position.set(0, 10.5, zPos);
+        this.citadel.add(arch);
+
+        // Wall Sconce Torches with Dynamic PointLights
+        // Left Fire Torch
+        const torchL = new THREE.Mesh(new THREE.OctahedronGeometry(0.22, 0), new THREE.MeshBasicMaterial({ color: 0xffaa00 }));
+        torchL.position.set(-5.1, 4.2, zPos);
+        const lightL = new THREE.PointLight(0xff7700, 1.2, 12);
+        lightL.position.copy(torchL.position);
+        this.citadel.add(torchL); this.citadel.add(lightL);
+        this.citadelTorches.push({ mesh: torchL, light: lightL, baseColor: 0xff7700 });
+
+        // Right Aqua Torch
+        const torchR = new THREE.Mesh(new THREE.OctahedronGeometry(0.22, 0), new THREE.MeshBasicMaterial({ color: 0x00ffff }));
+        torchR.position.set(5.1, 4.2, zPos);
+        const lightR = new THREE.PointLight(0x00ccff, 1.1, 12);
+        lightR.position.copy(torchR.position);
+        this.citadel.add(torchR); this.citadel.add(lightR);
+        this.citadelTorches.push({ mesh: torchR, light: lightR, baseColor: 0x00ccff });
       });
-      this.hellfireEye = new THREE.Mesh(new THREE.SphereGeometry(2.6, 16, 16), fireOrbMat);
-      this.hellfireEye.position.y = 23.5;
-      this.bigCastle.add(this.hellfireEye);
 
-      // 4 Curved Demon Horns surrounding the Eye of Hellfire
-      const hornOffsets = [
-        [-1.8, 23.5, 0, 0.45],
-        [1.8, 23.5, 0, -0.45],
-        [0, 23.5, -1.8, -0.45],
-        [0, 23.5, 1.8, 0.45]
-      ];
-      hornOffsets.forEach(h => {
-        const horn = new THREE.Mesh(new THREE.ConeGeometry(0.4, 3.6, 6), obsidianBaseMat);
-        horn.position.set(h[0], h[1], h[2]);
-        if (h[0] !== 0) horn.rotation.z = h[3];
-        else horn.rotation.x = h[3];
-        this.bigCastle.add(horn);
-      });
+      // 4. CITADEL WALLS & VAULTED CEILING
+      // Left Wall
+      const wallL = new THREE.Mesh(new THREE.BoxGeometry(0.8, 12, 60), wallMat);
+      wallL.position.set(-13, 6.0, -5);
+      this.citadel.add(wallL);
 
-      // --- 4. TWIN NETHER SPIRES (MENARA KEMBAR API & BELERANG) ---
-      // Left Spire: Menara Magma Kocorock (Charred Obsidian & Flaming Braziers)
-      const towerL = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 2.2, 13, 8), keepMat);
-      towerL.position.set(-7.5, 8.0, 1.8);
-      const roofL = new THREE.Mesh(new THREE.ConeGeometry(2.4, 5.0, 6), new THREE.MeshToonMaterial({ color: 0x991b1b }));
-      roofL.position.set(-7.5, 16.5, 1.8);
-      this.bigCastle.add(towerL);
-      this.bigCastle.add(roofL);
+      // Right Wall
+      const wallR = new THREE.Mesh(new THREE.BoxGeometry(0.8, 12, 60), wallMat);
+      wallR.position.set(13, 6.0, -5);
+      this.citadel.add(wallR);
 
-      // Right Spire: Menara Belerang Pipimon (Volcanic Spire & Cyan Hellfire)
-      const towerR = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 2.2, 13, 8), keepMat);
-      towerR.position.set(7.5, 8.0, 1.8);
-      const roofR = new THREE.Mesh(new THREE.ConeGeometry(2.4, 5.0, 6), new THREE.MeshToonMaterial({ color: 0x0e7490 }));
-      roofR.position.set(7.5, 16.5, 1.8);
-      this.bigCastle.add(towerR);
-      this.bigCastle.add(roofR);
+      // Vaulted Dark Stone Ceiling
+      const ceiling = new THREE.Mesh(new THREE.BoxGeometry(26, 0.6, 60), wallMat);
+      ceiling.position.set(0, 11.8, -5);
+      this.citadel.add(ceiling);
 
-      // Spiked Connecting Bastion Bridge
-      const bridge = new THREE.Mesh(new THREE.BoxGeometry(17, 1.0, 2.5), keepMat);
-      bridge.position.set(0, 8.0, 1.8);
-      this.bigCastle.add(bridge);
+      // Front Entrance Wall & Grand Demonic Portcullis Gates (z = 24)
+      const gateWallL = new THREE.Mesh(new THREE.BoxGeometry(10, 12, 0.8), wallMat);
+      gateWallL.position.set(-8, 6.0, 24);
+      const gateWallR = new THREE.Mesh(new THREE.BoxGeometry(10, 12, 0.8), wallMat);
+      gateWallR.position.set(8, 6.0, 24);
+      const gateLintel = new THREE.Mesh(new THREE.BoxGeometry(6.5, 4.5, 0.8), wallMat);
+      gateLintel.position.set(0, 9.75, 24);
+      this.citadel.add(gateWallL); this.citadel.add(gateWallR); this.citadel.add(gateLintel);
 
-      // 6 Burning Nether Braziers on Citadel Ramparts
-      this.hellBraziers = [];
-      const citadelBrazierPos = [
-        [-6.5, 8.8, 3.2], [6.5, 8.8, 3.2],
-        [-3.2, 10.4, 4.4], [3.2, 10.4, 4.4],
-        [-7.5, 19.2, 1.8], [7.5, 19.2, 1.8]
-      ];
-      citadelBrazierPos.forEach(pos => {
-        const bz = new THREE.Group();
-        bz.position.set(pos[0], pos[1], pos[2]);
-        const stand = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.25, 0.5, 6), obsidianBaseMat);
-        bz.add(stand);
-        const fl = new THREE.Mesh(
-          new THREE.OctahedronGeometry(0.35, 1),
-          new THREE.MeshToonMaterial({ color: 0xfef08a, emissive: 0xff3b00, emissiveIntensity: 1.4 })
+      // 5. THE GRAND DAIS & ALTAR OF HYBRID SYNTHESIS (z = -24 to -34)
+      // Grand Ceremonial Stone Steps
+      for (let st = 0; st < 4; st++) {
+        const stepMesh = new THREE.Mesh(
+          new THREE.BoxGeometry(16 - st * 0.8, 0.5, 1.2),
+          stoneStepMat
         );
-        fl.position.y = 0.45;
-        bz.add(fl);
-        this.bigCastle.add(bz);
-        this.hellBraziers.push(fl);
-      });
+        stepMesh.position.set(0, 0.25 + st * 0.5, -22.5 - st * 0.9);
+        stepMesh.receiveShadow = true;
+        this.citadel.add(stepMesh);
+      }
 
-      // --- 5. DEMONIC VOLCANIC BANNER BILLBOARD ---
-      const bannerCanvas = document.createElement('canvas');
-      bannerCanvas.width = 512;
-      bannerCanvas.height = 160;
-      const bCtx = bannerCanvas.getContext('2d');
-
-      // Dark obsidian badge with fiery border
-      bCtx.fillStyle = 'rgba(15, 10, 8, 0.95)';
-      if (bCtx.roundRect) bCtx.roundRect(10, 10, 492, 140, 26);
-      else bCtx.rect(10, 10, 492, 140);
-      bCtx.fill();
-      bCtx.strokeStyle = '#dc2626';
-      bCtx.lineWidth = 6;
-      bCtx.stroke();
-
-      bCtx.font = 'bold 30px sans-serif';
-      bCtx.fillStyle = '#fef08a';
-      bCtx.textAlign = 'center';
-      bCtx.fillText('🏰 BENTENG API DARI NERAKA 🌋', 256, 58);
-
-      bCtx.font = 'bold 20px sans-serif';
-      bCtx.fillStyle = '#ff7849';
-      bCtx.fillText('Nether Magma Citadel • Sinergi BFO & VNS', 256, 98);
-
-      bCtx.font = 'bold 14px sans-serif';
-      bCtx.fillStyle = '#ea580c';
-      bCtx.fillText('🔥 Reaktor Riset Sintesis Komputasi Awan Paling Ekstrem 🔥', 256, 132);
-
-      const bannerTex = new THREE.CanvasTexture(bannerCanvas);
-      const castleBanner = new THREE.Mesh(
-        new THREE.PlaneGeometry(8.5, 2.7),
-        new THREE.MeshBasicMaterial({ map: bannerTex, transparent: true, side: THREE.DoubleSide })
+      // Elevated Semicircular Altar Dais (y = 2.0)
+      const daisMesh = new THREE.Mesh(
+        new THREE.CylinderGeometry(10.5, 11.2, 2.0, 20),
+        floorMat
       );
-      castleBanner.position.set(0, 11.2, 4.6);
-      this.bigCastle.add(castleBanner);
+      daisMesh.position.set(0, 1.0, -29);
+      daisMesh.receiveShadow = true;
+      this.citadel.add(daisMesh);
 
-      this.rootGroup.add(this.bigCastle);
+      // Golden Inscribed Center Altar Base
+      const centerAltar = new THREE.Mesh(
+        new THREE.CylinderGeometry(3.2, 3.6, 0.6, 16),
+        goldAltarMat
+      );
+      centerAltar.position.set(0, 2.3, -28.5);
+      this.citadel.add(centerAltar);
+
+      // --- THE GRAND HYBRID REACTOR CORE (Memetic BFO-VNS) ---
+      this.hybridReactor = new THREE.Group();
+      this.hybridReactor.position.set(0, 3.9, -28.5);
+
+      // Outer Golden Flame Gyroscope Ring
+      const ring1Mat = new THREE.MeshStandardMaterial({
+        color: 0xf59e0b,
+        roughness: 0.2,
+        metalness: 0.8,
+        emissive: 0xd97706,
+        emissiveIntensity: 0.8
+      });
+      this.gyroRing1 = new THREE.Mesh(new THREE.TorusGeometry(1.9, 0.08, 12, 32), ring1Mat);
+      this.hybridReactor.add(this.gyroRing1);
+
+      // Inner Electric Cyan Gyroscope Ring
+      const ring2Mat = new THREE.MeshStandardMaterial({
+        color: 0x38bdf8,
+        roughness: 0.2,
+        metalness: 0.8,
+        emissive: 0x0284c7,
+        emissiveIntensity: 0.8
+      });
+      this.gyroRing2 = new THREE.Mesh(new THREE.TorusGeometry(1.4, 0.07, 12, 32), ring2Mat);
+      this.hybridReactor.add(this.gyroRing2);
+
+      // Central Pulsing Hybrid Plasma Sphere (Fusion of Magma Fire & Aqua Water!)
+      const coreMat = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        emissive: 0x38bdf8,
+        emissiveIntensity: 1.6,
+        roughness: 0.1
+      });
+      this.plasmaCore = new THREE.Mesh(new THREE.SphereGeometry(0.85, 24, 24), coreMat);
+      this.hybridReactor.add(this.plasmaCore);
+
+      // Dynamic Center PointLight casting magical dual-color glow
+      this.coreLight = new THREE.PointLight(0x38bdf8, 2.5, 18);
+      this.hybridReactor.add(this.coreLight);
+
+      // Floating 3D Alchemical Banner Above the Dais
+      const bannerTag = this.createFloatingTag('REAKTOR SINTESIS HIBRIDA', 'Memetic BFO-VNS • 1 + 1 > 2', '#38bdf8');
+      bannerTag.position.set(0, 3.2, 0);
+      bannerTag.scale.set(2.4, 0.85, 1);
+      this.hybridReactor.add(bannerTag);
+
+      // Energy Beams linking rulers to core
+      const beamMatL = new THREE.MeshBasicMaterial({ color: 0xff5722, transparent: true, opacity: 0.75 });
+      const beamMatR = new THREE.MeshBasicMaterial({ color: 0x00d2ff, transparent: true, opacity: 0.75 });
+
+      this.beamKocok = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 4.2, 8).rotateZ(Math.PI / 2.7), beamMatL);
+      this.beamKocok.position.set(-2.0, 0.3, 0);
+      this.hybridReactor.add(this.beamKocok);
+
+      this.beamPip = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 4.2, 8).rotateZ(-Math.PI / 2.7), beamMatR);
+      this.beamPip.position.set(2.0, 0.3, 0);
+      this.hybridReactor.add(this.beamPip);
+
+      this.citadel.add(this.hybridReactor);
+
+      // Background Demonic Eye & Spire visible through rear skylight
+      const centerTower = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 3.2, 14, 8), pillarMat);
+      centerTower.position.set(0, 16.0, -35);
+      this.citadel.add(centerTower);
+
+      const fireOrbMat = new THREE.MeshToonMaterial({ color: 0xff3b00, emissive: 0xff4500, emissiveIntensity: 1.6 });
+      this.hellfireEye = new THREE.Mesh(new THREE.SphereGeometry(2.6, 16, 16), fireOrbMat);
+      this.hellfireEye.position.set(0, 24.5, -35);
+      this.citadel.add(this.hellfireEye);
+
+      this.rootGroup.add(this.citadel);
+    }
+
+    createBigFriendshipCastle() {
+      // Kept for backward compatibility
     }
 
     createDistantCitadels() {
@@ -1996,49 +2030,52 @@ reset() {
 
     createFloatingTag(name, subtitle, colHex) {
       const canvas = document.createElement('canvas');
-      canvas.width = 320;
-      canvas.height = 110;
+      canvas.width = 280;
+      canvas.height = 96;
       const ctx = canvas.getContext('2d');
 
       // Rounded pill background
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
       ctx.strokeStyle = colHex;
-      ctx.lineWidth = 5;
+      ctx.lineWidth = 4;
       ctx.beginPath();
-      ctx.roundRect(10, 10, 300, 90, 28);
+      ctx.roundRect(6, 6, 268, 84, 22);
       ctx.fill();
       ctx.stroke();
 
       // Title
-      ctx.font = 'bold 30px Inter, sans-serif';
+      ctx.font = 'bold 24px Inter, sans-serif';
       ctx.fillStyle = '#ffffff';
       ctx.textAlign = 'center';
-      ctx.fillText(name, 160, 50);
+      ctx.fillText(name, 140, 42);
 
       // Subtitle
-      ctx.font = 'bold 19px Inter, sans-serif';
+      ctx.font = 'bold 15px Inter, sans-serif';
       ctx.fillStyle = colHex;
-      ctx.fillText(subtitle, 160, 80);
+      ctx.fillText(subtitle, 140, 70);
 
       const texture = new THREE.CanvasTexture(canvas);
-      const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
+      const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: true });
       const sprite = new THREE.Sprite(mat);
-      sprite.scale.set(4.0, 1.4, 1);
+      sprite.scale.set(1.8, 0.62, 1);
       return sprite;
     }
 
     buildCharacters() {
-      this.charMode = 'meshy';
+      this.charMode = 'procedural'; // Default to high-fidelity procedural models!
       this.meshyGroup = new THREE.Group();
       this.proceduralGroup = new THREE.Group();
       this.rootGroup.add(this.meshyGroup);
       this.rootGroup.add(this.proceduralGroup);
 
-      // 1. PROCEDURAL MAGMA-KOCOROCK (OBSIDIAN MAGMA GOLEM - VNS, Image 1)
+      // ==========================================
+      // 1. PROCEDURAL MAGMA-KOCOROCK (VNS Master)
+      // Placed on Grand Dais beside the Hybrid Core!
+      // ==========================================
       this.kocok = new THREE.Group();
-      const obsidianMat = new THREE.MeshToonMaterial({ color: 0x1c1917, roughness: 0.85 });
-      const magmaSeamMat = new THREE.MeshToonMaterial({ color: 0xff5722, emissive: 0xea580c, emissiveIntensity: 0.85 });
-      const goldenCoreMat = new THREE.MeshToonMaterial({ color: 0xfef08a, emissive: 0xf59e0b, emissiveIntensity: 1.15 });
+      const obsidianMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.75, metalness: 0.3 });
+      const magmaSeamMat = new THREE.MeshStandardMaterial({ color: 0xff5722, emissive: 0xea580c, emissiveIntensity: 1.4 });
+      const goldenCoreMat = new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xf59e0b, emissiveIntensity: 1.8 });
 
       // Torso: Faceted Obsidian Rock
       const bodyGeo = new THREE.DodecahedronGeometry(1.65, 1);
@@ -2046,7 +2083,7 @@ reset() {
       body.castShadow = true;
       this.kocok.add(body);
 
-      // Magma Belly & Chest Seams (Image 1)
+      // Magma Belly & Chest Seams
       const bellyPlate = new THREE.Mesh(new THREE.DodecahedronGeometry(0.95, 0), goldenCoreMat);
       bellyPlate.position.set(0, -0.15, 1.15);
       bellyPlate.scale.set(1.1, 1.25, 0.45);
@@ -2059,11 +2096,11 @@ reset() {
       head.position.set(0, 1.6, 0.2);
       this.kocok.add(head);
 
-      // Fiery Magma Glowing Eyes (Image 1)
-      const eyeMat = new THREE.MeshToonMaterial({ color: 0xfef08a, emissive: 0xf59e0b, emissiveIntensity: 1.4 });
-      const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.22, 10, 10), eyeMat);
+      // Fiery Magma Glowing Eyes
+      const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+      const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.2, 10, 10), eyeMat);
       eyeL.position.set(-0.35, 1.7, 0.95);
-      const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.22, 10, 10), eyeMat);
+      const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.2, 10, 10), eyeMat);
       eyeR.position.set(0.35, 1.7, 0.95);
       this.kocok.add(eyeL);
       this.kocok.add(eyeR);
@@ -2071,19 +2108,19 @@ reset() {
       // Obsidian Boulder Fists with Magma Knuckles
       const fistGeo = new THREE.DodecahedronGeometry(0.65, 1);
       const fistL = new THREE.Mesh(fistGeo, obsidianMat);
-      fistL.position.set(-1.9, 0.2, 0.5);
+      fistL.position.set(-1.8, 0.2, 0.5);
       const fistR = new THREE.Mesh(fistGeo, obsidianMat);
-      fistR.position.set(1.9, 0.2, 0.5);
+      fistR.position.set(1.8, 0.2, 0.5);
       this.kocok.add(fistL);
       this.kocok.add(fistR);
 
-      // Volcanic Battle Axe (Double-bladed Obsidian Axe with Molten Lava Edge, Image 1 & 3)
+      // Volcanic Battle Axe (Double-bladed Obsidian Axe with Molten Lava Edge)
       this.axe = new THREE.Group();
       const axeHaft = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 3.8, 8), obsidianMat);
       this.axe.add(axeHaft);
 
-      const axeBladeMat = new THREE.MeshToonMaterial({ color: 0x0c0a09, roughness: 0.7 });
-      const axeEdgeMat = new THREE.MeshToonMaterial({ color: 0xff5722, emissive: 0xea580c, emissiveIntensity: 1.2 });
+      const axeBladeMat = new THREE.MeshStandardMaterial({ color: 0x0c0a09, roughness: 0.6, metalness: 0.5 });
+      const axeEdgeMat = new THREE.MeshBasicMaterial({ color: 0xff4500 });
 
       const axeBladeL = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.4, 0.18), axeBladeMat);
       axeBladeL.position.set(-0.7, 1.2, 0);
@@ -2099,155 +2136,113 @@ reset() {
       axeEdgeR.position.set(1.1, 1.2, 0);
       this.axe.add(axeEdgeR);
 
-      this.axe.position.set(2.1, 0.8, 0.6);
-      this.axe.rotation.z = 0.25;
+      // Raised toward the central Hybrid Core!
+      this.axe.position.set(1.6, 1.6, 0.6);
+      this.axe.rotation.z = -0.55;
+      this.axe.rotation.x = 0.2;
       this.kocok.add(this.axe);
 
-      // 3D Floating Name Tag for Magma-Kocorock
+      // Sleek 3D Floating Name Tag for Magma-Kocorock
       const tagKocok = this.createFloatingTag('MAGMA KOCOROCK', 'VNS • Obsidian Golem', '#f59e0b');
       tagKocok.position.set(0, 3.8, 0);
+      tagKocok.scale.set(1.8, 0.65, 1);
       this.kocok.add(tagKocok);
 
-      this.kocok.position.set(-11, 1.6, 2.6);
+      // Positioned on the Left of the Hybrid Core on the Dais!
+      this.kocok.position.set(-3.8, 2.0, -28.5);
+      this.kocok.rotation.y = 0.38;
       this.proceduralGroup.add(this.kocok);
 
-      // 2. PROCEDURAL AQUA-PIPIMON COLONY (PIXEL WATER DROPLET - BFO, Image 2)
+      // ==========================================
+      // 2. PROCEDURAL AQUA-PIPIMON COLONY (BFO Leader)
+      // Placed on Grand Dais beside the Hybrid Core!
+      // ==========================================
       this.pips = [];
-      for (let p = 0; p < 5; p++) {
-        const pip = new THREE.Group();
-        const isLeader = (p === 0);
-        const rad = isLeader ? 1.35 : 0.65;
+      const leaderPip = new THREE.Group();
+      const rad = 1.35;
 
-        // Teardrop Water Droplet Geometry: Sphere Base + Tapered Cone Peak (Image 2)
-        const dropletBody = new THREE.Group();
-        const baseSphere = new THREE.Mesh(
-          new THREE.SphereGeometry(rad, 20, 20),
-          new THREE.MeshToonMaterial({
-            color: isLeader ? 0x38bdf8 : 0x7dd3fc,
-            emissive: 0x0284c7,
-            emissiveIntensity: 0.45,
-            transparent: true,
-            opacity: 0.92
-          })
+      // Teardrop Water Droplet Geometry
+      const dropletBody = new THREE.Group();
+      const pipMat = new THREE.MeshStandardMaterial({
+        color: 0x38bdf8,
+        emissive: 0x0284c7,
+        emissiveIntensity: 0.65,
+        transparent: true,
+        opacity: 0.94,
+        roughness: 0.1,
+        metalness: 0.1
+      });
+
+      const baseSphere = new THREE.Mesh(new THREE.SphereGeometry(rad, 20, 20), pipMat);
+      dropletBody.add(baseSphere);
+
+      const tipCone = new THREE.Mesh(new THREE.ConeGeometry(rad * 0.82, rad * 1.25, 20), pipMat);
+      tipCone.position.y = rad * 0.72;
+      dropletBody.add(tipCone);
+      leaderPip.add(dropletBody);
+
+      // Pixel-Shaded Kawaii Black Eyes with White Catchlight Dots
+      const eyeW = rad * 0.24;
+      const eyeGeo = new THREE.BoxGeometry(eyeW, eyeW * 1.3, eyeW * 0.4);
+      const eyePupilMat = new THREE.MeshBasicMaterial({ color: 0x0f172a });
+      const eyeDotMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+      const eyeLeft = new THREE.Mesh(eyeGeo, eyePupilMat);
+      eyeLeft.position.set(-rad * 0.32, rad * 0.15, rad * 0.88);
+      const dotL = new THREE.Mesh(new THREE.BoxGeometry(eyeW * 0.4, eyeW * 0.4, eyeW * 0.45), eyeDotMat);
+      dotL.position.set(-rad * 0.36, rad * 0.25, rad * 0.95);
+      leaderPip.add(eyeLeft); leaderPip.add(dotL);
+
+      const eyeRight = new THREE.Mesh(eyeGeo, eyePupilMat);
+      eyeRight.position.set(rad * 0.32, rad * 0.15, rad * 0.88);
+      const dotR = new THREE.Mesh(new THREE.BoxGeometry(eyeW * 0.4, eyeW * 0.4, eyeW * 0.45), eyeDotMat);
+      dotR.position.set(rad * 0.28, rad * 0.25, rad * 0.95);
+      leaderPip.add(eyeRight); leaderPip.add(dotR);
+
+      // Cute Smile Mouth
+      const mouth = new THREE.Mesh(new THREE.BoxGeometry(eyeW * 0.9, eyeW * 0.28, eyeW * 0.3), eyePupilMat);
+      mouth.position.set(0, -rad * 0.12, rad * 0.92);
+      leaderPip.add(mouth);
+
+      // Water arms raised toward the Core
+      const armMat = pipMat;
+      const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 0.9, 8), armMat);
+      armL.position.set(-rad * 0.88, rad * 0.2, 0);
+      armL.rotation.z = 0.8;
+      const armR = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 0.9, 8), armMat);
+      armR.position.set(rad * 0.88, rad * 0.2, 0);
+      armR.rotation.z = -0.8;
+      leaderPip.add(armL); leaderPip.add(armR);
+
+      // Tail for swishy animation
+      leaderPip.userData = { tail: dropletBody };
+
+      // Sleek 3D Floating Name Tag for Aqua-Pipimon
+      const tagPip = this.createFloatingTag('AQUA PIPIMON', 'BFO • Water Droplet', '#06b6d4');
+      tagPip.position.set(0, 3.2, 0);
+      tagPip.scale.set(1.8, 0.65, 1);
+      leaderPip.add(tagPip);
+
+      // Positioned on the Right of the Hybrid Core on the Dais!
+      leaderPip.position.set(3.8, 2.0, -28.5);
+      leaderPip.rotation.y = -0.38;
+      this.pips.push(leaderPip);
+      this.proceduralGroup.add(leaderPip);
+
+      // Swimming Mini-Pipimon Droplets orbiting the leader
+      for (let s = 1; s <= 4; s++) {
+        const miniPip = new THREE.Mesh(
+          new THREE.SphereGeometry(0.42, 14, 14),
+          new THREE.MeshStandardMaterial({ color: 0x7dd3fc, emissive: 0x0284c7, emissiveIntensity: 0.5, transparent: true, opacity: 0.85 })
         );
-        dropletBody.add(baseSphere);
-
-        const tipCone = new THREE.Mesh(
-          new THREE.ConeGeometry(rad * 0.82, rad * 1.25, 20),
-          new THREE.MeshToonMaterial({
-            color: isLeader ? 0x38bdf8 : 0x7dd3fc,
-            emissive: 0x0284c7,
-            emissiveIntensity: 0.45,
-            transparent: true,
-            opacity: 0.92
-          })
-        );
-        tipCone.position.y = rad * 0.72;
-        dropletBody.add(tipCone);
-        pip.add(dropletBody);
-
-        // Pixel-Shaded Kawaii Black Eyes with White Specular Dot (Image 2)
-        const eyeW = rad * 0.24;
-        const eyeGeo = new THREE.BoxGeometry(eyeW, eyeW * 1.3, eyeW * 0.4);
-        const eyePupilMat = new THREE.MeshToonMaterial({ color: 0x0f172a });
-        const eyeDotMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-
-        const eyeLeft = new THREE.Mesh(eyeGeo, eyePupilMat);
-        eyeLeft.position.set(-rad * 0.32, rad * 0.15, rad * 0.88);
-        const dotL = new THREE.Mesh(new THREE.BoxGeometry(eyeW * 0.4, eyeW * 0.4, eyeW * 0.45), eyeDotMat);
-        dotL.position.set(-rad * 0.36, rad * 0.22, rad * 0.92);
-        pip.add(eyeLeft); pip.add(dotL);
-
-        const eyeRight = new THREE.Mesh(eyeGeo, eyePupilMat);
-        eyeRight.position.set(rad * 0.32, rad * 0.15, rad * 0.88);
-        const dotR = new THREE.Mesh(new THREE.BoxGeometry(eyeW * 0.4, eyeW * 0.4, eyeW * 0.45), eyeDotMat);
-        dotR.position.set(rad * 0.28, rad * 0.22, rad * 0.92);
-        pip.add(eyeRight); pip.add(dotR);
-
-        // Water droplet tail / fin
-        const tail = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.04 * rad, 0.12 * rad, 0.7 * rad, 6),
-          new THREE.MeshToonMaterial({ color: 0x0284c7 })
-        );
-        tail.position.set(0, -rad * 0.4, -rad * 0.75);
-        tail.rotation.x = Math.PI / 3;
-        pip.add(tail);
-
-        let crown = null;
-        if (isLeader) {
-          crown = new THREE.Group();
-          const crBase = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.42, 0.42, 0.14, 12),
-            new THREE.MeshToonMaterial({ color: 0x38bdf8, emissive: 0x0ea5e9, emissiveIntensity: 0.6 })
-          );
-          crown.add(crBase);
-          crown.position.set(0, rad * 1.5, 0);
-          pip.add(crown);
-
-          // 3D Floating Name Tag for Aqua-Pipimon
-          const tagPip = this.createFloatingTag('AQUA PIPIMON', 'BFO • Water Droplet', '#06b6d4');
-          tagPip.position.set(0, 3.6, 0);
-          pip.add(tagPip);
-
-          pip.position.set(11, 1.5, 2.4);
-        } else {
-          const angle = (p / 4) * Math.PI * 2;
-          pip.position.set(11 + Math.cos(angle) * 3.4, 1.0, Math.sin(angle) * 2.2);
-        }
-
-        pip.userData = { tail, crown, isLeader };
-        this.proceduralGroup.add(pip);
-        this.pips.push(pip);
+        const ang = (s / 4) * Math.PI * 2;
+        miniPip.position.set(3.8 + Math.cos(ang) * 1.8, 2.2 + Math.sin(ang) * 0.4, -28.5 + Math.sin(ang) * 1.8);
+        miniPip.userData = { angle: ang, radius: 1.8 };
+        this.pips.push(miniPip);
+        this.proceduralGroup.add(miniPip);
       }
 
-      // 3. LOAD MESHY AI GLB ASSETS (SCALED UP & VIBRANT)
-      if (typeof THREE.GLTFLoader !== 'undefined') {
-        const loader = new THREE.GLTFLoader();
-        loader.load('./assets/models/kocok.glb', (gltf) => {
-          this.meshyKocok = gltf.scene;
-          this.meshyKocok.scale.set(3.0, 3.0, 3.0);
-          this.meshyKocok.position.set(-11, 1.2, 2.6);
-          this.meshyKocok.traverse(child => {
-            if (child.isMesh) {
-              child.castShadow = true;
-              child.material = new THREE.MeshToonMaterial({
-                color: 0x262626,
-                emissive: 0xea580c,
-                emissiveIntensity: 0.35,
-                roughness: 0.8
-              });
-            }
-          });
-          const tagM = this.createFloatingTag('MAGMA KOCOROCK', 'VNS • Obsidian Golem', '#f59e0b');
-          tagM.position.set(0, 1.5, 0);
-          this.meshyKocok.add(tagM);
-          this.meshyGroup.add(this.meshyKocok);
-        }, undefined, (err) => console.log('Meshy Kocok GLB load notice:', err));
-
-        loader.load('./assets/models/pip.glb', (gltf) => {
-          this.meshyPip = gltf.scene;
-          this.meshyPip.scale.set(2.8, 2.8, 2.8);
-          this.meshyPip.position.set(11, 1.3, 2.4);
-          this.meshyPip.traverse(child => {
-            if (child.isMesh) {
-              child.castShadow = true;
-              child.material = new THREE.MeshToonMaterial({
-                color: 0x38bdf8,
-                transparent: true,
-                opacity: 0.95,
-                emissive: 0x0284c7,
-                emissiveIntensity: 0.45
-              });
-            }
-          });
-          const tagP = this.createFloatingTag('AQUA PIPIMON', 'BFO • Water Droplet', '#06b6d4');
-          tagP.position.set(0, 1.4, 0);
-          this.meshyPip.add(tagP);
-          this.meshyGroup.add(this.meshyPip);
-        }, undefined, (err) => console.log('Meshy Pip GLB load notice:', err));
-      }
-
-      this.setCharMode('meshy');
+      this.setCharMode('procedural');
     }
 
     setCharMode(mode) {
@@ -2723,9 +2718,9 @@ reset() {
 
       if (nextMode === 'fps') {
         if (this.controls) this.controls.enabled = false;
-        this.fpsPlayer.position.set(0, 0.8, 12);
-        this.fpsPlayer.yaw = 0;
-        this.fpsPlayer.pitch = -0.05;
+        this.fpsPlayer.position.set(0, 0, 18); // Inside castle grand hall entrance
+        this.fpsPlayer.yaw = 0; // Facing North toward Throne & Hybrid Core
+        this.fpsPlayer.pitch = -0.02;
         this.fpsPlayer.velocity.set(0, 0, 0);
         this.fpsPlayer.isGrounded = true;
 
@@ -2766,32 +2761,27 @@ reset() {
     }
 
     getGroundHeight(x, z) {
-      // 1. Istana Api dari Neraka Platform
-      if (z < -26 && Math.abs(x) < 9) return 5.8;
-      // 2. Ramp to Citadel
-      if (z < -18 && z >= -26 && Math.abs(x) < 4.5) {
-        const p = (-18 - z) / 8;
-        return 0.8 + p * 5.0;
+      // 1. Altar Dais at Far End (z <= -25)
+      if (z <= -25 && Math.abs(x) <= 11) return 2.0;
+
+      // 2. Ceremonial Steps leading up to Altar (z between -25 and -22)
+      if (z > -25 && z < -22 && Math.abs(x) <= 9) {
+        const progress = (-22 - z) / 3.0; // 0.0 at -22, 1.0 at -25
+        return progress * 2.0;
       }
-      // 3. Warrior Statue Altar
-      if (z < -16 && z >= -24 && Math.abs(x) < 5.5) return 2.2;
-      // 4. North Causeway
-      if (z < 0 && z >= -18 && Math.abs(x) < 3.2) return 0.55;
-      // 5. Main East-West Bridge & Central Islands
-      if (Math.abs(z) < 4.2 && Math.abs(x) < 22) return 0.55;
-      // 6. Left Realm (VNS islands)
-      if (Math.abs(x + 11) < 8 && Math.abs(z) < 6) return 0.85;
-      // 7. Right Realm (BFO islands)
-      if (Math.abs(x - 11) < 8 && Math.abs(z) < 6) return 0.85;
-      // 8. Ground default
-      return -1.2;
+
+      // 3. Main Grand Castle Hall Floor
+      if (z >= -22 && z <= 24 && Math.abs(x) <= 12.5) return 0.0;
+
+      // 4. Fallback default
+      return 0.0;
     }
 
     updateFPS(delta) {
       const p = this.fpsPlayer;
       const speed = p.isSprinting ? 15.0 : 8.8;
 
-      // Calculate directional movement vectors from camera yaw
+      // Directional vectors from yaw
       const forward = new THREE.Vector3(-Math.sin(p.yaw), 0, -Math.cos(p.yaw));
       const right = new THREE.Vector3(Math.cos(p.yaw), 0, -Math.sin(p.yaw));
 
@@ -2807,12 +2797,11 @@ reset() {
         p.position.x += moveDir.x * speed * delta;
         p.position.z += moveDir.z * speed * delta;
 
-        // Head bobbing and footstep audio
+        // Head bobbing and rhythmic basalt footsteps
         if (p.isGrounded) {
           const prevStep = p.walkStep;
           p.walkStep += delta * (p.isSprinting ? 14 : 9.5);
 
-          // Footstep audio on downstep
           if (Math.sin(prevStep) <= 0 && Math.sin(p.walkStep) > 0) {
             if (window.app && window.app.soundtrack && window.app.soundtrack.playFootstep) {
               window.app.soundtrack.playFootstep();
@@ -2823,9 +2812,9 @@ reset() {
         p.walkStep = 0;
       }
 
-      // World Boundary Constraints (keep player within kingdom bounds)
-      p.position.x = Math.max(-36, Math.min(36, p.position.x));
-      p.position.z = Math.max(-40, Math.min(22, p.position.z));
+      // Boundaries inside Castle Grand Hall
+      p.position.x = Math.max(-11.2, Math.min(11.2, p.position.x));
+      p.position.z = Math.max(-30.5, Math.min(21.5, p.position.z));
 
       // Gravity and Ground Physics
       const groundY = this.getGroundHeight(p.position.x, p.position.z);
@@ -2839,7 +2828,6 @@ reset() {
           p.isGrounded = true;
         }
       } else {
-        // Smoothly adjust ground height while walking
         p.position.y = THREE.MathUtils.lerp(p.position.y, groundY, 0.25);
       }
 
@@ -2847,7 +2835,7 @@ reset() {
       const bobY = isMoving && p.isGrounded ? Math.sin(p.walkStep) * 0.08 : 0;
       this.camera.position.set(p.position.x, p.position.y + p.eyeHeight + bobY, p.position.z);
 
-      // Apply Camera Rotation
+      // Camera Aim Rotation
       this.camera.rotation.order = 'YXZ';
       this.camera.rotation.y = p.yaw;
       this.camera.rotation.x = p.pitch;
@@ -2869,36 +2857,66 @@ reset() {
       const box = document.getElementById('pov-proximity-box');
       if (!box) return;
 
-      const landmarks = [
-        { name: 'VM 1: Pulau Kilat (Merah)', pos: { x: -7, z: 0 }, desc: 'Kapasitas 3500 MIPS (Compute-Optimized). Mesin tercepat namun rentan memicu bottleneck!' },
-        { name: 'VM 2: Pulau Seimbang (Kuning)', pos: { x: 0, z: 0 }, desc: 'Kapasitas 2000 MIPS (General Purpose). Distribusi beban paling stabil.' },
-        { name: 'VM 3: Pulau Hemat (Biru)', pos: { x: 7, z: 0 }, desc: 'Kapasitas 1000 MIPS (Eco Burst). Menangani tugas-tugas ringan secara efisien.' },
-        { name: 'Magma-Kocorock (VNS Master)', pos: { x: -11, z: 2.6 }, desc: 'Obsidian Golem penjaga VNS. Bersenjatakan Kapak Volkanik untuk mengocok tugas bottleneck!' },
-        { name: 'Aqua-Pipimon (BFO Leader)', pos: { x: 11, z: 2.4 }, desc: 'Pemimpin koloni kemotaksis. Berenang menelusuri gradien nutrisi solusi penjadwalan!' },
-        { name: 'Benteng Api dari Neraka', pos: { x: 0, z: -30 }, desc: 'Nether Magma Citadel — Reaktor pusat penggabungan algoritma hibrida paling ekstrem!' },
-        { name: 'Patung Ksatria Volkanik', pos: { x: 0, z: -20 }, desc: 'Monumen ksatria kuno penjaga sumpah minimasi Makespan di lautan lahar.' }
-      ];
-
-      let nearest = null;
-      let minDist = Infinity;
-
-      landmarks.forEach(lm => {
-        const dist = Math.hypot(p.x - lm.pos.x, p.z - lm.pos.z);
-        if (dist < minDist) {
-          minDist = dist;
-          nearest = lm;
-        }
-      });
-
-      if (minDist < 6.8 && nearest) {
+      // 1. Far End: The Grand Hybrid Dais (Kocorock & Pipimon Working Together!)
+      const distToThrone = Math.hypot(p.x, p.z - (-28.5));
+      if (distToThrone < 6.8) {
         box.style.display = 'block';
         box.innerHTML = `
-          <div style="font-weight:800; color:#f59e0b; font-size:13px;">📍 ${nearest.name} (Jarak: ${minDist.toFixed(1)}m)</div>
-          <div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">${nearest.desc}</div>
+          <div style="font-weight:800; color:#38bdf8; font-size:13.5px; display:flex; align-items:center; justify-content:center; gap:6px;">
+            <span>👑</span> <span>SINGGASANA ALIANSI HIBRIDA (MEMETIC BFO-VNS)</span>
+          </div>
+          <div style="font-size:11.5px; color:#f8fafc; margin-top:4px; line-height:1.4;">
+            <b>Magma-Kocorock (VNS)</b> dan <b>Aqua-Pipimon (BFO)</b> bersatu di depan Reaktor Hibrida! Pipimon memindai ruang solusi global dengan kemotaksis swarm, lalu Kocorock mengocok dan memangkas pulau bottleneck dengan kapak volkaniknya. 
+            <span style="color:#f59e0b; font-weight:700;">Prinsip Ilmiah: 1 + 1 > 2 (Makespan Lebih Optimal dari Algoritma Tunggal)!</span>
+          </div>
         `;
-      } else {
-        box.style.display = 'none';
+        return;
       }
+
+      // 2. Near VM 1 (x = -5.5, z = 8)
+      const distVM1 = Math.hypot(p.x - (-5.5), p.z - 8);
+      if (distVM1 < 4.8) {
+        box.style.display = 'block';
+        box.innerHTML = `
+          <div style="font-weight:800; color:#ef4444; font-size:13px;">📍 VM 1: Kuil Kilat (Compute-Optimized)</div>
+          <div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">Kapasitas: <b>3500 MIPS</b>. Mesin tercepat namun rentan memicu bottleneck jika tugas menumpuk!</div>
+        `;
+        return;
+      }
+
+      // 3. Near VM 2 (x = 0, z = -2)
+      const distVM2 = Math.hypot(p.x, p.z - (-2));
+      if (distVM2 < 4.8) {
+        box.style.display = 'block';
+        box.innerHTML = `
+          <div style="font-weight:800; color:#eab308; font-size:13px;">📍 VM 2: Kuil Seimbang (General Purpose)</div>
+          <div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">Kapasitas: <b>2000 MIPS</b>. Titik tumpu penyeimbang beban kerja heterogen.</div>
+        `;
+        return;
+      }
+
+      // 4. Near VM 3 (x = 5.5, z = -12)
+      const distVM3 = Math.hypot(p.x - 5.5, p.z - (-12));
+      if (distVM3 < 4.8) {
+        box.style.display = 'block';
+        box.innerHTML = `
+          <div style="font-weight:800; color:#06b6d4; font-size:13px;">📍 VM 3: Kuil Hemat (Eco Burst)</div>
+          <div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">Kapasitas: <b>1000 MIPS</b>. Mesin hemat energi untuk menangani tugas ringan secara efisien.</div>
+        `;
+        return;
+      }
+
+      // 5. Entrance / Hallway
+      if (p.z > 14) {
+        box.style.display = 'block';
+        box.innerHTML = `
+          <div style="font-weight:800; color:#f59e0b; font-size:12.5px;">🏰 Gerbang Masuk Kastil Sintesis Hibrida</div>
+          <div style="font-size:11px; color:#94a3b8; margin-top:2px;">Berjalanlah lurus menyusuri lorong (tekan <b>W</b>) menuju Singgasana Kocorock & Pipimon di ujung kastil!</div>
+        `;
+        return;
+      }
+
+      box.style.display = 'none';
     }
 
     animate() {
@@ -2907,6 +2925,29 @@ reset() {
 
       // 1. Gentle Floating Bob of Floating Realms
       this.realmLeft.position.y = Math.sin(t) * 0.25;
+
+      // Animate Grand Hybrid Reactor Core on the Dais
+      if (this.gyroRing1) this.gyroRing1.rotation.x += 0.02;
+      if (this.gyroRing1) this.gyroRing1.rotation.y += 0.015;
+      if (this.gyroRing2) this.gyroRing2.rotation.y -= 0.025;
+      if (this.gyroRing2) this.gyroRing2.rotation.z += 0.018;
+      if (this.plasmaCore) {
+        const sc = 1.0 + Math.sin(performance.now() * 0.005) * 0.12;
+        this.plasmaCore.scale.set(sc, sc, sc);
+      }
+      if (this.beamKocok && this.beamPip) {
+        const bPulse = 0.65 + Math.sin(performance.now() * 0.008) * 0.25;
+        this.beamKocok.material.opacity = bPulse;
+        this.beamPip.material.opacity = bPulse;
+      }
+
+      // Animate Citadel Wall Torches
+      if (this.citadelTorches) {
+        const now = performance.now();
+        this.citadelTorches.forEach((tc, idx) => {
+          tc.light.intensity = 1.0 + Math.sin(now * 0.012 + idx) * 0.3;
+        });
+      }
       this.realmRight.position.y = Math.sin(t + 1.5) * 0.25;
 
       const isJumping = (mesh) => this.activeJumps && this.activeJumps.some(j => j.mesh === mesh);
