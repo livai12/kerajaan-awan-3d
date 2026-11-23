@@ -2557,7 +2557,7 @@
       }
 
       // Double-click canvas to smoothly reset camera to initial front perspective
-      this.canvas.addEventListener('dblclick', () => this.resetCamera());
+      if (this.canvas) this.canvas.addEventListener('dblclick', () => this.resetCamera());
     }
 
     initSphericalFallback() {
@@ -3866,10 +3866,10 @@
     }
 
     initEvents() {
-      // Play / Pause
-      this.btnPlay.addEventListener('click', () => this.togglePlay());
-      this.btnStep.addEventListener('click', () => this.step());
-      this.btnReset.addEventListener('click', () => this.reset());
+      // Play / Pause (Safely guarded)
+      if (this.btnPlay) this.btnPlay.addEventListener('click', () => this.togglePlay());
+      if (this.btnStep) this.btnStep.addEventListener('click', () => this.step());
+      if (this.btnReset) this.btnReset.addEventListener('click', () => this.reset());
 
       // Experiment Mode Switcher (Standoff vs Reaktor Sintesis Hibrida)
       document.querySelectorAll('#expSeg button').forEach(btn => {
@@ -3979,43 +3979,65 @@
         });
       });
 
-      // 2D Ground Truth Pane Toggle
-      this.btnToggle2D.addEventListener('click', () => {
-        this.pane2D.classList.toggle('open');
-        this.btnToggle2D.classList.toggle('on', this.pane2D.classList.contains('open'));
-        this.render2D();
-      });
-      document.getElementById('btnClose2D').addEventListener('click', () => {
-        this.pane2D.classList.remove('open');
-        this.btnToggle2D.classList.remove('on');
-      });
+      // 2D Ground Truth Pane Toggle (Safely guarded)
+      if (this.btnToggle2D) {
+        this.btnToggle2D.addEventListener('click', () => {
+          if (this.pane2D) {
+            this.pane2D.classList.toggle('open');
+            this.btnToggle2D.classList.toggle('on', this.pane2D.classList.contains('open'));
+            this.render2D();
+          }
+        });
+      }
+      const btnClose2D = document.getElementById('btnClose2D');
+      if (btnClose2D) {
+        btnClose2D.addEventListener('click', () => {
+          if (this.pane2D) this.pane2D.classList.remove('open');
+          if (this.btnToggle2D) this.btnToggle2D.classList.remove('on');
+        });
+      }
 
-      // Slide Presentation Modal
-      this.btnTour.addEventListener('click', () => {
-        this.sheetOverlay.classList.add('open');
-        this.showSlide(0);
-      });
-      document.getElementById('btnCloseSheet').addEventListener('click', () => {
-        this.sheetOverlay.classList.remove('open');
-      });
-      document.getElementById('btnSheetNext').addEventListener('click', () => {
-        if (this.sheetIndex < this.sheetSlides.length - 1) this.showSlide(this.sheetIndex + 1);
-      });
-      document.getElementById('btnSheetPrev').addEventListener('click', () => {
-        if (this.sheetIndex > 0) this.showSlide(this.sheetIndex - 1);
-      });
-      this.sheetDots.forEach((dot, idx) => {
-        dot.addEventListener('click', () => this.showSlide(idx));
-      });
+      // Slide Presentation Modal (Safely guarded)
+      if (this.btnTour) {
+        this.btnTour.addEventListener('click', () => {
+          if (this.sheetOverlay) this.sheetOverlay.classList.add('open');
+          this.showSlide(0);
+        });
+      }
+      const btnCloseSheet = document.getElementById('btnCloseSheet');
+      if (btnCloseSheet) {
+        btnCloseSheet.addEventListener('click', () => {
+          if (this.sheetOverlay) this.sheetOverlay.classList.remove('open');
+        });
+      }
+      const btnSheetNext = document.getElementById('btnSheetNext');
+      if (btnSheetNext) {
+        btnSheetNext.addEventListener('click', () => {
+          if (this.sheetIndex < this.sheetSlides.length - 1) this.showSlide(this.sheetIndex + 1);
+        });
+      }
+      const btnSheetPrev = document.getElementById('btnSheetPrev');
+      if (btnSheetPrev) {
+        btnSheetPrev.addEventListener('click', () => {
+          if (this.sheetIndex > 0) this.showSlide(this.sheetIndex - 1);
+        });
+      }
+      if (this.sheetDots && this.sheetDots.forEach) {
+        this.sheetDots.forEach((dot, idx) => {
+          dot.addEventListener('click', () => this.showSlide(idx));
+        });
+      }
 
-      // Voice Audio Speech Synthesis
-      this.btnVoice.addEventListener('click', () => {
-        this.voiceEnabled = !this.voiceEnabled;
-        this.btnVoice.classList.toggle('on', this.voiceEnabled);
-        if (this.voiceEnabled) {
-          this.speak("Suara narasi Awan diaktifkan.");
-        }
-      });
+      // Voice Audio Speech Synthesis (Safely guarded)
+      if (this.btnVoice) {
+        this.btnVoice.addEventListener('click', () => {
+          this.voiceEnabled = !this.voiceEnabled;
+          this.btnVoice.classList.toggle('on', this.voiceEnabled);
+          if (this.voiceEnabled) {
+            this.speak("Suara narasi Awan diaktifkan.");
+          }
+        });
+      }
 
       // Fantasy Ambient Music (Web Audio API)
       if (this.btnMusic) {
@@ -4079,27 +4101,34 @@
       if (btnOpenPOV) btnOpenPOV.addEventListener('click', () => this.world.toggleCameraMode());
       if (btnClosePOV) btnClosePOV.addEventListener('click', () => this.world.toggleCameraMode('orbit'));
 
-      // Fullscreen
-      document.getElementById('btnFullscreen').addEventListener('click', () => {
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen().catch(() => { });
-        } else {
-          document.exitFullscreen().catch(() => { });
-        }
-      });
+      // Fullscreen (Safely guarded)
+      const btnFullscreen = document.getElementById('btnFullscreen');
+      if (btnFullscreen) {
+        btnFullscreen.addEventListener('click', () => {
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => { });
+          } else {
+            document.exitFullscreen().catch(() => { });
+          }
+        });
+      }
 
-      // Narrator toggles
-      this.btnModeNarr.addEventListener('click', () => {
-        this.narrMode = (this.narrMode === 'story') ? 'tech' : 'story';
-        this.btnModeNarr.textContent = `Mode: ${this.narrMode === 'story' ? 'Cerita' : 'Teknis'} 🔄`;
-        this.say(this.narrMode === 'story'
-          ? "Beralih ke Mode Cerita: Memvisualisasikan Kocok dan Pip dalam petualangan awan!"
-          : "Beralih ke Mode Teknis: Menampilkan formulasi matematis dan metrik evaluasi.");
-      });
+      // Narrator toggles (Cerita <-> Penjelasan, safely guarded)
+      if (this.btnModeNarr) {
+        this.btnModeNarr.addEventListener('click', () => {
+          this.narrMode = (this.narrMode === 'story') ? 'tech' : 'story';
+          this.btnModeNarr.textContent = `Mode: ${this.narrMode === 'story' ? 'Cerita' : 'Penjelasan'} 🔄`;
+          this.say(this.narrMode === 'story'
+            ? "📖 Beralih ke Mode Cerita: Menyaksikan Magma-Kocorock dan Aqua-Pipimon dalam petualangan optimasi awan!"
+            : "🔬 Beralih ke Mode Penjelasan: Menampilkan formulasi matematis, metrik evaluasi Makespan, dan rincian parameter algoritma.");
+        });
+      }
 
-      this.btnAltAnalogy.addEventListener('click', () => {
-        this.say("💡 Analogi Alternatif: Seperti menyeimbangkan muatan kapal kargo antar pelabuhan. Shaking membongkar peti kemas yang menumpuk, sedangkan chemotaxis memindai dermaga paling efisien!");
-      });
+      if (this.btnAltAnalogy) {
+        this.btnAltAnalogy.addEventListener('click', () => {
+          this.say("💡 Analogi Alternatif: Seperti menyeimbangkan muatan kapal kargo antar pelabuhan. Shaking membongkar peti kemas yang menumpuk, sedangkan chemotaxis memindai dermaga paling efisien!");
+        });
+      }
 
       // Benchmark button inside slide
       const btnBench = document.getElementById('btnRunBenchmark');
@@ -4497,23 +4526,28 @@
     }
 
     say(text) {
-      this.narrTextEl.innerHTML = text;
-      if (this.voiceEnabled) {
+      if (this.narrTextEl) this.narrTextEl.innerHTML = text;
+      // Automatically speak when user has entered or voice is enabled
+      if (this.voiceEnabled || this.hasEnteredAbyssal) {
         this.speak(text.replace(/<[^>]*>?/gm, ''));
       }
     }
 
     speak(text) {
       if (!('speechSynthesis' in window)) return;
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = 'id-ID';
-      u.pitch = 1.55; // Suara anak kecil yang ceria & energik
-      u.rate = 1.12;
-      const voices = window.speechSynthesis.getVoices();
-      const naturalVoice = voices.find(v => v.lang.startsWith('id') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Ardi')));
-      if (naturalVoice) u.voice = naturalVoice;
-      window.speechSynthesis.speak(u);
+      try {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'id-ID';
+        u.pitch = 1.15;
+        u.rate = 1.08;
+        const voices = window.speechSynthesis.getVoices();
+        const naturalVoice = voices.find(v => v.lang.startsWith('id') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Ardi') || v.name.includes('Indonesian') || v.name.includes('Gadis')));
+        if (naturalVoice) u.voice = naturalVoice;
+        window.speechSynthesis.speak(u);
+      } catch (e) {
+        console.warn('SpeechSynthesis error:', e);
+      }
     }
 
     startStoryTour() {
@@ -5289,12 +5323,15 @@
     enterAbyssalFromGate() {
       if (this.hasEnteredAbyssal) return;
       this.hasEnteredAbyssal = true;
+      this.voiceEnabled = true;
 
       // 1. Play Lava infernal Web Audio soundtrack (ducked for speech clarity)
       if (this.soundtrack) {
         try {
           this.soundtrack.start();
-          this.soundtrack.duck();
+          if (typeof this.soundtrack.duck === 'function') {
+            this.soundtrack.duck();
+          }
         } catch (e) {
           console.warn('Soundtrack start failed:', e);
         }
@@ -5565,19 +5602,24 @@
           }
         };
 
-        aud.onerror = () => {
-          console.warn("Could not load audio file:", part.audio, "proceeding to next part...");
+        aud.onerror = (e) => {
+          console.warn("Could not load audio file:", part.audio, e, "using TTS fallback...");
+          if (this.speak) this.speak(part.text.replace(/\[.*?\]/g, ''));
           setTimeout(() => {
             if (!isFinished) playPart(idx + 1);
-          }, 7000);
+          }, 6500);
         };
 
-        aud.play().catch(err => {
-          console.warn("Autoplay audio blocked or error:", err);
-          setTimeout(() => {
-            if (!isFinished) playPart(idx + 1);
-          }, 7000);
-        });
+        const playPromise = aud.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(err => {
+            console.warn("Autoplay audio blocked or error:", err, "using TTS fallback...");
+            if (this.speak) this.speak(part.text.replace(/\[.*?\]/g, ''));
+            setTimeout(() => {
+              if (!isFinished) playPart(idx + 1);
+            }, 6500);
+          });
+        }
       };
 
       playPart(0);
