@@ -2304,6 +2304,7 @@ reset() {
       // Positioned on the Right of the Hybrid Core on the Dais!
       leaderPip.position.set(3.8, 2.0, -28.5);
       leaderPip.rotation.y = -0.38;
+      this.leaderPip = leaderPip;
       this.pips.push(leaderPip);
       this.proceduralGroup.add(leaderPip);
 
@@ -3369,6 +3370,52 @@ reset() {
       drawLine(this.vnsData, '#d97706'); // Ember Kocok
       drawLine(this.bfoData, '#0d9488'); // Jade Pip
     }
+
+    // ==========================================
+    // NPC INTERACTION & MOVEMENT TOWARD POV
+    // ==========================================
+    npcApproachPlayer(onComplete) {
+      const pip = this.leaderPip || (this.pips && this.pips[0]);
+      const kocok = this.kocok;
+      if (!pip || !kocok) {
+        if (onComplete) onComplete();
+        return;
+      }
+
+      // Stage 1: Jump halfway down the hallway toward entrance
+      this.jumpCharacter(pip, new THREE.Vector3(2.0, 0.4, -10.0), 3.2, 520, () => {
+        // Stage 2: Leap right in front of player POV camera (at z = 10)
+        this.jumpCharacter(pip, new THREE.Vector3(0.9, 0.2, 5.8), 2.8, 480, () => {
+          pip.rotation.y = Math.PI; // Face the player
+          this.showBubble('pipimon', "Pipi-pipi! Halo penjelajah! Selamat datang di markas kami!", 4500);
+          if (onComplete) onComplete();
+        });
+      });
+
+      this.jumpCharacter(kocok, new THREE.Vector3(-2.2, 0.3, -10.0), 3.0, 560, () => {
+        this.jumpCharacter(kocok, new THREE.Vector3(-1.6, 0.2, 5.2), 2.6, 520, () => {
+          kocok.rotation.y = Math.PI + 0.18; // Face the player
+          this.showBubble('kocorock', "Salam hangat dari Palung Abyssal! Mari kita pelajari Cloud Scheduling!", 4500);
+        });
+      });
+    }
+
+    resetNpcPosition(onComplete) {
+      const pip = this.leaderPip || (this.pips && this.pips[0]);
+      const kocok = this.kocok;
+      if (pip) {
+        this.jumpCharacter(pip, new THREE.Vector3(3.8, 2.0, -28.5), 3.0, 600, () => {
+          pip.rotation.y = -0.38;
+          if (onComplete) onComplete();
+        });
+      }
+      if (kocok) {
+        this.jumpCharacter(kocok, new THREE.Vector3(-3.8, 2.0, -28.5), 3.2, 600, () => {
+          kocok.rotation.y = 0.38;
+        });
+      }
+    }
+
   }
 
   // ==========================================
@@ -3753,6 +3800,8 @@ reset() {
       this.initEvents();
       this.initGameMode();
       this.syncHUD();
+      this.initAbyssalIntro();
+      this.initTheaterClassroom();
     }
 
     initDOM() {
@@ -4255,6 +4304,30 @@ reset() {
       window.addEventListener('keydown', (e) => {
         // If typing inside an input or textarea, don't hijack keys
         if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+
+        // Key T toggles Holographic Cinema Theater
+        if (e.key.toLowerCase() === 't') {
+          e.preventDefault();
+          this.toggleTheaterClassroom();
+          return;
+        }
+
+        // When Theater is open, handle slide navigation & close
+        if (this.isTheaterOpen) {
+          if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            this.nextTheaterSlide();
+            return;
+          } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            this.prevTheaterSlide();
+            return;
+          } else if (e.key === 'Escape') {
+            e.preventDefault();
+            this.closeTheaterClassroom();
+            return;
+          }
+        }
 
         // Key V toggles First-Person POV mode vs Orbit mode cleanly from anywhere!
         if (e.key.toLowerCase() === 'v') {
@@ -5203,6 +5276,615 @@ reset() {
       this.renderGameBoard();
       this.updateGameMetrics();
     }
+
+    // ==============================================================
+    // ABYSSAL INTRO GATE & NPC WALKTHROUGH INVITATION
+    // ==============================================================
+    initAbyssalIntro() {
+      const gate = document.getElementById('abyssal-welcome-gate');
+      const btnEnter = document.getElementById('btnEnterAbyssal');
+      const modalTour = document.getElementById('tour-invitation-modal');
+      const btnAccept = document.getElementById('btnAcceptTour');
+      const btnDecline = document.getElementById('btnDeclineTour');
+
+      if (btnEnter) {
+        btnEnter.addEventListener('click', () => {
+          // 1. Play Lava infernal Web Audio soundtrack
+          if (this.soundtrack) {
+            this.soundtrack.start();
+          }
+
+          // 2. Speak/Narrate prologue in ElevenLabs format
+          const introSpeech = "[whispering] Kedalaman sebelas ribu meter di bawah laut. [mysterious] Selamat datang di markas Abyssal Grid Three-D!";
+          this.speakElevenlabsText(introSpeech, 'narrator');
+
+          // 3. Smoothly fade out welcome gate
+          if (gate) {
+            gate.style.opacity = '0';
+            gate.style.pointerEvents = 'none';
+            setTimeout(() => {
+              gate.style.display = 'none';
+            }, 800);
+          }
+
+          // 4. Character walks/hops forward to player POV
+          if (this.world && typeof this.world.npcApproachPlayer === 'function') {
+            setTimeout(() => {
+              this.world.npcApproachPlayer(() => {
+                this.showTourInvitation();
+              });
+            }, 500);
+          } else {
+            this.showTourInvitation();
+          }
+        });
+      }
+
+      if (btnAccept) {
+        btnAccept.addEventListener('click', () => {
+          if (modalTour) modalTour.style.display = 'none';
+          this.startCinematicCutscene();
+        });
+      }
+
+      if (btnDecline) {
+        btnDecline.addEventListener('click', () => {
+          if (modalTour) modalTour.style.display = 'none';
+          if (this.world && typeof this.world.resetNpcPosition === 'function') {
+            this.world.resetNpcPosition();
+          }
+          this.say("🚶 Silakan jelajahi kastil menggunakan WASD! Tekan tombol [🏛️ Teater] di pojok kanan atas atau tombol [T] kapan saja untuk membuka Bioskop.");
+        });
+      }
+    }
+
+    showTourInvitation() {
+      const modalTour = document.getElementById('tour-invitation-modal');
+      if (modalTour) {
+        modalTour.style.display = 'block';
+        modalTour.style.opacity = '0';
+        modalTour.style.transform = 'translate(-50%, -46%) scale(0.94)';
+        modalTour.style.transition = 'opacity 0.4s ease, transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28)';
+        requestAnimationFrame(() => {
+          modalTour.style.opacity = '1';
+          modalTour.style.transform = 'translate(-50%, -50%) scale(1)';
+        });
+      }
+
+      const inviteText = "[cheerful] Pipi-pipi! Selamat datang di markas Abyssal Grid Three-D! Maukah kamu ikut tur pembelajaran eksklusif bersama kami ke Ruang Teater Holografik?";
+      this.speakElevenlabsText(inviteText, 'pipimon');
+    }
+
+    startCinematicCutscene() {
+      const cutscene = document.getElementById('cutscene-overlay');
+      if (cutscene) {
+        cutscene.style.display = 'flex';
+        cutscene.style.opacity = '1';
+
+        // Play deep cinematic warp bass sweep if AudioContext exists
+        if (this.soundtrack && this.soundtrack.ctx) {
+          try {
+            const ctx = this.soundtrack.ctx;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(65, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(260, ctx.currentTime + 1.2);
+            gain.gain.setValueAtTime(0.25, ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 1.4);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 1.5);
+          } catch (e) {}
+        }
+
+        setTimeout(() => {
+          cutscene.style.opacity = '0';
+          setTimeout(() => {
+            cutscene.style.display = 'none';
+            this.openTheaterClassroom();
+          }, 600);
+        }, 1600);
+      } else {
+        this.openTheaterClassroom();
+      }
+    }
+
+    // ==============================================================
+    // HOLOGRAPHIC CINEMA THEATER & BIG SCREEN CLASSROOM
+    // ==============================================================
+    initTheaterClassroom() {
+      this.isTheaterOpen = false;
+      this.theaterSlideIndex = 0;
+      this.theaterVoiceEnabled = true;
+
+      const btnOpen = document.getElementById('btnOpenTheater');
+      const btnClose = document.getElementById('btnCloseTheater');
+      const btnNext = document.getElementById('btnTheaterNext');
+      const btnPrev = document.getElementById('btnTheaterPrev');
+      const btnVoice = document.getElementById('btnTheaterVoice');
+
+      if (btnOpen) {
+        btnOpen.addEventListener('click', () => this.openTheaterClassroom());
+      }
+      if (btnClose) {
+        btnClose.addEventListener('click', () => this.closeTheaterClassroom());
+      }
+      if (btnNext) {
+        btnNext.addEventListener('click', () => this.nextTheaterSlide());
+      }
+      if (btnPrev) {
+        btnPrev.addEventListener('click', () => this.prevTheaterSlide());
+      }
+      if (btnVoice) {
+        btnVoice.addEventListener('click', () => {
+          this.theaterVoiceEnabled = !this.theaterVoiceEnabled;
+          btnVoice.innerHTML = this.theaterVoiceEnabled ? '<span>🔊 Suara Aktif</span>' : '<span>🔇 Suara Mati</span>';
+          if (this.theaterVoiceEnabled) {
+            this.speakCurrentTheaterSlide();
+          } else {
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+          }
+        });
+      }
+
+      this.initTheaterSlidesData();
+    }
+
+    toggleTheaterClassroom() {
+      if (this.isTheaterOpen) {
+        this.closeTheaterClassroom();
+      } else {
+        this.openTheaterClassroom();
+      }
+    }
+
+    openTheaterClassroom() {
+      this.isTheaterOpen = true;
+      const overlay = document.getElementById('theater-overlay');
+      if (overlay) {
+        overlay.style.display = 'flex';
+      }
+      this.showTheaterSlide(this.theaterSlideIndex);
+      this.say("🏛️ Memasuki Ruang Teater Holografik Abyssal Grid 3D.");
+    }
+
+    closeTheaterClassroom() {
+      this.isTheaterOpen = false;
+      const overlay = document.getElementById('theater-overlay');
+      if (overlay) {
+        overlay.style.display = 'none';
+      }
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      this.say("🚶 Kembali ke area penjelajahan kastil.");
+    }
+
+    nextTheaterSlide() {
+      if (this.theaterSlideIndex < this.theaterSlides.length - 1) {
+        this.showTheaterSlide(this.theaterSlideIndex + 1);
+      }
+    }
+
+    prevTheaterSlide() {
+      if (this.theaterSlideIndex > 0) {
+        this.showTheaterSlide(this.theaterSlideIndex - 1);
+      }
+    }
+
+    showTheaterSlide(idx) {
+      if (!this.theaterSlides || idx < 0 || idx >= this.theaterSlides.length) return;
+      this.theaterSlideIndex = idx;
+      const s = this.theaterSlides[idx];
+
+      // Update Header & Indicator
+      const titleEl = document.getElementById('theater-slide-title');
+      const indEl = document.getElementById('theater-slide-indicator');
+      const contentEl = document.getElementById('theater-screen-content');
+      const speakerEl = document.getElementById('theater-speaker-pill');
+      const subtitleEl = document.getElementById('theater-subtitle-box');
+
+      if (titleEl) titleEl.textContent = s.title;
+      if (indEl) indEl.textContent = `${idx + 1} / ${this.theaterSlides.length}`;
+      if (contentEl) {
+        contentEl.innerHTML = s.contentHtml;
+        // If slide has interactive handlers, attach them
+        if (typeof s.onMount === 'function') {
+          s.onMount(this);
+        }
+      }
+
+      // Update Speaker Badge
+      if (speakerEl) {
+        speakerEl.textContent = s.speakerName;
+        if (s.speakerType === 'kocorock') {
+          speakerEl.style.background = 'linear-gradient(135deg, #ea580c 0%, #f59e0b 100%)';
+          speakerEl.style.color = '#ffffff';
+        } else if (s.speakerType === 'pipimon') {
+          speakerEl.style.background = 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)';
+          speakerEl.style.color = '#ffffff';
+        } else {
+          speakerEl.style.background = 'linear-gradient(135deg, #f59e0b 0%, #38bdf8 100%)';
+          speakerEl.style.color = '#ffffff';
+        }
+      }
+
+      // Update ElevenLabs format Subtitle
+      if (subtitleEl) {
+        subtitleEl.innerHTML = s.elevenlabsScript;
+      }
+
+      if (this.theaterVoiceEnabled) {
+        this.speakCurrentTheaterSlide();
+      }
+    }
+
+    speakCurrentTheaterSlide() {
+      if (!this.theaterSlides || !this.theaterVoiceEnabled) return;
+      const s = this.theaterSlides[this.theaterSlideIndex];
+      if (!s) return;
+      this.speakElevenlabsText(s.spokenText || s.elevenlabsScript, s.speakerType);
+    }
+
+    speakElevenlabsText(textWithTags, speakerType = 'narrator') {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+
+      // Strip [tag] intonation markers for browser Web Speech API
+      const cleanText = textWithTags.replace(/\[[^\]]+\]/g, '').trim();
+      if (!cleanText) return;
+
+      const utter = new SpeechSynthesisUtterance(cleanText);
+      utter.lang = 'id-ID';
+
+      if (speakerType === 'kocorock') {
+        utter.pitch = 0.72; // Deep, booming
+        utter.rate = 0.95;
+      } else if (speakerType === 'pipimon') {
+        utter.pitch = 1.38; // Cheerful, high-pitched kawaii
+        utter.rate = 1.05;
+      } else {
+        utter.pitch = 0.92;
+        utter.rate = 0.98;
+      }
+
+      window.speechSynthesis.speak(utter);
+    }
+
+    // ==============================================================
+    // THEATER EDUCATIONAL SLIDES DATA
+    // ==============================================================
+    initTheaterSlidesData() {
+      this.theaterSlides = [
+        {
+          title: "Bab 1: Konsep Dasar Cloud Task Scheduling & Tantangan Heterogenitas",
+          speakerName: "🎙️ Dosen Aqua-Pipimon & Magma-Kocorock",
+          speakerType: "both",
+          elevenlabsScript: "[whispering] Bab Satu. [cheerful] Di era komputasi awan modern, ribuan tugas masuk bersamaan ke pusat data! [booming] Masalahnya, mesin virtual kita heterogen alias berbeda spesifikasi MIPS. Jika salah alokasi, bottleneck parah akan meledak!",
+          spokenText: "Di era komputasi awan modern, ribuan tugas masuk bersamaan ke pusat data. Masalahnya, mesin virtual kita heterogen alias berbeda spesifikasi MIPS. Jika salah alokasi, bottleneck parah akan meledak!",
+          contentHtml: `
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:center;">
+              <div>
+                <h3 style="margin-top:0; color:#38bdf8; font-size:17px;">🌐 Mengapa Cloud Task Scheduling Sangat Kritis?</h3>
+                <p style="font-size:12.5px; line-height:1.6; color:#cbd5e1;">
+                  Dalam komputasi awan (Cloud Computing), tugas-tugas komputasi datang dengan ukuran panjang instruksi bervariasi (<i>Million Instructions / MI</i>). Tugas harus dipetakan ke <b>Virtual Machine (VM)</b> yang memiliki kapasitas komputasi berbeda (<i>MIPS</i>).
+                </p>
+                <div style="background:rgba(2,132,199,0.15); border-left:3px solid #38bdf8; padding:10px 12px; border-radius:8px; margin:10px 0; font-size:12px;">
+                  <b>⚡ Waktu Eksekusi (Execution Time):</b><br>
+                  <code style="color:#7dd3fc; font-weight:700;">ET(i, j) = Length(Task i) / MIPS(VM j)</code><br>
+                  Semakin kecil MIPS mesin, semakin lama waktu yang dibutuhkan untuk menyelesaikan tugas yang sama.
+                </div>
+              </div>
+              <div style="background:rgba(24,24,27,0.8); border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:14px;">
+                <div style="font-size:11px; font-weight:800; color:#f59e0b; margin-bottom:8px; text-transform:uppercase;">Arsitektur Cloud Abyssal Grid (10 Tugas &rarr; 3 VM Heterogen)</div>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                  <div style="background:rgba(234,88,12,0.2); border:1px solid #ea580c; border-radius:8px; padding:8px; font-size:11.5px; display:flex; justify-content:space-between;">
+                    <span>🔥 <b>VM 1 (High-Performance Node):</b></span>
+                    <span style="color:#fbbf24; font-weight:700;">3.500 MIPS</span>
+                  </div>
+                  <div style="background:rgba(56,189,248,0.2); border:1px solid #38bdf8; border-radius:8px; padding:8px; font-size:11.5px; display:flex; justify-content:space-between;">
+                    <span>💧 <b>VM 2 (Mid-Range Node):</b></span>
+                    <span style="color:#38bdf8; font-weight:700;">2.000 MIPS</span>
+                  </div>
+                  <div style="background:rgba(16,185,129,0.2); border:1px solid #10b981; border-radius:8px; padding:8px; font-size:11.5px; display:flex; justify-content:space-between;">
+                    <span>🌿 <b>VM 3 (Eco-Green Node):</b></span>
+                    <span style="color:#34d399; font-weight:700;">1.000 MIPS</span>
+                  </div>
+                </div>
+                <div style="margin-top:10px; font-size:11px; color:#94a3b8; text-align:center;">
+                  Tugas kita adalah mencari pemetaan terbaik agar waktu penyelesaian total sekecil mungkin!
+                </div>
+              </div>
+            </div>
+          `
+        },
+        {
+          title: "Bab 2: Formulasi Matematis: Makespan, DI & Batas Bawah Ideal",
+          speakerName: "🎙️ Dosen Magma-Kocorock (VNS Master)",
+          speakerType: "kocorock",
+          elevenlabsScript: "[booming] [focused] Perhatikan rumus emas di layar! Makespan adalah waktu kerja VM paling lambat di seluruh data center! Garis laser biru adalah Batas Bawah Teoretis jika beban terdistribusi seratus persen sempurna!",
+          spokenText: "Perhatikan rumus emas di layar! Makespan adalah waktu kerja VM paling lambat di seluruh data center. Garis laser biru adalah Batas Bawah Teoretis jika beban terdistribusi seratus persen sempurna!",
+          contentHtml: `
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+              <div style="background:rgba(24,24,27,0.7); border:1px solid rgba(245,158,11,0.3); border-radius:12px; padding:14px;">
+                <h4 style="margin:0 0 8px; color:#f59e0b; font-size:14px;">1. Makespan (C_max) - Sasaran Utama Optimasi</h4>
+                <p style="font-size:12px; color:#cbd5e1; margin-bottom:8px;">
+                  Makespan didefinisikan sebagai waktu selesai dari mesin virtual yang bekerja paling lama:
+                </p>
+                <div style="background:#09090b; padding:10px; border-radius:8px; text-align:center; font-family:monospace; font-size:14px; color:#fde047;">
+                  Makespan = max(Load(VM_1), Load(VM_2), ..., Load(VM_m))
+                </div>
+                <p style="font-size:11.5px; color:#94a3b8; margin-top:8px;">
+                  Jika satu VM kelebihan beban hingga 200 detik meskipun dua VM lainnya selesai dalam 20 detik, Makespan keseluruhan tetap bernilai <b>200 detik</b>!
+                </p>
+              </div>
+
+              <div style="background:rgba(24,24,27,0.7); border:1px solid rgba(56,189,248,0.3); border-radius:12px; padding:14px;">
+                <h4 style="margin:0 0 8px; color:#38bdf8; font-size:14px;">2. Degree of Imbalance (DI) &amp; Batas Teoretis</h4>
+                <p style="font-size:12px; color:#cbd5e1; margin-bottom:8px;">
+                  Keseimbangan beban antar mesin diukur menggunakan derajat ketidakseimbangan:
+                </p>
+                <div style="background:#09090b; padding:10px; border-radius:8px; text-align:center; font-family:monospace; font-size:13px; color:#67e8f9;">
+                  DI = (Load_max - Load_min) / Load_avg
+                </div>
+                <div style="margin-top:10px; background:rgba(245,158,11,0.12); border-left:3px solid #f59e0b; padding:8px 10px; font-size:11.5px; color:#fef08a;">
+                  <b>Theoretical Lower Bound (LB):</b><br>
+                  <code>LB = Total_MI / Total_MIPS</code><br>
+                  Batas bawah absolut yang mustahil ditembus oleh algoritma apa pun.
+                </div>
+              </div>
+            </div>
+          `
+        },
+        {
+          title: "Bab 3: Algoritma VNS - Shaking & Eksploitasi Lokal Kocorock",
+          speakerName: "🎙️ Dosen Magma-Kocorock (VNS Master)",
+          speakerType: "kocorock",
+          elevenlabsScript: "[booming] [fierce] Sekarang keahlianku! Variable Neighborhood Search! Saat terjadi antrean bottleneck, aku menghantamkan Shaking radius k bertingkat untuk memindahkan tugas ke mesin yang lebih longgar!",
+          spokenText: "Sekarang keahlianku! Variable Neighborhood Search! Saat terjadi antrean bottleneck, aku menghantamkan Shaking radius k bertingkat untuk memindahkan tugas ke mesin yang lebih longgar!",
+          contentHtml: `
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+              <div>
+                <h3 style="margin-top:0; color:#ea580c; font-size:16px;">🔨 Mekanisme Shaking Bertingkat (k = 1..3)</h3>
+                <p style="font-size:12.5px; line-height:1.6; color:#cbd5e1;">
+                  VNS beroperasi dengan menjelajahi struktur lingkungan tetangga (<i>Neighborhood Structures</i>) secara teratur untuk melepaskan solusi dari jebakan lokal:
+                </p>
+                <div style="display:flex; flex-direction:column; gap:8px; margin:12px 0;">
+                  <div style="background:rgba(234,88,12,0.15); border-left:3px solid #ea580c; padding:8px 10px; border-radius:6px; font-size:11.5px;">
+                    <b>k = 1 (Single Task Migration):</b> Pindahkan 1 tugas dari VM dengan beban tertinggi ke VM lain secara acak.
+                  </div>
+                  <div style="background:rgba(245,158,11,0.15); border-left:3px solid #f59e0b; padding:8px 10px; border-radius:6px; font-size:11.5px;">
+                    <b>k = 2 (Pairwise Task Swap):</b> Tukar dua tugas antara dua VM yang berbeda.
+                  </div>
+                  <div style="background:rgba(239,68,68,0.15); border-left:3px solid #ef4444; padding:8px 10px; border-radius:6px; font-size:11.5px;">
+                    <b>k = 3 (Multi-Task Reshuffle):</b> Kocok alokasi tiga tugas sekaligus untuk melompat lebih jauh.
+                  </div>
+                </div>
+              </div>
+              <div style="background:rgba(24,24,27,0.8); border:1px solid rgba(245,158,11,0.3); border-radius:12px; padding:14px;">
+                <h4 style="margin:0 0 8px; color:#f59e0b; font-size:13.5px;">Karakteristik &amp; Kelemahan VNS Mandiri</h4>
+                <div style="font-size:12px; color:#e2e8f0; line-height:1.6;">
+                  <span style="color:#10b981; font-weight:700;">✅ Keunggulan:</span> Sangat cepat berkonvergensi karena menggunakan <i>First-Improvement Descent</i>.<br>
+                  <span style="color:#ef4444; font-weight:700;">❌ Kelemahan:</span> Memiliki probabilitas tinggi terjebak di <i>Local Optimum</i> jika inisiasi awalnya buruk (sering macet di Makespan ~115 detik).
+                </div>
+              </div>
+            </div>
+          `
+        },
+        {
+          title: "Bab 4: Algoritma BFO - Kemotaksis & Eksplorasi Global Pipimon",
+          speakerName: "🎙️ Dosen Aqua-Pipimon (BFO Leader)",
+          speakerType: "pipimon",
+          elevenlabsScript: "[cheerful] [giggling] Dan ini kehebatan koloni air kami! Bacterial Foraging Optimization! Kami berenang memindai ruang pencarian dengan Kemotaksis Tumble and Swim menuju Makespan terendah!",
+          spokenText: "Dan ini kehebatan koloni air kami! Bacterial Foraging Optimization! Kami berenang memindai ruang pencarian dengan Kemotaksis Tumble and Swim menuju Makespan terendah!",
+          contentHtml: `
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+              <div>
+                <h3 style="margin-top:0; color:#38bdf8; font-size:16px;">🧪 4 Fase Siklus Hidup Bio-Swarm BFO</h3>
+                <div style="display:flex; flex-direction:column; gap:8px; font-size:11.5px;">
+                  <div style="background:rgba(2,132,199,0.18); border-left:3px solid #38bdf8; padding:8px 10px; border-radius:6px;">
+                    <b>1. Kemotaksis (Chemotaxis):</b> Bakteri bergantian antara <i>Tumble</i> (memilih arah acak) dan <i>Swim</i> (berenang maju jika Makespan membaik).
+                  </div>
+                  <div style="background:rgba(14,165,233,0.18); border-left:3px solid #0ea5e9; padding:8px 10px; border-radius:6px;">
+                    <b>2. Swarming:</b> Komunikasi antar-bakteri menggunakan fungsi atraktan agar koloni berkumpul di lembah nutrisi tinggi.
+                  </div>
+                  <div style="background:rgba(56,189,248,0.18); border-left:3px solid #7dd3fc; padding:8px 10px; border-radius:6px;">
+                    <b>3. Reproduksi (Reproduction):</b> 50% bakteri tersehat membelah diri menjadi dua klon, 50% bakteri terlemah mati.
+                  </div>
+                  <div style="background:rgba(99,102,241,0.18); border-left:3px solid #818cf8; padding:8px 10px; border-radius:6px;">
+                    <b>4. Eliminasi-Dispersi:</b> Eliminasi acak dengan probabilitas P_ed untuk menyebarkan bakteri ke titik baru dan mencegah konvergensi dini.
+                  </div>
+                </div>
+              </div>
+              <div style="background:rgba(24,24,27,0.8); border:1px solid rgba(56,189,248,0.3); border-radius:12px; padding:14px;">
+                <h4 style="margin:0 0 8px; color:#38bdf8; font-size:13.5px;">Karakteristik &amp; Kelemahan BFO Mandiri</h4>
+                <div style="font-size:12px; color:#e2e8f0; line-height:1.6;">
+                  <span style="color:#10b981; font-weight:700;">✅ Keunggulan:</span> Diversitas eksplorasi global sangat tinggi dan tidak mudah terjebak di optimum lokal.<br>
+                  <span style="color:#ef4444; font-weight:700;">❌ Kelemahan:</span> Lambat mencapai titik presisi tinggi di akhir iterasi karena langkah kemotaksis acak (Makespan ~118 detik).
+                </div>
+              </div>
+            </div>
+          `
+        },
+        {
+          title: "Bab 5: Reaktor Sintesis Hibrida Memetic BFO-VNS (1 + 1 > 2)",
+          speakerName: "🎙️ Kolaborasi Dosen Magma & Aqua",
+          speakerType: "both",
+          elevenlabsScript: "[dramatic] [epic] Dan inilah mahakarya penelitian kita! Reaktor Sintesis Hibrida Memetic BFO-VNS! [joyful] Kolaborasi eksplorasi global Pipimon dan eksploitasi lokal Kocorock memangkas Makespan hingga tiga puluh empat koma delapan persen!",
+          spokenText: "Dan inilah mahakarya penelitian kita! Reaktor Sintesis Hibrida Memetic BFO-VNS! Kolaborasi eksplorasi global Pipimon dan eksploitasi lokal Kocorock memangkas Makespan hingga tiga puluh empat koma delapan persen!",
+          contentHtml: `
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:center;">
+              <div>
+                <h3 style="margin-top:0; color:#fbbf24; font-size:16px;">⚛️ Mengapa Algoritma Hibrida Memetik Unggul?</h3>
+                <p style="font-size:12.5px; line-height:1.6; color:#cbd5e1;">
+                  Dalam literatur metaheuristik, <b>Algoritma Memetik (Memetic Algorithm)</b> menyatukan kekuatan pencarian global berbasis populasi (BFO) dengan teknik penyempurnaan lokal individual (VNS).
+                </p>
+                <div style="background:linear-gradient(135deg, rgba(234,88,12,0.2) 0%, rgba(2,132,199,0.2) 100%); border:1px solid rgba(251,191,36,0.4); border-radius:10px; padding:12px; font-size:12px;">
+                  <b>🚀 Sinergi Sempurna:</b><br>
+                  1. <b>BFO</b> bertindak sebagai pemindai global yang mendeteksi cekungan solusi potensial di seluruh ruang pencarian.<br>
+                  2. <b>VNS</b> melakukan intervensi lokal (Shaking k=1..3) pada individu bakteri terunggul untuk mengasah nilai Makespan hingga mendekati batas bawah teoretis!
+                </div>
+              </div>
+              <div style="background:rgba(24,24,27,0.85); border:1px solid rgba(251,191,36,0.3); border-radius:14px; padding:14px; text-align:center;">
+                <div style="font-size:12px; font-weight:800; color:#fbbf24; margin-bottom:8px;">HASIL KOMPARASI KINERJA (600 NFE)</div>
+                <div style="display:flex; justify-content:space-around; align-items:flex-end; height:130px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.15);">
+                  <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+                    <span style="font-size:11px; color:#ea580c; font-weight:700;">115.5s</span>
+                    <div style="width:40px; height:85px; background:#ea580c; border-radius:6px 6px 0 0;"></div>
+                    <span style="font-size:10px; color:#cbd5e1;">VNS Murni</span>
+                  </div>
+                  <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+                    <span style="font-size:11px; color:#38bdf8; font-weight:700;">118.7s</span>
+                    <div style="width:40px; height:88px; background:#38bdf8; border-radius:6px 6px 0 0;"></div>
+                    <span style="font-size:10px; color:#cbd5e1;">BFO Murni</span>
+                  </div>
+                  <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+                    <span style="font-size:11px; color:#fbbf24; font-weight:800;">88.4s</span>
+                    <div style="width:48px; height:58px; background:linear-gradient(to top, #ea580c, #38bdf8); border-radius:6px 6px 0 0; box-shadow:0 0 16px rgba(251,191,36,0.6);"></div>
+                    <span style="font-size:10px; color:#fef08a; font-weight:700;">Hybrid Memetic</span>
+                  </div>
+                </div>
+                <div style="margin-top:8px; font-size:11px; color:#86efac; font-weight:700;">
+                  ✨ Peningkatan Efisiensi: -34.8% Waktu Makespan!
+                </div>
+              </div>
+            </div>
+          `
+        },
+        {
+          title: "Bab 6: Mini-Game Interaktif - Cloud Dispatcher Challenge",
+          speakerName: "🎙️ Dosen Magma-Kocorock & Aqua-Pipimon",
+          speakerType: "both",
+          elevenlabsScript: "[playful] [excited] Nah, sekarang giliranmu menguji kemampuan logika! [challenging] Coba klik preset atau buka Cloud Dispatcher Challenge untuk menyeimbangkan beban 10 tugas ke 3 mesin virtual!",
+          spokenText: "Nah, sekarang giliranmu menguji kemampuan logika! Coba klik preset atau buka Cloud Dispatcher Challenge untuk menyeimbangkan beban 10 tugas ke 3 mesin virtual!",
+          contentHtml: `
+            <div style="text-align:center; padding:10px;">
+              <h3 style="margin-top:0; color:#f59e0b; font-size:18px;">🎮 Uji Logika: Cloud Dispatcher Challenge</h3>
+              <p style="font-size:12.5px; color:#cbd5e1; max-width:650px; margin:0 auto 16px;">
+                Coba bereksperimen dengan alokasi tugas! Lihat bagaimana distribusi beban memengaruhi nilai Makespan di bawah ini, atau buka mode simulasi interaktif penuh:
+              </p>
+              
+              <div style="display:flex; justify-content:center; gap:12px; margin-bottom:20px; flex-wrap:wrap;">
+                <button id="btnTheaterPresetAnti" style="padding:10px 18px; background:rgba(239,68,68,0.25); border:1.5px solid #ef4444; border-radius:12px; color:#fca5a5; font-size:12px; font-weight:700; cursor:pointer;">
+                  ⚠️ Uji Anti-Pola (Bottleneck VM 1)
+                </button>
+                <button id="btnTheaterPresetRand" style="padding:10px 18px; background:rgba(245,158,11,0.25); border:1.5px solid #f59e0b; border-radius:12px; color:#fde68a; font-size:12px; font-weight:700; cursor:pointer;">
+                  🎲 Uji Preset Acak (Random)
+                </button>
+                <button id="btnTheaterPresetOpt" style="padding:10px 18px; background:rgba(16,185,129,0.25); border:1.5px solid #10b981; border-radius:12px; color:#6ee7b7; font-size:12px; font-weight:700; cursor:pointer;">
+                  ✨ Uji Solusi Optimal Hybrid
+                </button>
+                <button id="btnTheaterOpenFullGame" style="padding:10px 22px; background:linear-gradient(135deg, #ea580c 0%, #38bdf8 100%); border:none; border-radius:12px; color:#ffffff; font-size:12px; font-weight:800; cursor:pointer; box-shadow:0 4px 16px rgba(234,88,12,0.4);">
+                  🚀 Buka Mini-Game Interaktif Lengkap [G]
+                </button>
+              </div>
+
+              <div id="theater-game-feedback" style="background:rgba(15,23,42,0.8); border:1px solid rgba(255,255,255,0.15); border-radius:14px; padding:14px; max-width:620px; margin:0 auto; font-size:12.5px; color:#e2e8f0; line-height:1.6;">
+                Pilih salah satu tombol di atas untuk melihat respon langsung dari Dosen Kocorock dan Pipimon!
+              </div>
+            </div>
+          `,
+          onMount: (app) => {
+            const bAnti = document.getElementById('btnTheaterPresetAnti');
+            const bRand = document.getElementById('btnTheaterPresetRand');
+            const bOpt = document.getElementById('btnTheaterPresetOpt');
+            const bFull = document.getElementById('btnTheaterOpenFullGame');
+            const feed = document.getElementById('theater-game-feedback');
+
+            if (bAnti) {
+              bAnti.onclick = () => {
+                app.applyGamePreset('anti');
+                if (feed) {
+                  feed.innerHTML = `<span style="color:#ef4444; font-weight:800;">⚠️ Peringatan Antrean Kritis:</span> Semua 10 tugas ditumpuk ke VM 1! Beban VM 1 mencapai puncak <b>Makespan ~185.0s</b> sementara VM 2 & 3 menganggur. Ini adalah anti-pola terburuk!`;
+                }
+              };
+            }
+            if (bRand) {
+              bRand.onclick = () => {
+                app.applyGamePreset('rand');
+                if (feed) {
+                  feed.innerHTML = `<span style="color:#f59e0b; font-weight:800;">🎲 Distribusi Acak:</span> Tugas disebar tanpa perhitungan kapasitas MIPS. Makespan berada di kisaran <b>125s - 140s</b> dengan derajat ketidakseimbangan tinggi.`;
+                }
+              };
+            }
+            if (bOpt) {
+              bOpt.onclick = () => {
+                app.applyGamePreset('opt');
+                if (feed) {
+                  feed.innerHTML = `<span style="color:#10b981; font-weight:800;">✨ Solusi Optimal Terpilih:</span> Beban terbagi seimbang sempurna dengan <b>Makespan ~88.4s</b> mendekati Batas Bawah Teoretis! Utilisasi CPU ketiga VM mencapai 92%.`;
+                }
+              };
+            }
+            if (bFull) {
+              bFull.onclick = () => {
+                app.openGameModal();
+              };
+            }
+          }
+        },
+        {
+          title: "Bab 7: Hasil Benchmark 30x Run & Kesimpulan Ilmiah",
+          speakerName: "🎙️ Kolaborasi Dosen Magma-Kocorock & Aqua-Pipimon",
+          speakerType: "both",
+          elevenlabsScript: "[authoritative] [proud] Sebagai kesimpulan akademik: pengujian ketat tiga puluh kali run independen membuktikan keunggulan mutlak Algoritma Hibrida Memetic BFO-VNS! [cheerful] Terima kasih sudah mengikuti tur edukasi di markas Abyssal Grid Three-D!",
+          spokenText: "Sebagai kesimpulan akademik: pengujian ketat tiga puluh kali run independen membuktikan keunggulan mutlak Algoritma Hibrida Memetic BFO-VNS! Terima kasih sudah mengikuti tur edukasi di markas Abyssal Grid Three-D!",
+          contentHtml: `
+            <div>
+              <h3 style="margin-top:0; color:#10b981; font-size:16px;">📊 Tabel Komparasi Statistik (30 Independent Runs @ 600 NFE)</h3>
+              <div style="overflow-x:auto;">
+                <table style="width:100%; border-collapse:collapse; font-size:12px; text-align:left; color:#cbd5e1; margin-bottom:14px;">
+                  <thead>
+                    <tr style="background:rgba(255,255,255,0.08); border-bottom:1px solid rgba(255,255,255,0.15);">
+                      <th style="padding:8px 10px; color:#ffffff;">Algoritma Pengujian</th>
+                      <th style="padding:8px 10px; color:#ffffff;">Makespan Rata-rata (s)</th>
+                      <th style="padding:8px 10px; color:#ffffff;">Standar Deviasi (Std)</th>
+                      <th style="padding:8px 10px; color:#ffffff;">Degree of Imbalance (DI)</th>
+                      <th style="padding:8px 10px; color:#ffffff;">CPU Utilization (%)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                      <td style="padding:8px 10px; font-weight:700; color:#ea580c;">VNS Murni (Kocorock)</td>
+                      <td style="padding:8px 10px;">115.52 ± 4.2</td>
+                      <td style="padding:8px 10px;">4.21</td>
+                      <td style="padding:8px 10px;">0.28</td>
+                      <td style="padding:8px 10px;">78.4%</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                      <td style="padding:8px 10px; font-weight:700; color:#38bdf8;">BFO Murni (Pipimon)</td>
+                      <td style="padding:8px 10px;">118.74 ± 5.8</td>
+                      <td style="padding:8px 10px;">5.84</td>
+                      <td style="padding:8px 10px;">0.32</td>
+                      <td style="padding:8px 10px;">74.2%</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.06); background:rgba(245,158,11,0.08);">
+                      <td style="padding:8px 10px; font-weight:700; color:#f59e0b;">Heuristic Seeded-BFO</td>
+                      <td style="padding:8px 10px;">96.80 ± 2.1</td>
+                      <td style="padding:8px 10px;">2.15</td>
+                      <td style="padding:8px 10px;">0.12</td>
+                      <td style="padding:8px 10px;">86.5%</td>
+                    </tr>
+                    <tr style="background:rgba(16,185,129,0.15); font-weight:800;">
+                      <td style="padding:8px 10px; color:#34d399;">🌟 Memetic BFO-VNS (Juara)</td>
+                      <td style="padding:8px 10px; color:#34d399;">88.42 ± 0.9</td>
+                      <td style="padding:8px 10px; color:#34d399;">0.92 (Sangat Konsisten)</td>
+                      <td style="padding:8px 10px; color:#34d399;">0.04 (Mendekati Nol)</td>
+                      <td style="padding:8px 10px; color:#34d399;">92.4% (Optimal)</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div style="background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.3); border-radius:10px; padding:12px; font-size:12px; color:#a7f3d0; line-height:1.5;">
+                🎓 <b>Kesimpulan Utama:</b> Hibridisasi metaheuristik memetik terbukti statistically significant (p &lt; 0.001) dalam memecahkan masalah NP-Hard Cloud Task Scheduling. Selamat! Kamu kini memahami seluk-beluk optimasi cloud scheduling dari dasar matematis hingga implementasi hibrida tingkat lanjut!
+              </div>
+            </div>
+          `
+        }
+      ];
+    }
+
   }
 
   // Launch on ready
