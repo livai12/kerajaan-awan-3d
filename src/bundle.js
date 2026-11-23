@@ -5816,7 +5816,76 @@ reset() {
       if (!this.theaterSlides || !this.theaterVoiceEnabled) return;
       const s = this.theaterSlides[this.theaterSlideIndex];
       if (!s) return;
-      this.speakElevenlabsText(s.spokenText || s.elevenlabsScript, s.speakerType);
+
+      // Stop any existing theater audio or speech
+      if (this.currentTheaterAudio) {
+        this.currentTheaterAudio.pause();
+        this.currentTheaterAudio = null;
+      }
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+
+      const speakerEl = document.getElementById('theater-speaker-pill');
+      const subtitleEl = document.getElementById('theater-subtitle-box');
+
+      // Check if this slide has real ElevenLabs audio parts
+      if (s.audioParts && s.audioParts.length > 0) {
+        const playPart = (i) => {
+          if (!this.isTheaterOpen || !this.theaterVoiceEnabled || i >= s.audioParts.length) return;
+          const p = s.audioParts[i];
+
+          // Update Speaker badge
+          if (speakerEl) {
+            speakerEl.textContent = p.speakerName;
+            if (p.speakerType === 'kocorock') {
+              speakerEl.style.background = 'linear-gradient(135deg, #ea580c 0%, #f59e0b 100%)';
+              speakerEl.style.color = '#ffffff';
+            } else if (p.speakerType === 'pipimon') {
+              speakerEl.style.background = 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)';
+              speakerEl.style.color = '#ffffff';
+            } else {
+              speakerEl.style.background = 'linear-gradient(135deg, #f59e0b 0%, #38bdf8 100%)';
+              speakerEl.style.color = '#ffffff';
+            }
+          }
+
+          // Update subtitle
+          if (subtitleEl) {
+            subtitleEl.innerHTML = p.elevenlabsScript;
+          }
+
+          this.say(`${p.speakerName}: ${p.spokenText || p.elevenlabsScript}`);
+
+          try {
+            const aud = new Audio(p.audio);
+            this.currentTheaterAudio = aud;
+
+            aud.onended = () => {
+              if (this.isTheaterOpen && this.theaterVoiceEnabled) {
+                setTimeout(() => playPart(i + 1), 400);
+              }
+            };
+
+            aud.onerror = () => {
+              console.warn("Could not load slide audio:", p.audio, "falling back to speech synthesis");
+              this.speakElevenlabsText(p.spokenText || p.elevenlabsScript, p.speakerType);
+            };
+
+            aud.play().catch(e => {
+              console.warn("Autoplay audio blocked or error:", e);
+              this.speakElevenlabsText(p.spokenText || p.elevenlabsScript, p.speakerType);
+            });
+          } catch (e) {
+            this.speakElevenlabsText(p.spokenText || p.elevenlabsScript, p.speakerType);
+          }
+        };
+
+        playPart(0);
+      } else {
+        // Fallback to speech synthesis if slide does not have audio files yet
+        this.speakElevenlabsText(s.spokenText || s.elevenlabsScript, s.speakerType);
+      }
     }
 
     speakElevenlabsText(textWithTags, speakerType = 'narrator') {
@@ -5853,6 +5922,22 @@ reset() {
           title: "Bab 1: Konsep Dasar Cloud Task Scheduling & Tantangan Heterogenitas",
           speakerName: "🎙️ Dosen Aqua-Pipimon & Magma-Kocorock",
           speakerType: "both",
+          audioParts: [
+            {
+              audio: 'audio/bab1_01_pipimon.mp3',
+              speakerName: '💧 Dosen Aqua-Pipimon',
+              speakerType: 'pipimon',
+              elevenlabsScript: '[cheerful] [academic] Mari kita mulai materi pertama! Di era cloud modern, kita memiliki ribuan tugas dengan panjang instruksi yang berbeda-beda, mulai dari jutaan instruksi tugas ringan hingga tugas komputasi berat.',
+              spokenText: 'Mari kita mulai materi pertama! Di era cloud modern, kita memiliki ribuan tugas dengan panjang instruksi yang berbeda-beda, mulai dari jutaan instruksi tugas ringan hingga tugas komputasi berat.'
+            },
+            {
+              audio: 'audio/bab1_02_kocorock.mp3',
+              speakerName: '🌋 Dosen Magma-Kocorock',
+              speakerType: 'kocorock',
+              elevenlabsScript: '[deep-voice] [serious] Masalahnya, mesin virtual kita heterogen alias berbeda spesifikasi MIPS! VM Satu berkecepatan kilat 3.500 MIPS, VM Dua 2.000 MIPS, dan VM Tiga 1.000 MIPS. Jika kita asal menjadwalkan tugas, tugas raksasa bisa menumpuk di mesin yang lambat, memicu bottleneck parah dan pemborosan energi!',
+              spokenText: 'Masalahnya, mesin virtual kita heterogen alias berbeda spesifikasi MIPS! VM Satu berkecepatan kilat 3.500 MIPS, VM Dua 2.000 MIPS, dan VM Tiga 1.000 MIPS. Jika kita asal menjadwalkan tugas, tugas raksasa bisa menumpuk di mesin yang lambat, memicu bottleneck parah dan pemborosan energi!'
+            }
+          ],
           elevenlabsScript: "[whispering] Bab Satu. [cheerful] Di era komputasi awan modern, ribuan tugas masuk bersamaan ke pusat data! [booming] Masalahnya, mesin virtual kita heterogen alias berbeda spesifikasi MIPS. Jika salah alokasi, bottleneck parah akan meledak!",
           spokenText: "Di era komputasi awan modern, ribuan tugas masuk bersamaan ke pusat data. Masalahnya, mesin virtual kita heterogen alias berbeda spesifikasi MIPS. Jika salah alokasi, bottleneck parah akan meledak!",
           contentHtml: `
@@ -5893,9 +5978,25 @@ reset() {
         },
         {
           title: "Bab 2: Formulasi Matematis: Makespan, DI & Batas Bawah Ideal",
-          speakerName: "🎙️ Dosen Magma-Kocorock (VNS Master)",
-          speakerType: "kocorock",
-          elevenlabsScript: "[booming] [focused] Perhatikan rumus emas di layar! Makespan adalah waktu kerja VM paling lambat di seluruh data center! Garis laser biru adalah Batas Bawah Teoretis jika beban terdistribusi seratus persen sempurna!",
+          speakerName: "🎙️ Dosen Magma-Kocorock & Aqua-Pipimon",
+          speakerType: "both",
+          audioParts: [
+            {
+              audio: 'audio/bab2_01_kocorock.mp3',
+              speakerName: '🌋 Dosen Magma-Kocorock',
+              speakerType: 'kocorock',
+              elevenlabsScript: '[academic] [focused] Perhatikan rumus emas di layar: Makespan atau C-Max adalah waktu penyelesaian tugas terlama di antara seluruh mesin virtual. Target kita adalah meminimalkan nilai Makespan ini!',
+              spokenText: 'Perhatikan rumus emas di layar: Makespan atau C-Max adalah waktu penyelesaian tugas terlama di antara seluruh mesin virtual. Target kita adalah meminimalkan nilai Makespan ini!'
+            },
+            {
+              audio: 'audio/bab2_02_pipimon.mp3',
+              speakerName: '💧 Dosen Aqua-Pipimon',
+              speakerType: 'pipimon',
+              elevenlabsScript: '[enthusiastic] Betul sekali! Garis laser biru di layar adalah Theoretical Lower Bound, yaitu batas bawah ideal secara teoretis jika seluruh kapasitas MIPS terpakai seratus persen seimbang tanpa ada mesin yang menganggur!',
+              spokenText: 'Betul sekali! Garis laser biru di layar adalah Theoretical Lower Bound, yaitu batas bawah ideal secara teoretis jika seluruh kapasitas MIPS terpakai seratus persen seimbang tanpa ada mesin yang menganggur!'
+            }
+          ],
+          elevenlabsScript: "[academic] [focused] Perhatikan rumus emas di layar! Makespan adalah waktu kerja VM paling lambat di seluruh data center! Garis laser biru adalah Batas Bawah Teoretis jika beban terdistribusi seratus persen sempurna!",
           spokenText: "Perhatikan rumus emas di layar! Makespan adalah waktu kerja VM paling lambat di seluruh data center. Garis laser biru adalah Batas Bawah Teoretis jika beban terdistribusi seratus persen sempurna!",
           contentHtml: `
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
