@@ -1165,10 +1165,31 @@ reset() {
       this.camTarget = new THREE.Vector3(0, 1.5, 0);
       this.targetPos = new THREE.Vector3(0, 1.5, 0);
       this.activeJumps = []; // Pokemon-style dynamic jump tweens
+
+      // First-Person POV Controller State
+      this.cameraMode = 'orbit'; // 'orbit' | 'fps'
+      this.fpsPlayer = {
+        position: new THREE.Vector3(0, 1.2, 12),
+        velocity: new THREE.Vector3(0, 0, 0),
+        yaw: 0,
+        pitch: -0.05,
+        speed: 9.5,
+        eyeHeight: 1.85,
+        isGrounded: true,
+        jumpVelocity: 0,
+        walkStep: 0,
+        isSprinting: false
+      };
+      this.fpsKeys = { forward: false, backward: false, left: false, right: false, jump: false, sprint: false };
+      this.lastFrameTime = performance.now();
+
       this.initScene();
       this.buildIslands();
       this.buildCharacters();
       this.initOrbit();
+      this.createBasaltPathways();
+      this.createExplorerTorch();
+      this.initFPSControls();
       this.animate();
     }
 
@@ -2523,6 +2544,363 @@ reset() {
       return false;
     }
 
+    // ==========================================
+    // FIRST-PERSON POV (FIRST-PERSON VIEW CONTROLLER)
+    // ==========================================
+    createBasaltPathways() {
+      this.pathwayGroup = new THREE.Group();
+      const stoneMat = new THREE.MeshToonMaterial({ color: 0x1c1917, roughness: 0.85 });
+      const lavaTrimMat = new THREE.MeshToonMaterial({ color: 0xff5722, emissive: 0xea580c, emissiveIntensity: 0.8 });
+
+      // 1. Central Plaza & Causeway linking Left (VNS) & Right (BFO) Realms
+      const mainBridge = new THREE.Mesh(new THREE.BoxGeometry(26, 0.45, 3.6), stoneMat);
+      mainBridge.position.set(0, 0.25, 0);
+      mainBridge.receiveShadow = true;
+      this.pathwayGroup.add(mainBridge);
+
+      // Glowing lava rim along main causeway
+      const rimF = new THREE.Mesh(new THREE.BoxGeometry(26, 0.12, 0.12), lavaTrimMat);
+      rimF.position.set(0, 0.45, 1.8);
+      const rimB = new THREE.Mesh(new THREE.BoxGeometry(26, 0.12, 0.12), lavaTrimMat);
+      rimB.position.set(0, 0.45, -1.8);
+      this.pathwayGroup.add(rimF); this.pathwayGroup.add(rimB);
+
+      // 2. North Causeway leading toward Warrior Statue & Nether Citadel
+      const northPath = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.45, 16), stoneMat);
+      northPath.position.set(0, 0.25, -8);
+      northPath.receiveShadow = true;
+      this.pathwayGroup.add(northPath);
+
+      // 3. Ascending Ramp up to Istana Api dari Neraka
+      const hellRamp = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.5, 12), stoneMat);
+      hellRamp.position.set(0, 3.2, -26);
+      hellRamp.rotation.x = 0.22; // Incline ramp up to citadel
+      this.pathwayGroup.add(hellRamp);
+
+      // 4. Stepping Stone Slabs along the pathway
+      for (let s = -18; s <= 18; s += 3.6) {
+        const step = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.6, 0.35, 6), stoneMat);
+        step.position.set(s, 0.35, 3.8);
+        this.pathwayGroup.add(step);
+      }
+
+      this.rootGroup.add(this.pathwayGroup);
+    }
+
+    createExplorerTorch() {
+      // Stylized volcanic handheld torch / lantern in camera view
+      this.explorerTorch = new THREE.Group();
+      this.explorerTorch.position.set(0.38, -0.28, -0.65);
+
+      const handleMat = new THREE.MeshToonMaterial({ color: 0x1c1917, roughness: 0.9 });
+      const flameMat = new THREE.MeshToonMaterial({ color: 0xfef08a, emissive: 0xff5722, emissiveIntensity: 1.8 });
+
+      // Torch handle
+      const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.035, 0.42, 6), handleMat);
+      handle.rotation.x = Math.PI / 4;
+      this.explorerTorch.add(handle);
+
+      // Torch head & cage
+      const cage = new THREE.Mesh(new THREE.DodecahedronGeometry(0.065, 0), handleMat);
+      cage.position.set(0, 0.16, -0.16);
+      this.explorerTorch.add(cage);
+
+      // Flickering flame core
+      this.torchFlame = new THREE.Mesh(new THREE.OctahedronGeometry(0.048, 1), flameMat);
+      this.torchFlame.position.set(0, 0.21, -0.16);
+      this.explorerTorch.add(this.torchFlame);
+
+      // Warm dynamic point light illuminating the environment ahead
+      this.torchLight = new THREE.PointLight(0xff7700, 1.8, 18);
+      this.torchLight.position.set(0, 0.22, -0.16);
+      this.explorerTorch.add(this.torchLight);
+
+      this.camera.add(this.explorerTorch);
+      this.explorerTorch.visible = false; // Hidden in Orbit mode
+    }
+
+    initFPSControls() {
+      // Keyboard input handling for WASD movement
+      window.addEventListener('keydown', (e) => {
+        // If in First-Person POV mode, allow V or Escape to exit; WASD & Space are reserved for walking/jumping
+        if (this.world && this.world.cameraMode === 'fps') {
+          if (e.key.toLowerCase() === 'v' || e.key === 'Escape') {
+            e.preventDefault();
+            this.world.toggleCameraMode('orbit');
+          }
+          return;
+        }
+
+        if (e.key.toLowerCase() === 'v') {
+          e.preventDefault();
+          this.world.toggleCameraMode('fps');
+          return;
+        } else if (e.key.toLowerCase() === 'g') {
+          e.preventDefault();
+          this.toggleGameModal();
+          return;
+        } else if (e.key.toLowerCase() === 'a') {
+          e.preventDefault();
+          this.openAblationModal();
+          return;
+        } else if (e.key.toLowerCase() === 'e') {
+          e.preventDefault();
+          this.openEduHubModal();
+          return;
+        } else if (e.key.toLowerCase() === 'h') {
+          e.preventDefault();
+          const targetMode = (this.expMode === 'standoff') ? 'hybrid' : 'standoff';
+          const btn = document.querySelector(`#expSeg button[data-exp="${targetMode}"]`);
+          if (btn) btn.click();
+          return;
+        } else if (e.code === 'Space') {
+          e.preventDefault();
+          this.togglePlay();
+        } else if (e.key.toLowerCase() === 'r') {
+          this.world.resetCamera();
+          this.say("📷 Posisi kamera direset ke pandangan depan.");
+        } else if (e.key === 'ArrowRight') {
+          if (this.sheetOverlay.classList.contains('open')) {
+            if (this.sheetIndex < this.sheetSlides.length - 1) this.showSlide(this.sheetIndex + 1);
+          } else {
+            this.step();
+          }
+        } else if (e.key === 'ArrowLeft') {
+          if (this.sheetOverlay.classList.contains('open')) {
+            if (this.sheetIndex > 0) this.showSlide(this.sheetIndex - 1);
+          }
+        } else if (e.key.toLowerCase() === 'f') {
+          document.getElementById('btnFullscreen').click();
+        } else if (e.key.toLowerCase() === 'q') {
+          if (!this.inputPeerPool || document.activeElement !== this.inputPeerPool) {
+            e.preventDefault();
+            this.toggleDrillModal();
+          }
+        }
+      });
+
+      window.addEventListener('keyup', (e) => {
+        if (this.cameraMode !== 'fps') return;
+        const code = e.code;
+        if (code === 'KeyW' || code === 'ArrowUp') this.fpsKeys.forward = false;
+        if (code === 'KeyS' || code === 'ArrowDown') this.fpsKeys.backward = false;
+        if (code === 'KeyA' || code === 'ArrowLeft') this.fpsKeys.left = false;
+        if (code === 'KeyD' || code === 'ArrowRight') this.fpsKeys.right = false;
+        if (code === 'ShiftLeft' || code === 'ShiftRight') this.fpsPlayer.isSprinting = false;
+      });
+
+      // Mouse Look / Pointer Lock handling
+      const dom = this.renderer.domElement;
+      dom.addEventListener('click', () => {
+        if (this.cameraMode === 'fps' && document.pointerLockElement !== dom) {
+          dom.requestPointerLock = dom.requestPointerLock || dom.mozRequestPointerLock;
+          if (dom.requestPointerLock) dom.requestPointerLock();
+        }
+      });
+
+      document.addEventListener('pointerlockchange', () => {
+        this.isPointerLocked = (document.pointerLockElement === dom);
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (this.cameraMode !== 'fps') return;
+        // Move with Pointer Lock OR with Mouse Drag
+        if (this.isPointerLocked || e.buttons === 1) {
+          const sens = 0.0024;
+          this.fpsPlayer.yaw -= (e.movementX || 0) * sens;
+          this.fpsPlayer.pitch = Math.max(-1.35, Math.min(1.35, this.fpsPlayer.pitch - (e.movementY || 0) * sens));
+        }
+      });
+    }
+
+    toggleCameraMode(targetMode = null) {
+      const nextMode = targetMode || (this.cameraMode === 'fps' ? 'orbit' : 'fps');
+      this.cameraMode = nextMode;
+
+      const btnToggle = document.getElementById('btnTogglePOV');
+      const btnTop = document.getElementById('btnOpenPOV');
+      const povHUD = document.getElementById('pov-hud');
+
+      if (nextMode === 'fps') {
+        if (this.controls) this.controls.enabled = false;
+        this.fpsPlayer.position.set(0, 0.8, 12);
+        this.fpsPlayer.yaw = 0;
+        this.fpsPlayer.pitch = -0.05;
+        this.fpsPlayer.velocity.set(0, 0, 0);
+        this.fpsPlayer.isGrounded = true;
+
+        if (this.explorerTorch) this.explorerTorch.visible = true;
+        if (btnToggle) btnToggle.classList.add('on');
+        if (btnTop) {
+          btnTop.style.background = 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)';
+          btnTop.style.borderColor = '#f59e0b';
+        }
+        if (povHUD) povHUD.style.display = 'block';
+
+        if (window.app && window.app.say) {
+          window.app.say("🚶 Mode Jelajah First-Person POV AKTIF! Gunakan tombol W, A, S, D untuk berjalan mengelilingi kerajaan, Mouse untuk melihat sekeliling, dan Spasi untuk melompat.");
+        }
+      } else {
+        if (this.controls) {
+          this.controls.enabled = true;
+          this.controls.target.copy(this.camTarget);
+        }
+        this.camera.position.set(0, 19, 40);
+        this.camera.lookAt(this.camTarget);
+        this.camera.rotation.order = 'XYZ';
+
+        if (this.explorerTorch) this.explorerTorch.visible = false;
+        if (btnToggle) btnToggle.classList.remove('on');
+        if (btnTop) {
+          btnTop.style.background = 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)';
+          btnTop.style.borderColor = '#cbd5e1';
+        }
+        if (povHUD) povHUD.style.display = 'none';
+
+        if (document.exitPointerLock) document.exitPointerLock();
+
+        if (window.app && window.app.say) {
+          window.app.say("📷 Beralih kembali ke Mode Tinjauan Orbit 3D.");
+        }
+      }
+    }
+
+    getGroundHeight(x, z) {
+      // 1. Istana Api dari Neraka Platform
+      if (z < -26 && Math.abs(x) < 9) return 5.8;
+      // 2. Ramp to Citadel
+      if (z < -18 && z >= -26 && Math.abs(x) < 4.5) {
+        const p = (-18 - z) / 8;
+        return 0.8 + p * 5.0;
+      }
+      // 3. Warrior Statue Altar
+      if (z < -16 && z >= -24 && Math.abs(x) < 5.5) return 2.2;
+      // 4. North Causeway
+      if (z < 0 && z >= -18 && Math.abs(x) < 3.2) return 0.55;
+      // 5. Main East-West Bridge & Central Islands
+      if (Math.abs(z) < 4.2 && Math.abs(x) < 22) return 0.55;
+      // 6. Left Realm (VNS islands)
+      if (Math.abs(x + 11) < 8 && Math.abs(z) < 6) return 0.85;
+      // 7. Right Realm (BFO islands)
+      if (Math.abs(x - 11) < 8 && Math.abs(z) < 6) return 0.85;
+      // 8. Ground default
+      return -1.2;
+    }
+
+    updateFPS(delta) {
+      const p = this.fpsPlayer;
+      const speed = p.isSprinting ? 15.0 : 8.8;
+
+      // Calculate directional movement vectors from camera yaw
+      const forward = new THREE.Vector3(-Math.sin(p.yaw), 0, -Math.cos(p.yaw));
+      const right = new THREE.Vector3(Math.cos(p.yaw), 0, -Math.sin(p.yaw));
+
+      const moveDir = new THREE.Vector3(0, 0, 0);
+      if (this.fpsKeys.forward) moveDir.add(forward);
+      if (this.fpsKeys.backward) moveDir.sub(forward);
+      if (this.fpsKeys.right) moveDir.add(right);
+      if (this.fpsKeys.left) moveDir.sub(right);
+
+      const isMoving = moveDir.lengthSq() > 0.001;
+      if (isMoving) {
+        moveDir.normalize();
+        p.position.x += moveDir.x * speed * delta;
+        p.position.z += moveDir.z * speed * delta;
+
+        // Head bobbing and footstep audio
+        if (p.isGrounded) {
+          const prevStep = p.walkStep;
+          p.walkStep += delta * (p.isSprinting ? 14 : 9.5);
+
+          // Footstep audio on downstep
+          if (Math.sin(prevStep) <= 0 && Math.sin(p.walkStep) > 0) {
+            if (window.app && window.app.soundtrack && window.app.soundtrack.playFootstep) {
+              window.app.soundtrack.playFootstep();
+            }
+          }
+        }
+      } else {
+        p.walkStep = 0;
+      }
+
+      // World Boundary Constraints (keep player within kingdom bounds)
+      p.position.x = Math.max(-36, Math.min(36, p.position.x));
+      p.position.z = Math.max(-40, Math.min(22, p.position.z));
+
+      // Gravity and Ground Physics
+      const groundY = this.getGroundHeight(p.position.x, p.position.z);
+      if (!p.isGrounded) {
+        p.jumpVelocity -= 22.0 * delta;
+        p.position.y += p.jumpVelocity * delta;
+
+        if (p.position.y <= groundY) {
+          p.position.y = groundY;
+          p.jumpVelocity = 0;
+          p.isGrounded = true;
+        }
+      } else {
+        // Smoothly adjust ground height while walking
+        p.position.y = THREE.MathUtils.lerp(p.position.y, groundY, 0.25);
+      }
+
+      // Apply Head Bobbing
+      const bobY = isMoving && p.isGrounded ? Math.sin(p.walkStep) * 0.08 : 0;
+      this.camera.position.set(p.position.x, p.position.y + p.eyeHeight + bobY, p.position.z);
+
+      // Apply Camera Rotation
+      this.camera.rotation.order = 'YXZ';
+      this.camera.rotation.y = p.yaw;
+      this.camera.rotation.x = p.pitch;
+      this.camera.rotation.z = 0;
+
+      // Animate Handheld Torch
+      if (this.torchFlame && this.torchLight) {
+        const fl = 1.0 + Math.sin(performance.now() * 0.015) * 0.15;
+        this.torchFlame.scale.set(fl, fl * 1.1, fl);
+        this.torchLight.intensity = 1.6 + Math.sin(performance.now() * 0.012) * 0.35;
+      }
+
+      // Check Proximity to Landmarks & Update HUD Box
+      this.checkFPSProximity();
+    }
+
+    checkFPSProximity() {
+      const p = this.fpsPlayer.position;
+      const box = document.getElementById('pov-proximity-box');
+      if (!box) return;
+
+      const landmarks = [
+        { name: 'VM 1: Pulau Kilat (Merah)', pos: { x: -7, z: 0 }, desc: 'Kapasitas 3500 MIPS (Compute-Optimized). Mesin tercepat namun rentan memicu bottleneck!' },
+        { name: 'VM 2: Pulau Seimbang (Kuning)', pos: { x: 0, z: 0 }, desc: 'Kapasitas 2000 MIPS (General Purpose). Distribusi beban paling stabil.' },
+        { name: 'VM 3: Pulau Hemat (Biru)', pos: { x: 7, z: 0 }, desc: 'Kapasitas 1000 MIPS (Eco Burst). Menangani tugas-tugas ringan secara efisien.' },
+        { name: 'Magma-Kocorock (VNS Master)', pos: { x: -11, z: 2.6 }, desc: 'Obsidian Golem penjaga VNS. Bersenjatakan Kapak Volkanik untuk mengocok tugas bottleneck!' },
+        { name: 'Aqua-Pipimon (BFO Leader)', pos: { x: 11, z: 2.4 }, desc: 'Pemimpin koloni kemotaksis. Berenang menelusuri gradien nutrisi solusi penjadwalan!' },
+        { name: 'Benteng Api dari Neraka', pos: { x: 0, z: -30 }, desc: 'Nether Magma Citadel — Reaktor pusat penggabungan algoritma hibrida paling ekstrem!' },
+        { name: 'Patung Ksatria Volkanik', pos: { x: 0, z: -20 }, desc: 'Monumen ksatria kuno penjaga sumpah minimasi Makespan di lautan lahar.' }
+      ];
+
+      let nearest = null;
+      let minDist = Infinity;
+
+      landmarks.forEach(lm => {
+        const dist = Math.hypot(p.x - lm.pos.x, p.z - lm.pos.z);
+        if (dist < minDist) {
+          minDist = dist;
+          nearest = lm;
+        }
+      });
+
+      if (minDist < 6.8 && nearest) {
+        box.style.display = 'block';
+        box.innerHTML = `
+          <div style="font-weight:800; color:#f59e0b; font-size:13px;">📍 ${nearest.name} (Jarak: ${minDist.toFixed(1)}m)</div>
+          <div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">${nearest.desc}</div>
+        `;
+      } else {
+        box.style.display = 'none';
+      }
+    }
+
     animate() {
       requestAnimationFrame(() => this.animate());
       const t = performance.now() * 0.002;
@@ -2698,16 +3076,24 @@ reset() {
         this.camTarget.lerp(this.targetPos, 0.05);
       }
 
-      if (this.controls) {
-        this.controls.target.lerp(this.camTarget, 0.06);
-        this.controls.update();
-      } else if (this.spherical) {
-        const s = this.spherical;
-        if (this.autoRotate) s.theta += 0.003;
-        this.camera.position.x = this.camTarget.x + s.radius * Math.sin(s.phi) * Math.sin(s.theta);
-        this.camera.position.y = this.camTarget.y + s.radius * Math.cos(s.phi);
-        this.camera.position.z = this.camTarget.z + s.radius * Math.sin(s.phi) * Math.cos(s.theta);
-        this.camera.lookAt(this.camTarget);
+      // 9. Camera Controls: FPS Walkthrough vs Orbit 360
+      if (this.cameraMode === 'fps') {
+        const now = performance.now();
+        const delta = Math.min(0.08, (now - (this.lastFrameTime || now)) * 0.001);
+        this.lastFrameTime = now;
+        this.updateFPS(delta);
+      } else {
+        if (this.controls) {
+          this.controls.target.lerp(this.camTarget, 0.06);
+          this.controls.update();
+        } else if (this.spherical) {
+          const s = this.spherical;
+          if (this.autoRotate) s.theta += 0.003;
+          this.camera.position.x = this.camTarget.x + s.radius * Math.sin(s.phi) * Math.sin(s.theta);
+          this.camera.position.y = this.camTarget.y + s.radius * Math.cos(s.phi);
+          this.camera.position.z = this.camTarget.z + s.radius * Math.sin(s.phi) * Math.cos(s.theta);
+          this.camera.lookAt(this.camTarget);
+        }
       }
 
       // 10. Update 3D-to-2D Screen-space Speech Bubbles
@@ -3003,6 +3389,31 @@ reset() {
       osc2.start(now);
       osc1.stop(now + duration + 0.1);
       osc2.stop(now + duration + 0.1);
+    }
+
+        playFootstep() {
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const filter = this.ctx.createBiquadFilter();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(75 + Math.random() * 20, now);
+      osc.frequency.exponentialRampToValueAtTime(32, now + 0.08);
+
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(220, now);
+
+      gain.gain.setValueAtTime(0.09, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.masterGain);
+
+      osc.start(now);
+      osc.stop(now + 0.1);
     }
 
     playCrystalPlace(vmIdx = 0) {
@@ -3401,6 +3812,15 @@ reset() {
         });
       }
 
+      // First-Person POV Toggle Buttons
+      const btnTogglePOV = document.getElementById('btnTogglePOV');
+      const btnOpenPOV = document.getElementById('btnOpenPOV');
+      const btnClosePOV = document.getElementById('btnClosePOV');
+
+      if (btnTogglePOV) btnTogglePOV.addEventListener('click', () => this.world.toggleCameraMode());
+      if (btnOpenPOV) btnOpenPOV.addEventListener('click', () => this.world.toggleCameraMode());
+      if (btnClosePOV) btnClosePOV.addEventListener('click', () => this.world.toggleCameraMode('orbit'));
+
       // Fullscreen
       document.getElementById('btnFullscreen').addEventListener('click', () => {
         if (!document.fullscreenElement) {
@@ -3630,7 +4050,11 @@ reset() {
 
       // Keyboard Shortcuts
       window.addEventListener('keydown', (e) => {
-        if (e.key.toLowerCase() === 'g') {
+        if (e.key.toLowerCase() === 'v') {
+          e.preventDefault();
+          this.world.toggleCameraMode();
+          return;
+        } else if (e.key.toLowerCase() === 'g') {
           e.preventDefault();
           this.toggleGameModal();
           return;

@@ -1375,6 +1375,11 @@
       <span>Pusat Belajar [E]</span>
     </button>
 
+    <button id="btnOpenPOV" style="height:36px; padding:0 14px; border-radius:12px; display:inline-flex; align-items:center; gap:6px; font-weight:700; font-size:12px; color:#b45309; white-space:nowrap; background:linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border:1px solid #f59e0b; box-shadow:0 2px 10px rgba(245,158,11,0.2); cursor:pointer;" title="Mode Jelajah First-Person POV (W,A,S,D + Mouse) [V]">
+      <span style="font-size:14px;">🚶</span>
+      <span>Jelajah POV [V]</span>
+    </button>
+
     <button id="btnOpenGame" style="height:36px; padding:0 14px; border-radius:12px; display:inline-flex; align-items:center; gap:6px; font-weight:700; font-size:12px; color:#c2410c; white-space:nowrap; background:linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%); border:1px solid #f97316; box-shadow:0 2px 10px rgba(234,88,12,0.25); cursor:pointer;" title="Buka Game Edukatif: Cloud Dispatcher Challenge [G]">
       <span style="font-size:13px;">🎮</span>
       <span>Game Edukatif [G]</span>
@@ -1432,6 +1437,12 @@
     <!-- Narration Audio Voice Toggle (Web Speech) -->
     <button class="round" id="btnVoice" title="Suara Narasi Awan (Speech Synthesis)">
       <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+    </button>
+
+    <!-- Fullscreen Toggle -->
+    <!-- First-Person POV Walkthrough Toggle -->
+    <button class="round" id="btnTogglePOV" title="Jelajah Kerajaan First-Person POV [V]" style="color:#d97706;">
+      <svg viewBox="0 0 24 24" style="stroke:currentColor; fill:none; stroke-width:2;"><circle cx="12" cy="5" r="2.5"></circle><path d="M9 22v-6l-2-2v-4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4l-2 2v6"></path><path d="M6 12l3-1"></path><path d="M18 12l-3-1"></path></svg>
     </button>
 
     <!-- Fullscreen Toggle -->
@@ -2431,6 +2442,34 @@
   </div>
 
   <script src="./src/bundle.js"></script>
+
+
+  <!-- FIRST-PERSON POV HUD OVERLAY -->
+  <div id="pov-hud" style="display:none; position:fixed; inset:0; pointer-events:none; z-index:45;">
+    <!-- Crosshair Reticle -->
+    <div id="pov-crosshair" style="position:absolute; top:50%; left:50%; width:18px; height:18px; transform:translate(-50%, -50%); border:1.5px solid rgba(255,255,255,0.7); border-radius:50%; box-shadow:0 0 8px rgba(0,0,0,0.6);">
+      <div style="position:absolute; top:50%; left:50%; width:4px; height:4px; transform:translate(-50%, -50%); background:#f59e0b; border-radius:50%;"></div>
+    </div>
+
+    <!-- Proximity Inspection Card -->
+    <div id="pov-proximity-box" style="display:none; position:absolute; top:88px; left:50%; transform:translateX(-50%); background:rgba(15, 23, 42, 0.94); backdrop-filter:blur(12px); padding:12px 22px; border-radius:16px; border:1.5px solid #f59e0b; box-shadow:0 12px 36px rgba(0,0,0,0.65); max-width:520px; text-align:center; pointer-events:auto; color:#ffffff;">
+    </div>
+
+    <!-- Bottom Instructions Pill -->
+    <div style="position:absolute; bottom:28px; left:50%; transform:translateX(-50%); background:rgba(15, 23, 42, 0.92); backdrop-filter:blur(10px); padding:8px 18px; border-radius:24px; border:1px solid rgba(245, 158, 11, 0.5); box-shadow:0 8px 30px rgba(0,0,0,0.55); display:flex; align-items:center; gap:14px; font-size:12px; color:#e2e8f0; pointer-events:auto;">
+      <span style="display:inline-flex; align-items:center; gap:5px;"><b style="color:#f59e0b; font-size:13px;">W A S D</b> Berjalan</span>
+      <span style="color:#64748b;">•</span>
+      <span style="display:inline-flex; align-items:center; gap:5px;"><b style="color:#f59e0b; font-size:13px;">Mouse</b> Melihat (Klik untuk Kunci Kursor)</span>
+      <span style="color:#64748b;">•</span>
+      <span style="display:inline-flex; align-items:center; gap:5px;"><b style="color:#f59e0b; font-size:13px;">Shift</b> Lari</span>
+      <span style="color:#64748b;">•</span>
+      <span style="display:inline-flex; align-items:center; gap:5px;"><b style="color:#f59e0b; font-size:13px;">Spasi</b> Lompat</span>
+      <span style="color:#64748b;">•</span>
+      <button id="btnClosePOV" style="background:#ef4444; color:#ffffff; border:none; padding:4px 12px; border-radius:14px; font-weight:700; font-size:11px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; box-shadow:0 2px 8px rgba(239,68,68,0.4);" title="Keluar dari POV [V / Esc]">
+        <span>✕ Keluar POV [V]</span>
+      </button>
+    </div>
+  </div>
 
 </body>
 </html>

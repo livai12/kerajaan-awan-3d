@@ -74,7 +74,21 @@ Beralih dari sekadar komparasi rivalitas sederhana menjadi **Laboratorium Sintes
 - **Shortcut `[Q]`** atau tombol `[🎯 Uji Audiens [Q]]`:
 - Fitur pedagogi aktif untuk menunjuk teman kelas, memutar roulette presensi acak, mengarahkan kamera 3D ke objek spesifik (Pulau Bottleneck, Shaking Kocorock, Kemotaksis Pipimon, Garis Laser Lower Bound), serta membedah konsep dalam 3 tingkat pemahaman (Analogi ELI5 $\to$ Visual Spasial 3D $\to$ Formulasi Matematis).
 
-### 5. 📑 Slide Deck Presentasi Lengkap 12 Halaman (`presentasi.html`)
+### 7. 🚶 Mode Jelajah First-Person POV (FPS Walkthrough)
+- **Shortcut `[V]`** atau tombol `[🚶 Jelajah POV [V]]`:
+- Mengubah navigasi 3D orbital biasa menjadi **pengalaman first-person interaktif** di mana pengguna / mahasiswa dapat berjalan mengelilingi kerajaan volkanik dan jembatan magma layaknya karakter di game eksplorasi:
+  - **Kontrol Keyboard & Mouse:**
+    - `W, A, S, D` / Tombol Panah: Berjalan maju, mundur, kiri, kanan melintasi jalur pulau.
+    - `Shift`: Lari cepat (*sprint*).
+    - `Spasi`: Melompat (*jump with gravity physics*).
+    - `Mouse Look`: Mengarahkan pandangan 360° secara presisi (dilengkapi *Pointer Lock API* dengan klik kanvas, serta *mouse-drag fallback*).
+    - `V` atau `Esc`: Keluar dari POV dan kembali ke mode orbital overview.
+  - **Obor Volkanik Tangan (*Handheld Explorer Torch*):** Dilengkapi obor api beranimasi dinamis di sudut pandang kamera yang memancarkan pencahayaan dinamis ke lingkungan sekitarnya.
+  - **Jalan Setapak Basalt & Jembatan Magma:** Jalur basalt heksagonal bertepi magma menyala yang menghubungkan Pulau VNS (Kiri), Pulau BFO (Kanan), Altar Patung Ksatria, serta Tanjakan naik menuju Benteng Api dari Neraka.
+  - **Deteksi Jarak & Kartu Inspeksi Otomatis (*Proximity HUD*):** Ketika pemain mendekati pulau VM, Magma-Kocorock, Aqua-Pipimon, Patung Ksatria, atau Istana Neraka (< 7 meter), kartu informasi interaktif di HUD otomatis muncul menjelaskan spesifikasi komputasi MIPS atau peran algoritma hibridanya.
+  - **Efek Suara Langkah Kaki (*Procedural Basalt Footsteps*):** Sintesis audio langkah kaki berirama saat berjalan di atas batu basalt.
+
+### 8. 📑 Slide Deck Presentasi Lengkap 12 Halaman (`presentasi.html`)
 - Ditingkatkan menjadi 12 slide komprehensif berstandar internasional yang mencakup formulasi ETC Matrix, batas bawah teoretis ideal, taksonomi Talbi, arsitektur kedua hibrida, tabel ablasi 30x run, live simulator di slide, inovasi spasial 3D, FAQ sidang, dan daftar pustaka IEEE/Elsevier/Springer.
 
 ---
