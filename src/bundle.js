@@ -5289,16 +5289,12 @@ reset() {
 
       if (btnEnter) {
         btnEnter.addEventListener('click', () => {
-          // 1. Play Lava infernal Web Audio soundtrack
+          // 1. Play Lava infernal Web Audio soundtrack (ducked for speech clarity)
           if (this.soundtrack) {
             this.soundtrack.start();
           }
 
-          // 2. Speak/Narrate prologue in ElevenLabs format
-          const introSpeech = "[whispering] Kedalaman sebelas ribu meter di bawah laut. [mysterious] Selamat datang di markas Abyssal Grid Three-D!";
-          this.speakElevenlabsText(introSpeech, 'narrator');
-
-          // 3. Smoothly fade out welcome gate
+          // 2. Smoothly fade out welcome gate so player enters the castle
           if (gate) {
             gate.style.opacity = '0';
             gate.style.pointerEvents = 'none';
@@ -5307,16 +5303,8 @@ reset() {
             }, 800);
           }
 
-          // 4. Character walks/hops forward to player POV
-          if (this.world && typeof this.world.npcApproachPlayer === 'function') {
-            setTimeout(() => {
-              this.world.npcApproachPlayer(() => {
-                this.showTourInvitation();
-              });
-            }, 500);
-          } else {
-            this.showTourInvitation();
-          }
+          // 3. Play sequential real ElevenLabs audio prologue
+          this.playPrologueSequence();
         });
       }
 
@@ -5336,6 +5324,165 @@ reset() {
           this.say("🚶 Silakan jelajahi kastil menggunakan WASD! Tekan tombol [🏛️ Teater] di pojok kanan atas atau tombol [T] kapan saja untuk membuka Bioskop.");
         });
       }
+    }
+
+    playPrologueSequence() {
+      // Duck background lava music so ElevenLabs voice is crisp and clear
+      if (this.soundtrack && this.soundtrack.masterGain && this.soundtrack.ctx) {
+        this.soundtrack.masterGain.gain.setValueAtTime(0.12, this.soundtrack.ctx.currentTime);
+      }
+
+      const dialogBox = document.getElementById('prologue-dialog-box');
+      const speakerEl = document.getElementById('prologue-speaker');
+      const avatarEl = document.getElementById('prologue-avatar');
+      const textEl = document.getElementById('prologue-text');
+      const stepEl = document.getElementById('prologue-step-indicator');
+      const btnSkip = document.getElementById('btnSkipPrologue');
+
+      if (dialogBox) {
+        dialogBox.style.display = 'block';
+        dialogBox.style.opacity = '0';
+        dialogBox.style.transform = 'translate(-50%, 15px)';
+        requestAnimationFrame(() => {
+          dialogBox.style.opacity = '1';
+          dialogBox.style.transform = 'translate(-50%, 0)';
+        });
+      }
+
+      let isFinished = false;
+      let currentAudio = null;
+
+      const stopCurrentAudio = () => {
+        if (currentAudio) {
+          currentAudio.pause();
+          currentAudio.currentTime = 0;
+          currentAudio = null;
+        }
+      };
+
+      const finishPrologue = () => {
+        if (isFinished) return;
+        isFinished = true;
+        stopCurrentAudio();
+
+        if (dialogBox) {
+          dialogBox.style.opacity = '0';
+          dialogBox.style.transform = 'translate(-50%, 15px)';
+          setTimeout(() => {
+            dialogBox.style.display = 'none';
+          }, 400);
+        }
+
+        // Restore soundtrack volume
+        if (this.soundtrack && this.soundtrack.masterGain && this.soundtrack.ctx) {
+          this.soundtrack.masterGain.gain.setValueAtTime(this.soundtrack.idleVolume || 0.28, this.soundtrack.ctx.currentTime);
+        }
+
+        // Ensure characters approach player if they haven't yet, then show tour invitation
+        if (this.world && typeof this.world.npcApproachPlayer === 'function') {
+          this.world.npcApproachPlayer(() => {
+            this.showTourInvitation();
+          });
+        } else {
+          this.showTourInvitation();
+        }
+      };
+
+      if (btnSkip) {
+        btnSkip.onclick = () => finishPrologue();
+      }
+
+      const prologueParts = [
+        {
+          audio: 'audio/prologue_01_narrator.mp3',
+          speaker: '🎙️ Narator Palung Abyssal',
+          avatar: '🌊',
+          avatarBg: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)',
+          speakerColor: '#38bdf8',
+          text: '"Kedalaman sebelas ribu meter di bawah laut. Di antara rekahan palung magma dan samudera abadi. Selamat datang di markas Abyssal Grid Three-D!"',
+          onStart: () => {
+            this.say("🎙️ [Narator]: Kedalaman sebelas ribu meter di bawah laut. Selamat datang di markas Abyssal Grid 3D!");
+          }
+        },
+        {
+          audio: 'audio/prologue_02_kocorock.mp3',
+          speaker: '🌋 Magma-Kocorock (VNS Master)',
+          avatar: '🌋',
+          avatarBg: 'linear-gradient(135deg, #ea580c 0%, #f59e0b 100%)',
+          speakerColor: '#f59e0b',
+          text: '"Akulah Magma Kocorock! Penjaga stabilitas infrastruktur data center di palung neraka ini. Di sini, jutaan paket komputasi heterogen mengalir tanpa henti."',
+          onStart: () => {
+            this.say("🌋 [Magma-Kocorock]: Akulah Magma Kocorock! Penjaga stabilitas infrastruktur data center di palung neraka ini!");
+            if (this.world && typeof this.world.pokemonHopKocorock === 'function') {
+              this.world.pokemonHopKocorock(1);
+            }
+          }
+        },
+        {
+          audio: 'audio/prologue_03_pipimon.mp3',
+          speaker: '💧 Aqua-Pipimon (BFO Leader)',
+          avatar: '💧',
+          avatarBg: 'linear-gradient(135deg, #06b6d4 0%, #38bdf8 100%)',
+          speakerColor: '#38bdf8',
+          text: '"[tertawa kecil] Dan aku, Aqua Pipimon! Pemimpin koloni bio-swarm tetesan air samudra. Lihat, ada penjelajah baru yang tiba di hadapan kita!"',
+          onStart: () => {
+            this.say("💧 [Aqua-Pipimon]: Dan aku, Aqua Pipimon! Pemimpin koloni bio-swarm tetesan air samudra.");
+            // When Pipimon says "Lihat, ada penjelajah baru...", trigger dynamic approach!
+            setTimeout(() => {
+              if (!isFinished && this.world && typeof this.world.npcApproachPlayer === 'function') {
+                this.world.npcApproachPlayer();
+              }
+            }, 3200);
+          }
+        }
+      ];
+
+      const playPart = (idx) => {
+        if (isFinished) return;
+        if (idx >= prologueParts.length) {
+          finishPrologue();
+          return;
+        }
+
+        const part = prologueParts[idx];
+        if (speakerEl) {
+          speakerEl.textContent = part.speaker;
+          speakerEl.style.color = part.speakerColor;
+        }
+        if (avatarEl) {
+          avatarEl.textContent = part.avatar;
+          avatarEl.style.background = part.avatarBg;
+        }
+        if (textEl) textEl.innerHTML = part.text;
+        if (stepEl) stepEl.textContent = `Bagian ${idx + 1} dari ${prologueParts.length}`;
+
+        if (part.onStart) part.onStart();
+
+        const aud = new Audio(part.audio);
+        currentAudio = aud;
+
+        aud.onended = () => {
+          if (!isFinished) {
+            setTimeout(() => playPart(idx + 1), 350);
+          }
+        };
+
+        aud.onerror = () => {
+          console.warn("Could not load audio file:", part.audio, "proceeding to next part...");
+          setTimeout(() => {
+            if (!isFinished) playPart(idx + 1);
+          }, 7000);
+        };
+
+        aud.play().catch(err => {
+          console.warn("Autoplay audio blocked or error:", err);
+          setTimeout(() => {
+            if (!isFinished) playPart(idx + 1);
+          }, 7000);
+        });
+      };
+
+      playPart(0);
     }
 
     showTourInvitation() {

@@ -2449,6 +2449,38 @@
   </div>
 
   <!-- ============================================================== -->
+  <!-- 1.5 CINEMATIC PROLOGUE DIALOGUE BANNER (ELEVENLABS AUDIO SYNC) -->
+  <!-- ============================================================== -->
+  <div id="prologue-dialog-box" style="display:none; position:fixed; bottom:32px; left:50%; transform:translateX(-50%); z-index:115; width:min(720px, 94vw); background:rgba(15, 23, 42, 0.95); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border:1.5px solid rgba(56, 189, 248, 0.5); border-radius:20px; box-shadow:0 20px 50px rgba(0,0,0,0.85), 0 0 30px rgba(56,189,248,0.25); padding:16px 22px; color:#ffffff; transition:opacity 0.4s ease, transform 0.4s ease;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div id="prologue-avatar" style="width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg, #0284c7 0%, #38bdf8 100%); display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 0 12px rgba(56,189,248,0.5); flex-shrink:0;">
+          🎙️
+        </div>
+        <div>
+          <div id="prologue-speaker" style="font-size:13.5px; font-weight:800; color:#38bdf8;">
+            Narator Palung Abyssal
+          </div>
+          <div style="font-size:10px; color:#94a3b8; display:flex; align-items:center; gap:6px;">
+            <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#10b981;"></span>
+            <span>Audio ElevenLabs Resmi • 11.000m Palung Mariana</span>
+          </div>
+        </div>
+      </div>
+      <button id="btnSkipPrologue" style="padding:5px 14px; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.22); border-radius:10px; color:#cbd5e1; font-size:11.5px; font-weight:700; cursor:pointer;" title="Lewati dialog langsung ke tawaran tur">
+        Lewati Prolog ❯❯
+      </button>
+    </div>
+    <div id="prologue-text" style="font-size:13.5px; line-height:1.6; color:#f1f5f9; font-style:italic; padding:6px 0; min-height:44px;">
+      "Kedalaman sebelas ribu meter di bawah laut. Di antara rekahan palung magma dan samudera abadi. Selamat datang di markas Abyssal Grid Three-D!"
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; border-top:1px solid rgba(255,255,255,0.08); padding-top:6px; font-size:11px; color:#64748b;">
+      <span id="prologue-step-indicator" style="color:#f59e0b; font-weight:700;">Bagian 1 dari 3</span>
+      <span style="color:#38bdf8; display:flex; align-items:center; gap:5px;"><span>🔊</span> Suara Asli ElevenLabs Aktif</span>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
   <!-- 2. TOUR INVITATION MODAL (APPROACHING NPC DIALOGUE) -->
   <!-- ============================================================== -->
   <div id="tour-invitation-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:110; width:min(560px, 92vw); background:rgba(15, 23, 42, 0.96); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border:2px solid #38bdf8; border-radius:24px; box-shadow:0 24px 64px rgba(0,0,0,0.85), 0 0 35px rgba(56,189,248,0.35); padding:24px; color:#ffffff; text-align:center;">
