@@ -1169,7 +1169,7 @@ reset() {
       // First-Person POV Controller State (START DIRECTLY INSIDE CASTLE!)
       this.cameraMode = 'fps'; // Start directly in FPS Walkthrough mode!
       this.fpsPlayer = {
-        position: new THREE.Vector3(0, 0, 18), // Inside Grand Hallway entrance facing down toward Throne
+        position: new THREE.Vector3(0, 0, 10), // Inside Grand Hallway entrance facing down toward Throne facing down toward Throne
         velocity: new THREE.Vector3(0, 0, 0),
         yaw: 0, // Facing North toward the Grand Hybrid Altar at z = -28.5
         pitch: -0.02,
@@ -1197,21 +1197,23 @@ reset() {
     }
 
     initScene() {
-      this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, alpha: true, antialias: true });
+      this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, alpha: false, antialias: true });
       this.renderer.setSize(window.innerWidth, window.innerHeight);
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       this.renderer.shadowMap.enabled = true;
       this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      this.renderer.toneMappingExposure = 1.15;
+      this.renderer.toneMappingExposure = 1.25;
 
       this.scene = new THREE.Scene();
-      // Volcanic caldera atmosphere fog (Image 3)
-      this.scene.fog = new THREE.FogExp2(0x24120c, 0.0075);
+      // Rich volcanic dark stone citadel atmosphere
+      this.scene.background = new THREE.Color(0x160c09);
+      this.scene.fog = new THREE.Fog(0x160c09, 18, 110);
 
-      this.camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 1000);
+      this.camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
       this.camera.position.set(0, 19, 40);
       this.camera.lookAt(this.camTarget);
+      this.scene.add(this.camera);
 
       // 1. Volcanic Ambient Light (Warm Magma Glow from Below)
       const hemi = new THREE.HemisphereLight(0xffedd5, 0xea580c, 1.15);
@@ -2075,71 +2077,93 @@ reset() {
       // Placed on Grand Dais beside the Hybrid Core!
       // ==========================================
       this.kocok = new THREE.Group();
-      const obsidianMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.75, metalness: 0.3 });
-      const magmaSeamMat = new THREE.MeshStandardMaterial({ color: 0xff5722, emissive: 0xea580c, emissiveIntensity: 1.4 });
+      const obsidianMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.72, metalness: 0.35 });
+      const magmaSeamMat = new THREE.MeshStandardMaterial({ color: 0xff5722, emissive: 0xea580c, emissiveIntensity: 1.5 });
       const goldenCoreMat = new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xf59e0b, emissiveIntensity: 1.8 });
 
-      // Torso: Faceted Obsidian Rock
+      // Torso: Faceted Obsidian Rock with glowing seams
       const bodyGeo = new THREE.DodecahedronGeometry(1.65, 1);
       const body = new THREE.Mesh(bodyGeo, obsidianMat);
       body.castShadow = true;
       this.kocok.add(body);
 
-      // Magma Belly & Chest Seams
-      const bellyPlate = new THREE.Mesh(new THREE.DodecahedronGeometry(0.95, 0), goldenCoreMat);
-      bellyPlate.position.set(0, -0.15, 1.15);
-      bellyPlate.scale.set(1.1, 1.25, 0.45);
-      this.kocok.add(bellyPlate);
-      this.kocokCore = bellyPlate;
+      // Abdominal Segmented Plates with molten cracks (Reference Image 1)
+      for (let ab = 0; ab < 3; ab++) {
+        const abL = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.32, 0.22), obsidianMat);
+        abL.position.set(-0.32, -0.2 - ab * 0.36, 1.25);
+        const abR = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.32, 0.22), obsidianMat);
+        abR.position.set(0.32, -0.2 - ab * 0.36, 1.25);
+        this.kocok.add(abL); this.kocok.add(abR);
+      }
 
-      // Golem Obsidian Head with Fiery Magma Brow
+      // Molten Glowing Heart / Chest Core
+      const chestPlate = new THREE.Mesh(new THREE.DodecahedronGeometry(0.85, 0), goldenCoreMat);
+      chestPlate.position.set(0, 0.45, 1.18);
+      chestPlate.scale.set(1.15, 0.95, 0.4);
+      this.kocok.add(chestPlate);
+      this.kocokCore = chestPlate;
+
+      // Obsidian Shoulder Pauldrons with Magma Rims
+      const pauldronL = new THREE.Mesh(new THREE.DodecahedronGeometry(0.85, 0), obsidianMat);
+      pauldronL.position.set(-1.8, 1.2, 0.2);
+      const pauldronR = new THREE.Mesh(new THREE.DodecahedronGeometry(0.85, 0), obsidianMat);
+      pauldronR.position.set(1.8, 1.2, 0.2);
+      this.kocok.add(pauldronL); this.kocok.add(pauldronR);
+
+      // Golem Obsidian Helmet Head with Horns
       const headGeo = new THREE.DodecahedronGeometry(0.95, 1);
       const head = new THREE.Mesh(headGeo, obsidianMat);
-      head.position.set(0, 1.6, 0.2);
+      head.position.set(0, 1.65, 0.2);
       this.kocok.add(head);
+
+      // Horns
+      const hornL = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.7, 5), obsidianMat);
+      hornL.position.set(-0.55, 2.3, 0.1);
+      hornL.rotation.z = -0.4;
+      const hornR = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.7, 5), obsidianMat);
+      hornR.position.set(0.55, 2.3, 0.1);
+      hornR.rotation.z = 0.4;
+      this.kocok.add(hornL); this.kocok.add(hornR);
 
       // Fiery Magma Glowing Eyes
       const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
-      const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.2, 10, 10), eyeMat);
-      eyeL.position.set(-0.35, 1.7, 0.95);
-      const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.2, 10, 10), eyeMat);
-      eyeR.position.set(0.35, 1.7, 0.95);
-      this.kocok.add(eyeL);
-      this.kocok.add(eyeR);
+      const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 12), eyeMat);
+      eyeL.position.set(-0.35, 1.72, 0.96);
+      const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 12), eyeMat);
+      eyeR.position.set(0.35, 1.72, 0.96);
+      this.kocok.add(eyeL); this.kocok.add(eyeR);
 
       // Obsidian Boulder Fists with Magma Knuckles
-      const fistGeo = new THREE.DodecahedronGeometry(0.65, 1);
+      const fistGeo = new THREE.DodecahedronGeometry(0.68, 1);
       const fistL = new THREE.Mesh(fistGeo, obsidianMat);
-      fistL.position.set(-1.8, 0.2, 0.5);
+      fistL.position.set(-1.85, 0.1, 0.5);
       const fistR = new THREE.Mesh(fistGeo, obsidianMat);
-      fistR.position.set(1.8, 0.2, 0.5);
-      this.kocok.add(fistL);
-      this.kocok.add(fistR);
+      fistR.position.set(1.85, 0.1, 0.5);
+      this.kocok.add(fistL); this.kocok.add(fistR);
 
-      // Volcanic Battle Axe (Double-bladed Obsidian Axe with Molten Lava Edge)
+      // Volcanic Battle Axe (Held proudly, channeling to the Hybrid Core!)
       this.axe = new THREE.Group();
-      const axeHaft = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 3.8, 8), obsidianMat);
+      const axeHaft = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 4.0, 8), obsidianMat);
       this.axe.add(axeHaft);
 
       const axeBladeMat = new THREE.MeshStandardMaterial({ color: 0x0c0a09, roughness: 0.6, metalness: 0.5 });
       const axeEdgeMat = new THREE.MeshBasicMaterial({ color: 0xff4500 });
 
-      const axeBladeL = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.4, 0.18), axeBladeMat);
-      axeBladeL.position.set(-0.7, 1.2, 0);
+      const axeBladeL = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.5, 0.18), axeBladeMat);
+      axeBladeL.position.set(-0.75, 1.2, 0);
       this.axe.add(axeBladeL);
-      const axeEdgeL = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.6, 6), axeEdgeMat);
-      axeEdgeL.position.set(-1.3, 1.2, 0);
+      const axeEdgeL = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.7, 6), axeEdgeMat);
+      axeEdgeL.position.set(-1.38, 1.2, 0);
       this.axe.add(axeEdgeL);
 
-      const axeBladeR = new THREE.Mesh(new THREE.BoxGeometry(0.95, 1.2, 0.18), axeBladeMat);
-      axeBladeR.position.set(0.6, 1.2, 0);
+      const axeBladeR = new THREE.Mesh(new THREE.BoxGeometry(0.95, 1.3, 0.18), axeBladeMat);
+      axeBladeR.position.set(0.65, 1.2, 0);
       this.axe.add(axeBladeR);
-      const axeEdgeR = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.4, 6), axeEdgeMat);
-      axeEdgeR.position.set(1.1, 1.2, 0);
+      const axeEdgeR = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.5, 6), axeEdgeMat);
+      axeEdgeR.position.set(1.15, 1.2, 0);
       this.axe.add(axeEdgeR);
 
-      // Raised toward the central Hybrid Core!
-      this.axe.position.set(1.6, 1.6, 0.6);
+      this.axe.position.set(1.6, 1.5, 0.6);
       this.axe.rotation.z = -0.55;
       this.axe.rotation.x = 0.2;
       this.kocok.add(this.axe);
@@ -2156,68 +2180,120 @@ reset() {
       this.proceduralGroup.add(this.kocok);
 
       // ==========================================
-      // 2. PROCEDURAL AQUA-PIPIMON COLONY (BFO Leader)
-      // Placed on Grand Dais beside the Hybrid Core!
+      // 2. PROCEDURAL AQUA-PIPIMON (KAWAII WATER SPRITE)
+      // Reference Image 2: Teardrop body, anime eyes, blush cheeks!
       // ==========================================
       this.pips = [];
       const leaderPip = new THREE.Group();
       const rad = 1.35;
 
-      // Teardrop Water Droplet Geometry
+      // Glossy Translucent Cyan Droplet Body
       const dropletBody = new THREE.Group();
       const pipMat = new THREE.MeshStandardMaterial({
         color: 0x38bdf8,
         emissive: 0x0284c7,
-        emissiveIntensity: 0.65,
+        emissiveIntensity: 0.6,
         transparent: true,
         opacity: 0.94,
-        roughness: 0.1,
-        metalness: 0.1
+        roughness: 0.08,
+        metalness: 0.12
       });
 
-      const baseSphere = new THREE.Mesh(new THREE.SphereGeometry(rad, 20, 20), pipMat);
+      const baseSphere = new THREE.Mesh(new THREE.SphereGeometry(rad, 24, 24), pipMat);
       dropletBody.add(baseSphere);
 
-      const tipCone = new THREE.Mesh(new THREE.ConeGeometry(rad * 0.82, rad * 1.25, 20), pipMat);
+      const tipCone = new THREE.Mesh(new THREE.ConeGeometry(rad * 0.85, rad * 1.35, 24), pipMat);
       tipCone.position.y = rad * 0.72;
       dropletBody.add(tipCone);
+
+      // Light-cyan soft reflective belly patch (Image 2)
+      const bellyMat = new THREE.MeshStandardMaterial({
+        color: 0xbae6fd,
+        emissive: 0x38bdf8,
+        emissiveIntensity: 0.4,
+        transparent: true,
+        opacity: 0.88,
+        roughness: 0.15
+      });
+      const bellyPatch = new THREE.Mesh(new THREE.SphereGeometry(rad * 0.72, 16, 16), bellyMat);
+      bellyPatch.position.set(0, -rad * 0.15, rad * 0.55);
+      bellyPatch.scale.set(1.0, 1.15, 0.35);
+      dropletBody.add(bellyPatch);
       leaderPip.add(dropletBody);
 
-      // Pixel-Shaded Kawaii Black Eyes with White Catchlight Dots
-      const eyeW = rad * 0.24;
-      const eyeGeo = new THREE.BoxGeometry(eyeW, eyeW * 1.3, eyeW * 0.4);
-      const eyePupilMat = new THREE.MeshBasicMaterial({ color: 0x0f172a });
+      // KAWAII SOFT PINK BLUSH CHEEKS (#fb7185)
+      const blushMat = new THREE.MeshBasicMaterial({ color: 0xfb7185, transparent: true, opacity: 0.85 });
+      const blushL = new THREE.Mesh(new THREE.SphereGeometry(rad * 0.2, 12, 12), blushMat);
+      blushL.position.set(-rad * 0.56, -rad * 0.02, rad * 0.84);
+      blushL.scale.set(1.2, 0.7, 0.3);
+      const blushR = new THREE.Mesh(new THREE.SphereGeometry(rad * 0.2, 12, 12), blushMat);
+      blushR.position.set(rad * 0.56, -rad * 0.02, rad * 0.84);
+      blushR.scale.set(1.2, 0.7, 0.3);
+      leaderPip.add(blushL); leaderPip.add(blushR);
+
+      // SPARKLING ANIME EYES WITH BLINKING SUPPORT
+      const eyeW = rad * 0.26;
+      const eyePupilMat = new THREE.MeshBasicMaterial({ color: 0x030712 });
       const eyeDotMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
 
-      const eyeLeft = new THREE.Mesh(eyeGeo, eyePupilMat);
-      eyeLeft.position.set(-rad * 0.32, rad * 0.15, rad * 0.88);
-      const dotL = new THREE.Mesh(new THREE.BoxGeometry(eyeW * 0.4, eyeW * 0.4, eyeW * 0.45), eyeDotMat);
-      dotL.position.set(-rad * 0.36, rad * 0.25, rad * 0.95);
-      leaderPip.add(eyeLeft); leaderPip.add(dotL);
+      // Left Eye
+      const eyeLGroup = new THREE.Group();
+      eyeLGroup.position.set(-rad * 0.32, rad * 0.18, rad * 0.88);
+      const pupilL = new THREE.Mesh(new THREE.BoxGeometry(eyeW, eyeW * 1.35, eyeW * 0.4), eyePupilMat);
+      eyeLGroup.add(pupilL);
+      // Large white catchlight sparkle
+      const dotL1 = new THREE.Mesh(new THREE.BoxGeometry(eyeW * 0.45, eyeW * 0.45, eyeW * 0.45), eyeDotMat);
+      dotL1.position.set(-eyeW * 0.18, eyeW * 0.28, eyeW * 0.15);
+      eyeLGroup.add(dotL1);
+      // Small twinkle catchlight
+      const dotL2 = new THREE.Mesh(new THREE.BoxGeometry(eyeW * 0.22, eyeW * 0.22, eyeW * 0.45), eyeDotMat);
+      dotL2.position.set(eyeW * 0.18, -eyeW * 0.25, eyeW * 0.15);
+      eyeLGroup.add(dotL2);
+      leaderPip.add(eyeLGroup);
 
-      const eyeRight = new THREE.Mesh(eyeGeo, eyePupilMat);
-      eyeRight.position.set(rad * 0.32, rad * 0.15, rad * 0.88);
-      const dotR = new THREE.Mesh(new THREE.BoxGeometry(eyeW * 0.4, eyeW * 0.4, eyeW * 0.45), eyeDotMat);
-      dotR.position.set(rad * 0.28, rad * 0.25, rad * 0.95);
-      leaderPip.add(eyeRight); leaderPip.add(dotR);
+      // Right Eye
+      const eyeRGroup = new THREE.Group();
+      eyeRGroup.position.set(rad * 0.32, rad * 0.18, rad * 0.88);
+      const pupilR = new THREE.Mesh(new THREE.BoxGeometry(eyeW, eyeW * 1.35, eyeW * 0.4), eyePupilMat);
+      eyeRGroup.add(pupilR);
+      const dotR1 = new THREE.Mesh(new THREE.BoxGeometry(eyeW * 0.45, eyeW * 0.45, eyeW * 0.45), eyeDotMat);
+      dotR1.position.set(-eyeW * 0.18, eyeW * 0.28, eyeW * 0.15);
+      eyeRGroup.add(dotR1);
+      const dotR2 = new THREE.Mesh(new THREE.BoxGeometry(eyeW * 0.22, eyeW * 0.22, eyeW * 0.45), eyeDotMat);
+      dotR2.position.set(eyeW * 0.18, -eyeW * 0.25, eyeW * 0.15);
+      eyeRGroup.add(dotR2);
+      leaderPip.add(eyeRGroup);
 
-      // Cute Smile Mouth
-      const mouth = new THREE.Mesh(new THREE.BoxGeometry(eyeW * 0.9, eyeW * 0.28, eyeW * 0.3), eyePupilMat);
-      mouth.position.set(0, -rad * 0.12, rad * 0.92);
+      // Cute Cheerful Smiling Mouth
+      const mouthMat = new THREE.MeshBasicMaterial({ color: 0x0f172a });
+      const mouth = new THREE.Mesh(new THREE.BoxGeometry(eyeW * 1.1, eyeW * 0.32, eyeW * 0.3), mouthMat);
+      mouth.position.set(0, -rad * 0.14, rad * 0.94);
       leaderPip.add(mouth);
 
-      // Water arms raised toward the Core
+      // Tiny pink tongue
+      const tongueMat = new THREE.MeshBasicMaterial({ color: 0xf472b6 });
+      const tongue = new THREE.Mesh(new THREE.BoxGeometry(eyeW * 0.55, eyeW * 0.18, eyeW * 0.32), tongueMat);
+      tongue.position.set(0, -rad * 0.18, rad * 0.95);
+      leaderPip.add(tongue);
+
+      // Cute Waving Droplet Arms
       const armMat = pipMat;
-      const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 0.9, 8), armMat);
-      armL.position.set(-rad * 0.88, rad * 0.2, 0);
-      armL.rotation.z = 0.8;
-      const armR = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 0.9, 8), armMat);
-      armR.position.set(rad * 0.88, rad * 0.2, 0);
-      armR.rotation.z = -0.8;
+      const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.2, 0.95, 8), armMat);
+      armL.position.set(-rad * 0.88, rad * 0.15, 0);
+      armL.rotation.z = 0.85;
+      const armR = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.2, 0.95, 8), armMat);
+      armR.position.set(rad * 0.88, rad * 0.15, 0);
+      armR.rotation.z = -0.85;
       leaderPip.add(armL); leaderPip.add(armR);
 
-      // Tail for swishy animation
-      leaderPip.userData = { tail: dropletBody };
+      // Store animation handles
+      leaderPip.userData = {
+        tail: dropletBody,
+        leftEye: eyeLGroup,
+        rightEye: eyeRGroup,
+        armL: armL,
+        armR: armR
+      };
 
       // Sleek 3D Floating Name Tag for Aqua-Pipimon
       const tagPip = this.createFloatingTag('AQUA PIPIMON', 'BFO • Water Droplet', '#06b6d4');
@@ -2231,17 +2307,34 @@ reset() {
       this.pips.push(leaderPip);
       this.proceduralGroup.add(leaderPip);
 
-      // Swimming Mini-Pipimon Droplets orbiting the leader
+      // 4 Playful Mini-Pipimon Droplets (The BFO Chemotaxis Swarm)
       for (let s = 1; s <= 4; s++) {
-        const miniPip = new THREE.Mesh(
-          new THREE.SphereGeometry(0.42, 14, 14),
-          new THREE.MeshStandardMaterial({ color: 0x7dd3fc, emissive: 0x0284c7, emissiveIntensity: 0.5, transparent: true, opacity: 0.85 })
-        );
+        const miniPipGroup = new THREE.Group();
+        const miniMat = new THREE.MeshStandardMaterial({
+          color: 0x7dd3fc,
+          emissive: 0x0284c7,
+          emissiveIntensity: 0.55,
+          transparent: true,
+          opacity: 0.88
+        });
+        const miniSphere = new THREE.Mesh(new THREE.SphereGeometry(0.42, 14, 14), miniMat);
+        miniPipGroup.add(miniSphere);
+        const miniTip = new THREE.Mesh(new THREE.ConeGeometry(0.34, 0.45, 12), miniMat);
+        miniTip.position.y = 0.32;
+        miniPipGroup.add(miniTip);
+
+        // Cute mini eyes
+        const miniEyeL = new THREE.Mesh(new THREE.SphereGeometry(0.065, 8, 8), eyePupilMat);
+        miniEyeL.position.set(-0.12, 0.08, 0.38);
+        const miniEyeR = new THREE.Mesh(new THREE.SphereGeometry(0.065, 8, 8), eyePupilMat);
+        miniEyeR.position.set(0.12, 0.08, 0.38);
+        miniPipGroup.add(miniEyeL); miniPipGroup.add(miniEyeR);
+
         const ang = (s / 4) * Math.PI * 2;
-        miniPip.position.set(3.8 + Math.cos(ang) * 1.8, 2.2 + Math.sin(ang) * 0.4, -28.5 + Math.sin(ang) * 1.8);
-        miniPip.userData = { angle: ang, radius: 1.8 };
-        this.pips.push(miniPip);
-        this.proceduralGroup.add(miniPip);
+        miniPipGroup.position.set(3.8 + Math.cos(ang) * 1.8, 2.2 + Math.sin(ang) * 0.4, -28.5 + Math.sin(ang) * 1.8);
+        miniPipGroup.userData = { angle: ang, radius: 1.8, offset: s * 1.5 };
+        this.pips.push(miniPipGroup);
+        this.proceduralGroup.add(miniPipGroup);
       }
 
       this.setCharMode('procedural');
@@ -2585,108 +2678,84 @@ reset() {
     }
 
     createExplorerTorch() {
-      // Stylized volcanic handheld torch / lantern in camera view
+      // Stylized volcanic handheld torch in camera view
       this.explorerTorch = new THREE.Group();
       this.explorerTorch.position.set(0.38, -0.28, -0.65);
 
-      const handleMat = new THREE.MeshToonMaterial({ color: 0x1c1917, roughness: 0.9 });
-      const flameMat = new THREE.MeshToonMaterial({ color: 0xfef08a, emissive: 0xff5722, emissiveIntensity: 1.8 });
+      const handleMat = new THREE.MeshStandardMaterial({ color: 0x27272a, roughness: 0.7, metalness: 0.3 });
+      const flameMat = new THREE.MeshBasicMaterial({ color: 0xffedd5 });
 
       // Torch handle
-      const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.035, 0.42, 6), handleMat);
-      handle.rotation.x = Math.PI / 4;
+      const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.035, 0.45, 8), handleMat);
+      handle.rotation.x = Math.PI / 3.8;
       this.explorerTorch.add(handle);
 
-      // Torch head & cage
-      const cage = new THREE.Mesh(new THREE.DodecahedronGeometry(0.065, 0), handleMat);
-      cage.position.set(0, 0.16, -0.16);
+      // Torch cage
+      const cage = new THREE.Mesh(new THREE.DodecahedronGeometry(0.07, 0), handleMat);
+      cage.position.set(0, 0.18, -0.16);
       this.explorerTorch.add(cage);
 
       // Flickering flame core
-      this.torchFlame = new THREE.Mesh(new THREE.OctahedronGeometry(0.048, 1), flameMat);
-      this.torchFlame.position.set(0, 0.21, -0.16);
+      this.torchFlame = new THREE.Mesh(new THREE.OctahedronGeometry(0.052, 1), flameMat);
+      this.torchFlame.position.set(0, 0.23, -0.16);
       this.explorerTorch.add(this.torchFlame);
 
       // Warm dynamic point light illuminating the environment ahead
-      this.torchLight = new THREE.PointLight(0xff7700, 1.8, 18);
-      this.torchLight.position.set(0, 0.22, -0.16);
+      this.torchLight = new THREE.PointLight(0xff8811, 2.5, 28, 1.2);
+      this.torchLight.position.set(0, 0.24, -0.16);
       this.explorerTorch.add(this.torchLight);
 
       this.camera.add(this.explorerTorch);
-      this.explorerTorch.visible = false; // Hidden in Orbit mode
+      this.explorerTorch.visible = (this.cameraMode === 'fps');
     }
 
     initFPSControls() {
-      // Keyboard input handling for WASD movement
+      // 1. WASD & Arrow Keys Keyboard Input Handling
       window.addEventListener('keydown', (e) => {
-        // If in First-Person POV mode, allow V or Escape to exit; WASD & Space are reserved for walking/jumping
-        if (this.world && this.world.cameraMode === 'fps') {
-          if (e.key.toLowerCase() === 'v' || e.key === 'Escape') {
-            e.preventDefault();
-            this.world.toggleCameraMode('orbit');
+        if (this.cameraMode !== 'fps') return;
+        const code = e.code;
+        const key = e.key ? e.key.toLowerCase() : '';
+
+        // WASD & Arrow Keys movement
+        if (code === 'KeyW' || code === 'ArrowUp' || key === 'w') this.fpsKeys.forward = true;
+        if (code === 'KeyS' || code === 'ArrowDown' || key === 's') this.fpsKeys.backward = true;
+        if (code === 'KeyA' || code === 'ArrowLeft' || key === 'a') this.fpsKeys.left = true;
+        if (code === 'KeyD' || code === 'ArrowRight' || key === 'd') this.fpsKeys.right = true;
+
+        // Sprinting
+        if (code === 'ShiftLeft' || code === 'ShiftRight') this.fpsPlayer.isSprinting = true;
+
+        // Jump physics
+        if (code === 'Space') {
+          e.preventDefault();
+          if (this.fpsPlayer.isGrounded) {
+            this.fpsPlayer.jumpVelocity = 8.8;
+            this.fpsPlayer.isGrounded = false;
+            if (window.app && window.app.soundtrack && window.app.soundtrack.playChime) {
+              window.app.soundtrack.playChime(523.25, 0, 0.35, 0.12);
+            }
           }
-          return;
         }
 
-        if (e.key.toLowerCase() === 'v') {
+        // Exit POV mode with Escape (V is handled centrally by AppMaster to prevent double-toggle)
+        if (e.key === 'Escape') {
           e.preventDefault();
-          this.world.toggleCameraMode('fps');
-          return;
-        } else if (e.key.toLowerCase() === 'g') {
-          e.preventDefault();
-          this.toggleGameModal();
-          return;
-        } else if (e.key.toLowerCase() === 'a') {
-          e.preventDefault();
-          this.openAblationModal();
-          return;
-        } else if (e.key.toLowerCase() === 'e') {
-          e.preventDefault();
-          this.openEduHubModal();
-          return;
-        } else if (e.key.toLowerCase() === 'h') {
-          e.preventDefault();
-          const targetMode = (this.expMode === 'standoff') ? 'hybrid' : 'standoff';
-          const btn = document.querySelector(`#expSeg button[data-exp="${targetMode}"]`);
-          if (btn) btn.click();
-          return;
-        } else if (e.code === 'Space') {
-          e.preventDefault();
-          this.togglePlay();
-        } else if (e.key.toLowerCase() === 'r') {
-          this.world.resetCamera();
-          this.say("📷 Posisi kamera direset ke pandangan depan.");
-        } else if (e.key === 'ArrowRight') {
-          if (this.sheetOverlay.classList.contains('open')) {
-            if (this.sheetIndex < this.sheetSlides.length - 1) this.showSlide(this.sheetIndex + 1);
-          } else {
-            this.step();
-          }
-        } else if (e.key === 'ArrowLeft') {
-          if (this.sheetOverlay.classList.contains('open')) {
-            if (this.sheetIndex > 0) this.showSlide(this.sheetIndex - 1);
-          }
-        } else if (e.key.toLowerCase() === 'f') {
-          document.getElementById('btnFullscreen').click();
-        } else if (e.key.toLowerCase() === 'q') {
-          if (!this.inputPeerPool || document.activeElement !== this.inputPeerPool) {
-            e.preventDefault();
-            this.toggleDrillModal();
-          }
+          this.toggleCameraMode('orbit');
         }
       });
 
       window.addEventListener('keyup', (e) => {
         if (this.cameraMode !== 'fps') return;
         const code = e.code;
-        if (code === 'KeyW' || code === 'ArrowUp') this.fpsKeys.forward = false;
-        if (code === 'KeyS' || code === 'ArrowDown') this.fpsKeys.backward = false;
-        if (code === 'KeyA' || code === 'ArrowLeft') this.fpsKeys.left = false;
-        if (code === 'KeyD' || code === 'ArrowRight') this.fpsKeys.right = false;
+        const key = e.key ? e.key.toLowerCase() : '';
+        if (code === 'KeyW' || code === 'ArrowUp' || key === 'w') this.fpsKeys.forward = false;
+        if (code === 'KeyS' || code === 'ArrowDown' || key === 's') this.fpsKeys.backward = false;
+        if (code === 'KeyA' || code === 'ArrowLeft' || key === 'a') this.fpsKeys.left = false;
+        if (code === 'KeyD' || code === 'ArrowRight' || key === 'd') this.fpsKeys.right = false;
         if (code === 'ShiftLeft' || code === 'ShiftRight') this.fpsPlayer.isSprinting = false;
       });
 
-      // Mouse Look / Pointer Lock handling
+      // 2. Mouse Look / Pointer Lock handling
       const dom = this.renderer.domElement;
       dom.addEventListener('click', () => {
         if (this.cameraMode === 'fps' && document.pointerLockElement !== dom) {
@@ -2714,20 +2783,18 @@ reset() {
       const nextMode = targetMode || (this.cameraMode === 'fps' ? 'orbit' : 'fps');
       this.cameraMode = nextMode;
 
-      const btnToggle = document.getElementById('btnTogglePOV');
       const btnTop = document.getElementById('btnOpenPOV');
       const povHUD = document.getElementById('pov-hud');
 
       if (nextMode === 'fps') {
         if (this.controls) this.controls.enabled = false;
-        this.fpsPlayer.position.set(0, 0, 18); // Inside castle grand hall entrance
+        this.fpsPlayer.position.set(0, 0, 10); // Inside castle grand hall with full view of Dais & Rulers
         this.fpsPlayer.yaw = 0; // Facing North toward Throne & Hybrid Core
         this.fpsPlayer.pitch = -0.02;
         this.fpsPlayer.velocity.set(0, 0, 0);
         this.fpsPlayer.isGrounded = true;
 
         if (this.explorerTorch) this.explorerTorch.visible = true;
-        if (btnToggle) btnToggle.classList.add('on');
         if (btnTop) {
           btnTop.style.background = 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)';
           btnTop.style.borderColor = '#f59e0b';
@@ -2735,7 +2802,7 @@ reset() {
         if (povHUD) povHUD.style.display = 'block';
 
         if (window.app && window.app.say) {
-          window.app.say("🚶 Mode Jelajah First-Person POV AKTIF! Gunakan tombol W, A, S, D untuk berjalan mengelilingi kerajaan, Mouse untuk melihat sekeliling, dan Spasi untuk melompat.");
+          window.app.say("🚶 Mode Jelajah First-Person POV AKTIF! Gunakan W, A, S, D untuk berjalan ke Singgasana Hybrid di ujung lorong, Mouse untuk melihat sekeliling, dan Spasi untuk melompat!");
         }
       } else {
         if (this.controls) {
@@ -2747,7 +2814,6 @@ reset() {
         this.camera.rotation.order = 'XYZ';
 
         if (this.explorerTorch) this.explorerTorch.visible = false;
-        if (btnToggle) btnToggle.classList.remove('on');
         if (btnTop) {
           btnTop.style.background = 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)';
           btnTop.style.borderColor = '#cbd5e1';
@@ -2859,61 +2925,110 @@ reset() {
       const box = document.getElementById('pov-proximity-box');
       if (!box) return;
 
-      // 1. Far End: The Grand Hybrid Dais (Kocorock & Pipimon Working Together!)
+      // 1. Magma-Kocorock (Left on Dais, x = -3.8, z = -28.5)
+      const distKocok = Math.hypot(p.x - (-3.8), p.z - (-28.5));
+      if (distKocok < 5.2) {
+        box.style.display = 'block';
+        box.innerHTML = `
+          <div style="font-weight:800; color:#f59e0b; font-size:14px; display:flex; align-items:center; justify-content:center; gap:6px;">
+            <span>🌋</span> <span>MAGMA-KOCOROCK • PAKAR VNS (VARIABLE NEIGHBORHOOD SEARCH)</span>
+          </div>
+          <div style="font-size:12px; color:#fde68a; margin-top:2px; font-weight:700;">
+            Peran: Eksploitasi Lokal Agresif & Eliminasi Bottleneck Data Center
+          </div>
+          <div style="font-size:11.5px; color:#e2e8f0; margin-top:6px; line-height:1.45; text-align:left;">
+            • <b>Jurus Shaking (Radius k=1..3):</b> Menghantamkan kapak obsidian ke node terberat untuk memindahkan kristal tugas ke mesin yang lebih longgar.<br>
+            • <b>First-Improvement Descent:</b> Segera mengadopsi solusi baru saat Makespan membaik untuk efisiensi komputasi maksimal.<br>
+            • <b>Target Objektif:</b> Memangkas puncak Makespan teoretis: <code>C_max = max(Load_j / MIPS_j)</code>.
+          </div>
+        `;
+        if (this.showBubble) {
+          this.showBubble('kocorock', '🔥 Salam penjelajah! Aku Magma-Kocorock! Kapak obsidianku mengeliminasi antrean bottleneck dengan Shaking bertingkat!', 3500);
+        }
+        return;
+      }
+
+      // 2. Aqua-Pipimon (Right on Dais, x = 3.8, z = -28.5)
+      const distPip = Math.hypot(p.x - 3.8, p.z - (-28.5));
+      if (distPip < 5.2) {
+        box.style.display = 'block';
+        box.innerHTML = `
+          <div style="font-weight:800; color:#38bdf8; font-size:14px; display:flex; align-items:center; justify-content:center; gap:6px;">
+            <span>💧</span> <span>AQUA-PIPIMON • RATU BFO (BACTERIAL FORAGING OPTIMIZATION)</span>
+          </div>
+          <div style="font-size:12px; color:#bae6fd; margin-top:2px; font-weight:700;">
+            Peran: Eksplorasi Global Swarm & Penjelajahan Manifold Solusi
+          </div>
+          <div style="font-size:11.5px; color:#e2e8f0; margin-top:6px; line-height:1.45; text-align:left;">
+            • <b>Kemotaksis (Tumble & Swim):</b> Koloni droplet bakteri berenang serempak menuju gradien nutrisi konsentrasi tinggi (Makespan terendah).<br>
+            • <b>Reproduksi Bakteri:</b> 50% bakteri terunggul membelah diri, memperbanyak bibit solusi berkualitas.<br>
+            • <b>Eliminasi-Dispersi:</b> Mengacak sebagian bakteri agar optimasi tidak terjebak di optimum lokal!
+          </div>
+        `;
+        if (this.showBubble) {
+          this.showBubble('pipimon', '💧 Halo petualang! Aku Aqua-Pipimon! Koloni kami memindai ruang solusi global dengan kemotaksis cerdas!', 3500);
+        }
+        return;
+      }
+
+      // 3. Center Dais: Reaktor Sintesis Hibrida (Memetic BFO-VNS, x = 0, z = -28.5)
       const distToThrone = Math.hypot(p.x, p.z - (-28.5));
       if (distToThrone < 6.8) {
         box.style.display = 'block';
         box.innerHTML = `
-          <div style="font-weight:800; color:#38bdf8; font-size:13.5px; display:flex; align-items:center; justify-content:center; gap:6px;">
-            <span>👑</span> <span>SINGGASANA ALIANSI HIBRIDA (MEMETIC BFO-VNS)</span>
+          <div style="font-weight:800; color:#fbbf24; font-size:14px; display:flex; align-items:center; justify-content:center; gap:6px;">
+            <span>⚡</span> <span>REAKTOR SINTESIS HIBRIDA (MEMETIC BFO-VNS: 1 + 1 > 2)</span>
           </div>
-          <div style="font-size:11.5px; color:#f8fafc; margin-top:4px; line-height:1.4;">
-            <b>Magma-Kocorock (VNS)</b> dan <b>Aqua-Pipimon (BFO)</b> bersatu di depan Reaktor Hibrida! Pipimon memindai ruang solusi global dengan kemotaksis swarm, lalu Kocorock mengocok dan memangkas pulau bottleneck dengan kapak volkaniknya. 
-            <span style="color:#f59e0b; font-weight:700;">Prinsip Ilmiah: 1 + 1 > 2 (Makespan Lebih Optimal dari Algoritma Tunggal)!</span>
+          <div style="font-size:12px; color:#fef08a; margin-top:2px; font-weight:700;">
+            Sinergi Emas: Eksplorasi Global (BFO) + Eksploitasi Lokal (VNS)
+          </div>
+          <div style="font-size:11.5px; color:#f8fafc; margin-top:6px; line-height:1.45; text-align:left;">
+            • <b>Mengapa Algoritma Hibrida Menang?</b> VNS mandiri cepat namun rentan buntu lokal. BFO mandiri luas namun lambat konvergen. Saat digabung, BFO memandu koloni ke lembah global terbaik, lalu VNS mengasah solusi hingga mencapai <b>Theoretical Lower Bound</b>!<br>
+            • <b>Hasil Uji Empiris:</b> Memangkas Makespan sebesar <b>34.8%</b>, utilisasi CPU <b>92.4%</b>, dan Degree of Imbalance mendekati nol!
           </div>
         `;
         return;
       }
 
-      // 2. Near VM 1 (x = -5.5, z = 8)
+      // 4. Near VM 1 (x = -5.5, z = 8)
       const distVM1 = Math.hypot(p.x - (-5.5), p.z - 8);
       if (distVM1 < 4.8) {
         box.style.display = 'block';
         box.innerHTML = `
           <div style="font-weight:800; color:#ef4444; font-size:13px;">📍 VM 1: Kuil Kilat (Compute-Optimized)</div>
-          <div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">Kapasitas: <b>3500 MIPS</b>. Mesin tercepat namun rentan memicu bottleneck jika tugas menumpuk!</div>
+          <div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">Kapasitas: <b>3500 MIPS</b> (54% total kapasitas cluster). Mesin tercepat namun rentan memicu bottleneck jika tugas menumpuk!</div>
         `;
         return;
       }
 
-      // 3. Near VM 2 (x = 0, z = -2)
+      // 5. Near VM 2 (x = 0, z = -2)
       const distVM2 = Math.hypot(p.x, p.z - (-2));
       if (distVM2 < 4.8) {
         box.style.display = 'block';
         box.innerHTML = `
           <div style="font-weight:800; color:#eab308; font-size:13px;">📍 VM 2: Kuil Seimbang (General Purpose)</div>
-          <div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">Kapasitas: <b>2000 MIPS</b>. Titik tumpu penyeimbang beban kerja heterogen.</div>
+          <div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">Kapasitas: <b>2000 MIPS</b> (31% total kapasitas cluster). Titik tumpu penyeimbang beban kerja heterogen.</div>
         `;
         return;
       }
 
-      // 4. Near VM 3 (x = 5.5, z = -12)
+      // 6. Near VM 3 (x = 5.5, z = -12)
       const distVM3 = Math.hypot(p.x - 5.5, p.z - (-12));
       if (distVM3 < 4.8) {
         box.style.display = 'block';
         box.innerHTML = `
           <div style="font-weight:800; color:#06b6d4; font-size:13px;">📍 VM 3: Kuil Hemat (Eco Burst)</div>
-          <div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">Kapasitas: <b>1000 MIPS</b>. Mesin hemat energi untuk menangani tugas ringan secara efisien.</div>
+          <div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">Kapasitas: <b>1000 MIPS</b> (15% total kapasitas cluster). Mesin hemat energi untuk tugas komputasi ringan.</div>
         `;
         return;
       }
 
-      // 5. Entrance / Hallway
-      if (p.z > 14) {
+      // 7. Hallway entrance
+      if (p.z > 12) {
         box.style.display = 'block';
         box.innerHTML = `
-          <div style="font-weight:800; color:#f59e0b; font-size:12.5px;">🏰 Gerbang Masuk Kastil Sintesis Hibrida</div>
-          <div style="font-size:11px; color:#94a3b8; margin-top:2px;">Berjalanlah lurus menyusuri lorong (tekan <b>W</b>) menuju Singgasana Kocorock & Pipimon di ujung kastil!</div>
+          <div style="font-weight:800; color:#f59e0b; font-size:12.5px;">🏰 Lorong Kastil Sintesis Hibrida</div>
+          <div style="font-size:11px; color:#94a3b8; margin-top:2px;">Gunakan <b>W, A, S, D</b> untuk berjalan lurus menyusuri karpet runik menuju Singgasana Kocorock & Pipimon di ujung kastil!</div>
         `;
         return;
       }
@@ -2955,28 +3070,53 @@ reset() {
 
       const isJumping = (mesh) => this.activeJumps && this.activeJumps.some(j => j.mesh === mesh);
 
-      // 2. Animate Pips: squishy hopping bounce & mini pip flock (Safe against undefined tail!)
+      // 2. Animate Pips: Kawaii Blinking, Cheerful Arm Waving, Squishy Jelly Bounce & Mini Pip Leaps
       if (this.pips && this.pips.length > 0) {
         const leader = this.pips[0];
-        if (leader.userData && leader.userData.tail) {
-          leader.userData.tail.rotation.z = Math.sin(t * 3.5) * 0.45;
+        if (leader.userData) {
+          if (leader.userData.tail) {
+            leader.userData.tail.rotation.z = Math.sin(t * 3.5) * 0.25;
+          }
+          // Anime Blinking loop (every ~3.5 seconds)
+          if (leader.userData.leftEye && leader.userData.rightEye) {
+            const blinkTime = (t * 0.75) % (Math.PI * 2);
+            const isBlink = (blinkTime > 5.9 && blinkTime < 6.2);
+            const scY = isBlink ? 0.12 : 1.0;
+            leader.userData.leftEye.scale.y = scY;
+            leader.userData.rightEye.scale.y = scY;
+          }
+          // Cheerful arm waving loop
+          if (leader.userData.armL && leader.userData.armR) {
+            leader.userData.armL.rotation.z = 0.8 + Math.sin(t * 5.0) * 0.32;
+            leader.userData.armR.rotation.z = -0.8 - Math.cos(t * 5.0) * 0.32;
+          }
         }
         if (!isJumping(leader)) {
-          leader.position.y = 2.0 + Math.abs(Math.sin(t * 2.5)) * 0.12;
+          // Gelatinous squishy bounce physics
+          const sq = Math.sin(t * 3.6) * 0.06;
+          leader.scale.set(1.0 + sq, 1.0 - sq * 1.4, 1.0 + sq);
+          leader.position.y = 2.0 + Math.abs(Math.sin(t * 2.6)) * 0.16;
         }
-        // Mini pips orbit around leader
+        // Mini pips orbit and playful leaps around leader
         for (let i = 1; i < this.pips.length; i++) {
           const mp = this.pips[i];
           if (mp.userData && mp.userData.angle !== undefined) {
-            mp.userData.angle += 0.025;
+            mp.userData.angle += 0.028;
             mp.position.x = leader.position.x + Math.cos(mp.userData.angle) * mp.userData.radius;
             mp.position.z = leader.position.z + Math.sin(mp.userData.angle) * mp.userData.radius;
-            mp.position.y = leader.position.y + 0.2 + Math.sin(t * 4.0 + i) * 0.2;
+            mp.position.y = leader.position.y + 0.25 + Math.abs(Math.sin(t * 4.2 + (mp.userData.offset || i))) * 0.55;
           }
         }
       }
 
-      // 3. Characters gentle breathing / idle bounce on Dais
+      // 3. Magma Kocorock Breathing Core & Axe Channeling Animation
+      if (this.kocokCore) {
+        this.kocokCore.material.emissiveIntensity = 1.4 + Math.sin(t * 2.8) * 0.5;
+      }
+      if (this.axe) {
+        this.axe.rotation.z = -0.55 + Math.sin(t * 2.0) * 0.1;
+        this.axe.rotation.x = 0.2 + Math.cos(t * 2.0) * 0.08;
+      }
       if (this.meshyKocok && !isJumping(this.meshyKocok)) {
         this.meshyKocok.position.y = 2.0 + Math.sin(t * 1.5) * 0.08;
       }
@@ -4113,31 +4253,41 @@ reset() {
 
       // Keyboard Shortcuts
       window.addEventListener('keydown', (e) => {
+        // If typing inside an input or textarea, don't hijack keys
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+
+        // Key V toggles First-Person POV mode vs Orbit mode cleanly from anywhere!
         if (e.key.toLowerCase() === 'v') {
           e.preventDefault();
           this.world.toggleCameraMode();
           return;
-        } else if (e.key.toLowerCase() === 'g') {
+        }
+
+        // If in FPS mode, WASD & Space are handled by World3D for walking and jumping!
+        if (this.world && this.world.cameraMode === 'fps') {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            this.world.toggleCameraMode('orbit');
+          }
+          return;
+        }
+
+        // Global shortcuts when in Orbit Mode
+        if (e.key.toLowerCase() === 'g') {
           e.preventDefault();
           this.toggleGameModal();
-          return;
-        } else if (e.code === 'Space') {
-        if (e.key.toLowerCase() === 'a') {
+        } else if (e.key.toLowerCase() === 'a') {
           e.preventDefault();
           this.openAblationModal();
-          return;
         } else if (e.key.toLowerCase() === 'e') {
           e.preventDefault();
           this.openEduHubModal();
-          return;
         } else if (e.key.toLowerCase() === 'h') {
           e.preventDefault();
           const targetMode = (this.expMode === 'standoff') ? 'hybrid' : 'standoff';
           const btn = document.querySelector(`#expSeg button[data-exp="${targetMode}"]`);
           if (btn) btn.click();
-          return;
-        }
-
+        } else if (e.code === 'Space') {
           e.preventDefault();
           this.togglePlay();
         } else if (e.key.toLowerCase() === 'r') {
@@ -4156,14 +4306,15 @@ reset() {
         } else if (e.key.toLowerCase() === 'f') {
           document.getElementById('btnFullscreen').click();
         } else if (e.key.toLowerCase() === 'q') {
-          if (!this.inputPeerPool || document.activeElement !== this.inputPeerPool) {
-            e.preventDefault();
-            this.toggleDrillModal();
-          }
+          e.preventDefault();
+          this.toggleDrillModal();
         } else if (e.key === 'Escape') {
           if (this.drillOverlay) this.drillOverlay.classList.remove('open');
-          this.sheetOverlay.classList.remove('open');
-          this.pane2D.classList.remove('open');
+          if (this.sheetOverlay) this.sheetOverlay.classList.remove('open');
+          if (this.pane2D) this.pane2D.classList.remove('open');
+          if (this.ablationOverlay) this.ablationOverlay.classList.remove('open');
+          if (this.eduhubOverlay) this.eduhubOverlay.classList.remove('open');
+          if (this.gameOverlay) this.gameOverlay.classList.remove('open');
         }
       });
     }
