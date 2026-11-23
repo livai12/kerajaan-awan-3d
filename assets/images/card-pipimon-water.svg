@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 280" width="100%" height="100%">
+  <defs>
+    <!-- Deep Oceanic Azure Background -->
+    <linearGradient id="oceanCardBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#082f49"/>
+      <stop offset="50%" stop-color="#0c4a6e"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+
+    <!-- Glossy Aqua Droplet Gradient -->
+    <linearGradient id="waterDropletGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="35%" stop-color="#7dd3fc"/>
+      <stop offset="80%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+
+    <!-- Water Glow Filter -->
+    <filter id="waterGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4.5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <!-- Water Ripple Grid Pattern -->
+    <pattern id="waterGrid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="rgba(56, 189, 248, 0.1)" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="380" height="280" rx="18" fill="url(#oceanCardBg)" stroke="#38bdf8" stroke-width="2"/>
+  <rect width="380" height="280" rx="18" fill="url(#waterGrid)"/>
+
+  <!-- Glowing Corner Accents -->
+  <path d="M 14 30 L 14 14 L 30 14" fill="none" stroke="#38bdf8" stroke-width="2.5" filter="url(#waterGlow)"/>
+  <path d="M 366 30 L 366 14 L 350 14" fill="none" stroke="#38bdf8" stroke-width="2.5" filter="url(#waterGlow)"/>
+  <path d="M 14 250 L 14 266 L 30 266" fill="none" stroke="#38bdf8" stroke-width="2.5" filter="url(#waterGlow)"/>
+  <path d="M 366 250 L 366 266 L 350 266" fill="none" stroke="#38bdf8" stroke-width="2.5" filter="url(#waterGlow)"/>
+
+  <!-- Character Presentation: Pixel Water Droplet (Right Side - matching Image 2) -->
+  <g transform="translate(262, 145)">
+    <!-- Water Ripple Platform -->
+    <ellipse cx="0" cy="85" rx="55" ry="12" fill="#082f49" stroke="#38bdf8" stroke-width="2" filter="url(#waterGlow)"/>
+    <ellipse cx="0" cy="85" rx="35" ry="7" fill="rgba(56, 189, 248, 0.3)"/>
+
+    <!-- Pixel Art Water Droplet Body (Recreating Image 2 accurately) -->
+    <!-- Teardrop Pointed Top & Rounded Bottom with Pixel Stepping -->
+    <path d="
+      M 0 -75
+      L 8 -65 L 14 -55 L 22 -40 L 28 -20 L 34 0 L 36 20 L 32 45 L 24 62 L 14 70 L -14 70 L -24 62 L -32 45 L -36 20 L -34 0 L -28 -20 L -22 -40 L -14 -55 L -8 -65 Z
+    " fill="url(#waterDropletGrad)" stroke="#0284c7" stroke-width="3" filter="url(#waterGlow)"/>
+
+    <!-- Pixelated White Glint / Reflection (as in Image 2) -->
+    <!-- Top Left Shine -->
+    <rect x="-14" y="-45" width="12" height="12" fill="#ffffff" opacity="0.85"/>
+    <rect x="-8" y="-55" width="8" height="10" fill="#ffffff" opacity="0.85"/>
+    <rect x="-18" y="-33" width="10" height="18" fill="#ffffff" opacity="0.85"/>
+    <!-- Belly Reflection (from Image 2) -->
+    <ellipse cx="0" cy="35" rx="14" ry="18" fill="#ffffff" opacity="0.45"/>
+
+    <!-- Cute Eyes (Square Pixel Style from Image 2) -->
+    <!-- Left Eye -->
+    <rect x="-16" y="-12" width="10" height="14" rx="2" fill="#082f49"/>
+    <rect x="-14" y="-10" width="4" height="5" fill="#ffffff"/>
+    <!-- Right Eye -->
+    <rect x="6" y="-12" width="10" height="14" rx="2" fill="#082f49"/>
+    <rect x="8" y="-10" width="4" height="5" fill="#ffffff"/>
+
+    <!-- Cheerful Pixel Smile -->
+    <rect x="-8" y="10" width="16" height="4" rx="1.5" fill="#082f49"/>
+
+    <!-- Cute Tiny Water Droplet Arms -->
+    <rect x="-42" y="5" width="10" height="24" rx="4" fill="#38bdf8" stroke="#0284c7" stroke-width="2"/>
+    <rect x="32" y="5" width="10" height="24" rx="4" fill="#38bdf8" stroke="#0284c7" stroke-width="2"/>
+
+    <!-- Cute Little Droplet Feet -->
+    <rect x="-18" y="66" width="10" height="14" rx="3" fill="#38bdf8" stroke="#0284c7" stroke-width="2"/>
+    <rect x="8" y="66" width="10" height="14" rx="3" fill="#38bdf8" stroke="#0284c7" stroke-width="2"/>
+
+    <!-- Floating Mini Swarm Water Bubbles -->
+    <circle cx="-50" cy="-35" r="5" fill="#e0f2fe" filter="url(#waterGlow)"/>
+    <circle cx="48" cy="-40" r="4" fill="#e0f2fe" filter="url(#waterGlow)"/>
+    <circle cx="52" cy="15" r="5.5" fill="#bae6fd" filter="url(#waterGlow)"/>
+    <circle cx="-48" cy="45" r="3.5" fill="#7dd3fc"/>
+  </g>
+
+  <!-- Left Information Section -->
+  <g transform="translate(22, 22)">
+    <!-- Header Chip -->
+    <rect width="155" height="22" rx="6" fill="rgba(56, 189, 248, 0.2)" stroke="#38bdf8" stroke-width="1.2"/>
+    <text x="8" y="15" font-family="'JetBrains Mono', monospace" font-size="9.5" font-weight="800" fill="#e0f2fe">HYBRID 1 • BFO CHEMOTAXIS</text>
+
+    <!-- Character Name -->
+    <text x="0" y="52" font-family="'Fraunces', serif" font-size="23" font-weight="700" fill="#ffffff" font-style="italic">Pipimon</text>
+    <text x="0" y="70" font-family="'Inter', sans-serif" font-size="11.5" font-weight="600" fill="#bae6fd">The Aqua Droplet Swarm</text>
+
+    <!-- Technical Specs Grid -->
+    <g transform="translate(0, 88)">
+      <rect width="155" height="26" rx="6" fill="rgba(8, 47, 73, 0.75)" stroke="#0284c7" stroke-width="1"/>
+      <text x="8" y="17" font-family="'Inter', sans-serif" font-size="10.5" font-weight="600" fill="#e0f2fe">Tipe: Swarm Intelligence</text>
+
+      <rect y="32" width="155" height="26" rx="6" fill="rgba(8, 47, 73, 0.75)" stroke="#0284c7" stroke-width="1"/>
+      <text x="8" y="49" font-family="'Inter', sans-serif" font-size="10.5" font-weight="600" fill="#e0f2fe">Karakteristik: Aqua Droplet</text>
+
+      <rect y="64" width="155" height="26" rx="6" fill="rgba(8, 47, 73, 0.75)" stroke="#0284c7" stroke-width="1"/>
+      <text x="8" y="81" font-family="'Inter', sans-serif" font-size="10.5" font-weight="600" fill="#38bdf8">Operasi: Swim &amp; Tumble</text>
+
+      <rect y="96" width="155" height="26" rx="6" fill="rgba(56, 189, 248, 0.25)" stroke="#38bdf8" stroke-width="1.2"/>
+      <text x="8" y="113" font-family="'Inter', sans-serif" font-size="10.5" font-weight="800" fill="#ffffff">Fokus: Global Exploration</text>
+    </g>
+  </g>
+</svg>

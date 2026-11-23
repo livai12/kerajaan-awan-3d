@@ -1,12 +1,13 @@
 /**
  * Kerajaan Awan 3D - Modul Riset & Studi Ablasi (Ablation Study Benchmark)
- * Membandingkan 5 algoritma di bawah paritas ketat anggaran NFE (Number of Fitness Evaluations = 600)
- * Sesuai panduan ilmiah Perkuliahan Minggu 12 (Taksonomi El-Ghazali Talbi & 5 Pola Hibridisasi):
+ * Membandingkan algoritma di bawah paritas ketat anggaran NFE (Number of Fitness Evaluations = 600)
+ * Sesuai Dokumen Riset: "Analisis Perbandingan Algoritma Hybrid BFO-VNS dan PSO-MinMin untuk Minimasi Makespan"
+ * & Panduan Ilmiah Minggu 12 (Taksonomi El-Ghazali Talbi 2002):
  * 1. Min-Min (Heuristik Deterministik Klasik)
- * 2. VNS Murni (Kocorock)
- * 3. BFO Murni (Pipimon)
- * 4. Hybrid 2: Heuristic-Seeded BFO (Pola B - HRH)
- * 5. Hybrid 1: Memetic BFO-VNS (Pola D - LRH)
+ * 2. VNS Murni (Kocorock - Trajectory Metaheuristic)
+ * 3. BFO Murni (Pipimon - Swarm Metaheuristic)
+ * 4. Hybrid 2: PSO-MinMin (Pola B - HRH: Heuristik + Metaheuristik)
+ * 5. Hybrid 1: Memetic BFO-VNS (Pola D - LRH: Metaheuristik + Metaheuristik)
  */
 
 import {
@@ -21,6 +22,7 @@ import {
 import { VNSEngine } from './engine-vns.js';
 import { BFOEngine } from './engine-bfo.js';
 import { MemeticBFOVNSEngine } from './engine-hybrid-memetic.js';
+import { PSOMinMinEngine } from './engine-hybrid-pso-minmin.js';
 import { HeuristicSeededBFOEngine } from './engine-hybrid-seeded.js';
 
 /**
@@ -46,6 +48,7 @@ export function calcStdDev(arr, mean = null) {
  * Menguji signifikansi statistik antara dua populasi independen dengan varians berbeda
  */
 export function calcPValue(arrA, arrB) {
+  if (!arrA || !arrB) return 1.0;
   const n1 = arrA.length;
   const n2 = arrB.length;
   if (n1 < 2 || n2 < 2) return 1.0;
@@ -77,7 +80,7 @@ export function calcPValue(arrA, arrB) {
 /**
  * Menjalankan satu run algoritma hingga batas NFE tercapai
  */
-function runSingleAlgorithm(algoType, tasks, vms, maxNFE = 600) {
+export function runSingleAlgorithm(algoType, tasks, vms, maxNFE = 600) {
   const startTime = performance.now();
   let bestSolution = null;
   let bestMakespan = Infinity;
@@ -116,6 +119,24 @@ function runSingleAlgorithm(algoType, tasks, vms, maxNFE = 600) {
 
   if (algoType === 'bfo') {
     const engine = new BFOEngine(tasks, vms, { populationSize: 6 });
+    while (engine.evaluations < maxNFE) {
+      engine.step();
+    }
+    bestSolution = engine.bestSolution;
+    bestMakespan = engine.bestMakespan;
+    const duration = performance.now() - startTime;
+    const loads = calculateVmLoads(bestSolution, tasks, vms);
+    return {
+      makespan: bestMakespan,
+      di: calculateDegreeOfImbalance(loads),
+      util: calculateResourceUtilization(loads),
+      timeMs: duration,
+      nfe: engine.evaluations
+    };
+  }
+
+  if (algoType === 'hybrid_pso_minmin') {
+    const engine = new PSOMinMinEngine(tasks, vms, { maxNFE });
     while (engine.evaluations < maxNFE) {
       engine.step();
     }
@@ -179,8 +200,8 @@ export function runAblationStudy(tasks, vms, runs = 30, maxNFE = 600) {
     { id: 'minmin', name: 'Heuristik Min-Min', category: 'Baseline Heuristik', pattern: '-' },
     { id: 'vns', name: 'VNS Murni (Kocorock)', category: 'Trajectory Metaheuristic', pattern: '-' },
     { id: 'bfo', name: 'BFO Murni (Pipimon)', category: 'Swarm Metaheuristic', pattern: '-' },
-    { id: 'hybrid_seeded', name: 'Hybrid 2: Heuristic-Seeded BFO', category: 'Pola B (HRH)', pattern: 'Pola B (High-Level Relay)' },
-    { id: 'hybrid_memetic', name: 'Hybrid 1: Memetic BFO-VNS', category: 'Pola D (LRH)', pattern: 'Pola D (Low-Level Relay)' }
+    { id: 'hybrid_pso_minmin', name: 'Hybrid 2: PSO-MinMin', category: 'Pola B (HRH)', pattern: 'Heuristik + Metaheuristik' },
+    { id: 'hybrid_memetic', name: 'Hybrid 1: Memetic BFO-VNS', category: 'Pola D (LRH)', pattern: 'Metaheuristik + Metaheuristik' }
   ];
 
   const results = {};
@@ -240,6 +261,7 @@ export function runAblationStudy(tasks, vms, runs = 30, maxNFE = 600) {
   const memeticMS = results['hybrid_memetic'].rawMakespans;
   results['hybrid_memetic'].pValueVsBFO = calcPValue(memeticMS, results['bfo'].rawMakespans);
   results['hybrid_memetic'].pValueVsVNS = calcPValue(memeticMS, results['vns'].rawMakespans);
+  results['hybrid_memetic'].pValueVsPSOMinMin = calcPValue(memeticMS, results['hybrid_pso_minmin'].rawMakespans);
 
   return results;
 }

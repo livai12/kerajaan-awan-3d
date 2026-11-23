@@ -17,9 +17,9 @@ Salin dan tempelkan data berikut langsung ke [Google Spreadsheet Tugas Hibrida](
 | Kolom Spreadsheet | Nilai / Teks Pengisian |
 | :--- | :--- |
 | **Hybrid 1 (Unggulan)** | `Memetic BFO-VNS (Low-Level Relay Hybrid: Bacterial Foraging Optimization + Bottleneck Variable Neighborhood Search)` |
-| **Referensi 1** | `https://doi.org/10.1016/j.asoc.2021.107753 (Elsevier: Applied Soft Computing - Memetic Bacterial Swarm with Neighborhood Search for Cloud Scheduling)` |
-| **Hybrid 2 (Komparator)**| `Heuristic-Seeded BFO (High-Level Relay Hybrid: Min-Min / Max-Min Dispatcher Seed Injection into Bacterial Foraging Optimization)` |
-| **Referensi 2** | `https://doi.org/10.1109/TSC.2018.2889078 (IEEE Transactions on Services Computing - Heuristic-Seeded Bio-Inspired Scheduling in Heterogeneous Cloud)` |
+| **Referensi 1** | `https://doi.org/10.5267/j.ijiec.2026.6.005 (Silva-Muñoz et al., 2026 - A hybrid bacterial foraging optimization algorithm for makespan minimization)` |
+| **Hybrid 2 (Komparator)**| `PSO-MinMin (High-Level Relay Hybrid: Min-Min Heuristic Seed Injection into Particle Swarm Optimization)` |
+| **Referensi 2** | `https://doi.org/10.70102/afts.2025.1833.022 (Mokhtari et al., 2025 - GA-PSO-MIN: A Hybrid Heuristic Algorithm for Multi-Objective Job Scheduling)` |
 
 ---
 
@@ -55,7 +55,21 @@ Beralih dari sekadar komparasi rivalitas sederhana menjadi **Laboratorium Sintes
   - **Tab 3: Anatomi Memetic BFO-VNS**: Tahapan matematis integrasi kemotaksis Pipimon dan shaking Kocorock.
   - **Tab 4: Rubrik Sidang & Uji Ilmiah**: Kunci jawaban atas pertanyaan kritis dosen penguji.
 
-### 4. 🎯 Mode Interaktif Uji Audiens & Bedah Pemahaman Teman 3D
+### 4. 🎮 Game Edukatif: Cloud Dispatcher Challenge
+- **Shortcut `[G]`** atau tombol `[🎮 Game Edukatif [G]]`:
+- Sarana pembelajaran berbasis gamifikasi (*gamified dispatching challenge*):
+  - Mahasiswa bertindak sebagai **Cloud Dispatcher**, mengalokasikan 10 tugas heterogen (150–1200 MI) ke 3 VM heterogen (3500, 2000, 1000 MIPS).
+  - Metrik live langsung terhitung: Makespan ($C_{max}$), Batas Bawah Teoretis ($LB_{ideal}$), Gap persentase ke batas ideal, Degree of Imbalance (DoI), dan Utilisasi Sumber Daya (ARU).
+  - Sinkronisasi visual 3D spasial seketika pada pulau basalt volkanik.
+  - **Tombol Uji vs 5 AI**: Menantang solusi pemain langsung berhadapan dengan Min-Min, VNS, BFO, PSO-MinMin, dan Memetic BFO-VNS dengan sistem penilaian Rank S / A / B / C.
+  - **Petunjuk Pedagogis Cerdas**: Kocorock memberikan saran *Shaking Relocate* untuk memangkas bottleneck, dan Pipimon memberikan saran *Chemotaxis Nutrient Gradient*.
+
+### 5. 🌋 Aset Visual Baru: Volcanic Basalt Forge & Magma Ocean
+- **Kocorock (Magma Obsidian Golem)**: Zirah lempengan batu obsidian gelap dengan retakan magma pijar menyala, inti dada emas membara, dan kapak tempur volkanik (*Volcanic Battle Axe*).
+- **Pipimon (Aqua Pixel Water Droplet)**: Karakter tetesan air biru cyan berkilau (*glossy droplet*) dengan mata kawaii pixel-shaded dan koloni tetesan air.
+- **Pulau Basalt Bertingkat & Lautan Magma**: Lantai lautan lahar membara (*Molten Lava Sea*) dengan partikel bara api volkanik yang melayang ke atas, pilar basalt heksagonal bertingkat, serta patung ksatria raksasa bersenjatakan kapak di cakrawala.
+
+### 6. 🎯 Mode Interaktif Uji Audiens & Bedah Pemahaman Teman 3D
 - **Shortcut `[Q]`** atau tombol `[🎯 Uji Audiens [Q]]`:
 - Fitur pedagogi aktif untuk menunjuk teman kelas, memutar roulette presensi acak, mengarahkan kamera 3D ke objek spesifik (Pulau Bottleneck, Shaking Kocorock, Kemotaksis Pipimon, Garis Laser Lower Bound), serta membedah konsep dalam 3 tingkat pemahaman (Analogi ELI5 $\to$ Visual Spasial 3D $\to$ Formulasi Matematis).
 
@@ -85,6 +99,7 @@ Buka file `index.html` langsung di peramban Anda. Seluruh berkas (Three.js r158,
 ## 🎮 Pintasan Keyboard Lengkap
 
 - **`[Spasi]`**: Mulai / Jeda (*Play / Pause*) simulasi.
+- **`[G]`**: Buka / Tutup Game Edukatif (*Cloud Dispatcher Challenge*).
 - **`[H]`**: Beralih mode eksperimen (*Toggle Persaingan ⚔️ ↔ Reaktor Hibrida ⚛️*).
 - **`[A]`**: Buka Panel Uji Ilmiah Studi Ablasi (*30x Run Paritas 600 NFE*).
 - **`[E]`**: Buka Pusat Belajar Edukatif (*Taksonomi Talbi & 5 Pola Hibridisasi*).

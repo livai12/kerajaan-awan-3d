@@ -404,7 +404,7 @@
           { id: 'minmin', name: 'Heuristik Min-Min', category: 'Baseline Heuristik', badge: 'badge-baseline' },
           { id: 'vns', name: 'VNS Murni (Kocorock)', category: 'Trajectory Metaheuristic', badge: 'badge-baseline' },
           { id: 'bfo', name: 'BFO Murni (Pipimon)', category: 'Swarm Metaheuristic', badge: 'badge-baseline' },
-          { id: 'seeded', name: 'Hybrid 2: Seeded BFO', category: 'Pola B (HRH - Talbi)', badge: 'badge-pola-b' },
+          { id: 'seeded', name: 'Hybrid 2: PSO-MinMin', category: 'Pola B (HRH - Heuristik+Meta)', badge: 'badge-pola-b' },
           { id: 'memetic', name: 'Hybrid 1: Memetic BFO-VNS', category: 'Pola D (LRH - Talbi)', badge: 'badge-pola-d' }
         ];
 
@@ -437,8 +437,8 @@
           diResults.bfo.push(calculateDegreeOfImbalance(lb));
           utilResults.bfo.push(calculateResourceUtilization(lb));
 
-          // Seeded BFO
-          const s = new HeuristicSeededBFOEngine(tasks, vms, { maxNFE });
+          // Hybrid 2: PSO-MinMin (Heuristik Seed + Swarm)
+          const s = new PSOMinMinEngine(tasks, vms, { maxNFE });
           while (s.evaluations < maxNFE) s.step();
           rawResults.seeded.push(s.bestMakespan);
           const ls = calculateVmLoads(s.bestSolution, tasks, vms);
@@ -980,7 +980,181 @@ reset() {
   }
 
 
+  
   // ==========================================
+  // 2.5 HYBRID 2 ENGINE: PSO-MinMin (Pola B - HRH: Heuristik + Metaheuristik)
+  // Sesuai Dokumen Riset: "Analisis Perbandingan Algoritma Hybrid BFO-VNS dan PSO-MinMin"
+  // ==========================================
+  class PSOMinMinEngine {
+    constructor(tasks, vms, options = {}) {
+      this.tasks = tasks;
+      this.vms = vms;
+      this.numParticles = options.numParticles || 10;
+      this.omega = options.omega || 0.72; // Bobot inersia
+      this.c1 = options.c1 || 1.49;       // Koefisien kognitif (pBest)
+      this.c2 = options.c2 || 1.49;       // Koefisien sosial (gBest)
+      this.vMax = (this.vms.length - 1) * 0.5;
+      this.maxNFE = options.maxNFE || 600;
+      this.reset();
+    }
+
+    reset() {
+      this.particles = [];
+      this.evaluations = 0;
+      this.iteration = 0;
+
+      // Partikel #0: Inisialisasi Min-Min Heuristic (Deterministik)
+      const minMinSol = scheduleMinMin(this.tasks, this.vms);
+      const minMinMs = calculateMakespan(minMinSol, this.tasks, this.vms);
+      this.evaluations++;
+
+      this.gBestSolution = [...minMinSol];
+      this.gBestMakespan = minMinMs;
+
+      this.particles.push({
+        id: 0,
+        position: minMinSol.map(v => v + (Math.random() - 0.5) * 0.1),
+        velocity: this.tasks.map(() => (Math.random() - 0.5) * 0.5),
+        discreteSolution: [...minMinSol],
+        makespan: minMinMs,
+        pBestSolution: [...minMinSol],
+        pBestMakespan: minMinMs,
+        type: 'Min-Min Seed'
+      });
+
+      // Partikel #1: Max-Min Heuristic
+      const maxMinSol = scheduleMaxMin(this.tasks, this.vms);
+      const maxMinMs = calculateMakespan(maxMinSol, this.tasks, this.vms);
+      this.evaluations++;
+
+      if (maxMinMs < this.gBestMakespan) {
+        this.gBestMakespan = maxMinMs;
+        this.gBestSolution = [...maxMinSol];
+      }
+
+      this.particles.push({
+        id: 1,
+        position: maxMinSol.map(v => v + (Math.random() - 0.5) * 0.1),
+        velocity: this.tasks.map(() => (Math.random() - 0.5) * 0.5),
+        discreteSolution: [...maxMinSol],
+        makespan: maxMinMs,
+        pBestSolution: [...maxMinSol],
+        pBestMakespan: maxMinMs,
+        type: 'Max-Min Seed'
+      });
+
+      // Sisa Partikel: Perturbed Seed dan Eksplorasi Acak
+      for (let i = 2; i < this.numParticles; i++) {
+        let initSol;
+        if (i < Math.floor(this.numParticles * 0.6)) {
+          initSol = [...minMinSol];
+          const swapCount = 1 + Math.floor(Math.random() * 2);
+          for (let s = 0; s < swapCount; s++) {
+            const tIdx = Math.floor(Math.random() * this.tasks.length);
+            initSol[tIdx] = Math.floor(Math.random() * this.vms.length);
+          }
+        } else {
+          initSol = this.tasks.map(() => Math.floor(Math.random() * this.vms.length));
+        }
+
+        const ms = calculateMakespan(initSol, this.tasks, this.vms);
+        this.evaluations++;
+
+        if (ms < this.gBestMakespan) {
+          this.gBestMakespan = ms;
+          this.gBestSolution = [...initSol];
+        }
+
+        this.particles.push({
+          id: i,
+          position: initSol.map(v => v + (Math.random() - 0.5) * 0.2),
+          velocity: this.tasks.map(() => (Math.random() - 0.5) * 1.0),
+          discreteSolution: [...initSol],
+          makespan: ms,
+          pBestSolution: [...initSol],
+          pBestMakespan: ms,
+          type: i < Math.floor(this.numParticles * 0.6) ? 'Perturbed Min-Min' : 'Random Swarm'
+        });
+      }
+
+      this.bestSolution = [...this.gBestSolution];
+      this.bestMakespan = this.gBestMakespan;
+      this.history = [{ iteration: 0, makespan: this.bestMakespan, evalCount: this.evaluations }];
+    }
+
+    step() {
+      if (this.evaluations >= this.maxNFE) {
+        return {
+          type: 'completed',
+          solution: [...this.bestSolution],
+          makespan: this.bestMakespan,
+          evaluations: this.evaluations,
+          message: 'Batas NFE 600 tercapai'
+        };
+      }
+
+      this.iteration++;
+      let improvedThisStep = false;
+
+      for (let i = 0; i < this.particles.length; i++) {
+        if (this.evaluations >= this.maxNFE) break;
+        const p = this.particles[i];
+
+        for (let j = 0; j < this.tasks.length; j++) {
+          const r1 = Math.random();
+          const r2 = Math.random();
+
+          p.velocity[j] = (this.omega * p.velocity[j]) +
+            (this.c1 * r1 * (p.pBestSolution[j] - p.position[j])) +
+            (this.c2 * r2 * (this.gBestSolution[j] - p.position[j]));
+
+          if (p.velocity[j] > this.vMax) p.velocity[j] = this.vMax;
+          if (p.velocity[j] < -this.vMax) p.velocity[j] = -this.vMax;
+
+          p.position[j] += p.velocity[j];
+
+          let mappedVm = Math.round(p.position[j]);
+          if (mappedVm < 0) mappedVm = 0;
+          if (mappedVm >= this.vms.length) mappedVm = this.vms.length - 1;
+          p.discreteSolution[j] = mappedVm;
+        }
+
+        const ms = calculateMakespan(p.discreteSolution, this.tasks, this.vms);
+        this.evaluations++;
+        p.makespan = ms;
+
+        if (ms < p.pBestMakespan) {
+          p.pBestMakespan = ms;
+          p.pBestSolution = [...p.discreteSolution];
+        }
+
+        if (ms < this.gBestMakespan) {
+          this.gBestMakespan = ms;
+          this.gBestSolution = [...p.discreteSolution];
+          improvedThisStep = true;
+        }
+      }
+
+      this.bestSolution = [...this.gBestSolution];
+      this.bestMakespan = this.gBestMakespan;
+
+      this.history.push({
+        iteration: this.iteration,
+        makespan: this.bestMakespan,
+        evalCount: this.evaluations
+      });
+
+      return {
+        type: improvedThisStep ? 'improved' : 'swarm_move',
+        solution: [...this.bestSolution],
+        makespan: this.bestMakespan,
+        evaluations: this.evaluations,
+        iteration: this.iteration
+      };
+    }
+  }
+
+// ==========================================
   // 3. 3D WORLD BUILDER (PROCEDURAL THREE.JS)
   // ==========================================
   class World3D {
@@ -1008,18 +1182,19 @@ reset() {
       this.renderer.toneMappingExposure = 1.15;
 
       this.scene = new THREE.Scene();
-      this.scene.fog = new THREE.FogExp2(0xcde8f9, 0.007);
+      // Volcanic caldera atmosphere fog (Image 3)
+      this.scene.fog = new THREE.FogExp2(0x24120c, 0.0075);
 
       this.camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 1000);
       this.camera.position.set(0, 19, 40);
       this.camera.lookAt(this.camTarget);
 
-      // 1. Lush Anime Hemisphere Light (Sky Blue + Vibrant Grass Bounce)
-      const hemi = new THREE.HemisphereLight(0xdff4fc, 0x62c92b, 0.9);
+      // 1. Volcanic Ambient Light (Warm Magma Glow from Below)
+      const hemi = new THREE.HemisphereLight(0xffedd5, 0xea580c, 1.15);
       this.scene.add(hemi);
 
-      // 2. Main Warm Golden Sunlight
-      const sun = new THREE.DirectionalLight(0xfff6dc, 1.4);
+      // 2. Main Dramatic Volcanic Sun / Sky Light
+      const sun = new THREE.DirectionalLight(0xffedd5, 1.35);
       sun.position.set(24, 38, 22);
       sun.castShadow = true;
       sun.shadow.mapSize.width = 2048;
@@ -1033,8 +1208,13 @@ reset() {
       sun.shadow.bias = -0.0004;
       this.scene.add(sun);
 
-      // 3. Anime Rim Backlight (Warm Peach glow on character and island silhouettes)
-      const rim = new THREE.DirectionalLight(0xfed7aa, 0.55);
+      // 3. Fiery Magma Underglow (Red-Orange light shining upwards onto dark basalt cliffs)
+      const magmaLight = new THREE.DirectionalLight(0xff4500, 1.3);
+      magmaLight.position.set(0, -22, 0);
+      this.scene.add(magmaLight);
+
+      // 4. Amber Rim Backlight (Warm volcanic glow on character and basalt silhouettes)
+      const rim = new THREE.DirectionalLight(0xfba04e, 0.65);
       rim.position.set(-24, 15, -26);
       this.scene.add(rim);
 
@@ -1092,6 +1272,15 @@ reset() {
 
       // 10. Floating Sky Airship / Hot Air Balloon
       this.createAirship();
+
+      // 11. Volcanic Molten Lava Ocean (Image 3)
+      this.createLavaSea();
+
+      // 12. Rising Volcanic Fiery Sparks & Embers (Caldera Atmosphere)
+      this.createVolcanicEmbers();
+
+      // 13. Colossal Basalt Warrior Statue wielding Volcanic Battle Axe (Image 3)
+      this.createColossalWarriorStatue();
     }
 
     createDomainBanners() {
@@ -1388,6 +1577,173 @@ reset() {
       this.rootGroup.add(this.airship);
     }
 
+    createLavaSea() {
+      this.lavaSeaGroup = new THREE.Group();
+      const seaGeo = new THREE.PlaneGeometry(180, 180, 32, 32);
+      seaGeo.rotateX(-Math.PI / 2);
+      const seaMat = new THREE.MeshToonMaterial({
+        color: 0xc2410c,
+        emissive: 0xea580c,
+        emissiveIntensity: 0.85,
+        roughness: 0.35
+      });
+      this.lavaSea = new THREE.Mesh(seaGeo, seaMat);
+      this.lavaSea.position.y = -5.8;
+      this.lavaSeaGroup.add(this.lavaSea);
+
+      // Floating dark basalt volcanic crag chunks
+      const chunkMat = new THREE.MeshToonMaterial({ color: 0x1c1917, roughness: 0.9 });
+      for (let i = 0; i < 28; i++) {
+        const chunkGeo = new THREE.DodecahedronGeometry(0.8 + Math.random() * 1.6, 0);
+        const chunk = new THREE.Mesh(chunkGeo, chunkMat);
+        const ang = Math.random() * Math.PI * 2;
+        const dist = 12 + Math.random() * 38;
+        chunk.position.set(Math.cos(ang) * dist, -5.6, Math.sin(ang) * dist);
+        chunk.rotation.set(Math.random(), Math.random(), Math.random());
+        this.lavaSeaGroup.add(chunk);
+      }
+      this.rootGroup.add(this.lavaSeaGroup);
+    }
+
+    createVolcanicEmbers() {
+      const count = 140;
+      const geo = new THREE.BufferGeometry();
+      const positions = new Float32Array(count * 3);
+      this.emberData = [];
+      for (let i = 0; i < count; i++) {
+        const x = (Math.random() - 0.5) * 60;
+        const y = -5.5 + Math.random() * 26;
+        const z = (Math.random() - 0.5) * 50;
+        positions[i * 3] = x;
+        positions[i * 3 + 1] = y;
+        positions[i * 3 + 2] = z;
+        this.emberData.push({
+          x, y, z,
+          speedY: 0.04 + Math.random() * 0.06,
+          driftX: (Math.random() - 0.5) * 0.02,
+          driftZ: (Math.random() - 0.5) * 0.02
+        });
+      }
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const mat = new THREE.PointsMaterial({
+        color: 0xfba04e,
+        size: 0.55,
+        transparent: true,
+        opacity: 0.85
+      });
+      this.volcanicEmbers = new THREE.Points(geo, mat);
+      this.rootGroup.add(this.volcanicEmbers);
+    }
+
+    createColossalWarriorStatue() {
+      this.warriorStatue = new THREE.Group();
+      this.warriorStatue.position.set(0, 0, -22);
+
+      const stoneMat = new THREE.MeshToonMaterial({ color: 0x292524, roughness: 0.85 });
+      const magmaSeamMat = new THREE.MeshToonMaterial({ color: 0xff5722, emissive: 0xea580c, emissiveIntensity: 0.7 });
+
+      // Stepped Hexagonal Basalt Altar
+      const baseTier1 = new THREE.Mesh(new THREE.CylinderGeometry(8.5, 9.5, 2.2, 6), stoneMat);
+      baseTier1.position.y = -4.0;
+      this.warriorStatue.add(baseTier1);
+
+      const baseTier2 = new THREE.Mesh(new THREE.CylinderGeometry(6.2, 7.2, 1.8, 6), stoneMat);
+      baseTier2.position.y = -2.2;
+      this.warriorStatue.add(baseTier2);
+
+      const baseTier3 = new THREE.Mesh(new THREE.CylinderGeometry(4.2, 5.0, 1.4, 6), stoneMat);
+      baseTier3.position.y = -0.8;
+      this.warriorStatue.add(baseTier3);
+
+      // Glowing magma fissure lines around altar
+      const altarRing = new THREE.Mesh(new THREE.TorusGeometry(4.3, 0.12, 6, 24), magmaSeamMat);
+      altarRing.rotation.x = Math.PI / 2;
+      altarRing.position.y = -0.1;
+      this.warriorStatue.add(altarRing);
+
+      // 4 Burning Fire Braziers on Altar Steps
+      this.braziers = [];
+      const brazierOffsets = [
+        [-3.8, -0.6, -2.5], [3.8, -0.6, -2.5],
+        [-3.8, -0.6, 2.5], [3.8, -0.6, 2.5]
+      ];
+      brazierOffsets.forEach(pos => {
+        const bz = new THREE.Group();
+        bz.position.set(pos[0], pos[1], pos[2]);
+        const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.35, 0.6, 8), stoneMat);
+        bz.add(bowl);
+        const flame = new THREE.Mesh(
+          new THREE.OctahedronGeometry(0.35, 1),
+          new THREE.MeshToonMaterial({ color: 0xfef08a, emissive: 0xf59e0b, emissiveIntensity: 1.2 })
+        );
+        flame.position.y = 0.5;
+        bz.add(flame);
+        this.warriorStatue.add(bz);
+        this.braziers.push(flame);
+      });
+
+      // Giant Warrior Golem Statue
+      const warriorBody = new THREE.Mesh(new THREE.BoxGeometry(2.4, 3.2, 1.8), stoneMat);
+      warriorBody.position.y = 2.4;
+      this.warriorStatue.add(warriorBody);
+
+      // Magma chest crest
+      const crest = new THREE.Mesh(new THREE.OctahedronGeometry(0.65, 0), magmaSeamMat);
+      crest.position.set(0, 2.8, 0.95);
+      this.warriorStatue.add(crest);
+
+      // Warrior Head with Horned Visor
+      const warriorHead = new THREE.Mesh(new THREE.DodecahedronGeometry(1.1, 1), stoneMat);
+      warriorHead.position.set(0, 4.6, 0.2);
+      this.warriorStatue.add(warriorHead);
+
+      const hornL = new THREE.Mesh(new THREE.ConeGeometry(0.25, 1.2, 6), stoneMat);
+      hornL.position.set(-0.9, 5.2, 0); hornL.rotation.z = 0.5;
+      const hornR = new THREE.Mesh(new THREE.ConeGeometry(0.25, 1.2, 6), stoneMat);
+      hornR.position.set(0.9, 5.2, 0); hornR.rotation.z = -0.5;
+      this.warriorStatue.add(hornL); this.warriorStatue.add(hornR);
+
+      // Left Arm resting forward
+      const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 2.8, 8), stoneMat);
+      armL.position.set(-1.8, 2.2, 0.5); armL.rotation.x = 0.3;
+      this.warriorStatue.add(armL);
+
+      // Right Arm RAISED holding the COLOSSAL BATTLE AXE (Image 3)
+      const armR = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.48, 2.8, 8), stoneMat);
+      armR.position.set(2.0, 3.8, 0.4); armR.rotation.z = -0.7; armR.rotation.x = -0.4;
+      this.warriorStatue.add(armR);
+
+      // Colossal Volcanic Battle Axe
+      const axe = new THREE.Group();
+      axe.position.set(3.2, 5.6, 0.6);
+      axe.rotation.z = 0.4;
+
+      const haft = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.16, 6.2, 8), stoneMat);
+      axe.add(haft);
+
+      const bladeMat = new THREE.MeshToonMaterial({ color: 0x1c1917, roughness: 0.6 });
+      const bladeEdgeMat = new THREE.MeshToonMaterial({ color: 0xff5722, emissive: 0xea580c, emissiveIntensity: 1.1 });
+
+      const bladeL = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.8, 0.2), bladeMat);
+      bladeL.position.set(-1.0, 1.8, 0);
+      axe.add(bladeL);
+
+      const bladeEdgeL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.0, 6), bladeEdgeMat);
+      bladeEdgeL.position.set(-1.8, 1.8, 0);
+      axe.add(bladeEdgeL);
+
+      const bladeR = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.6, 0.2), bladeMat);
+      bladeR.position.set(0.9, 1.8, 0);
+      axe.add(bladeR);
+
+      const bladeEdgeR = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.8, 6), bladeEdgeMat);
+      bladeEdgeR.position.set(1.6, 1.8, 0);
+      axe.add(bladeEdgeR);
+
+      this.warriorStatue.add(axe);
+      this.rootGroup.add(this.warriorStatue);
+    }
+
     createFluffyCloud() {
       const g = new THREE.Group();
       const count = 6 + Math.floor(Math.random() * 4);
@@ -1471,55 +1827,65 @@ reset() {
         const island = new THREE.Group();
         island.position.set(startX + i * spacing, 0, (i % 2 === 1) ? 1.6 : -1.6);
 
-        // --- 1. LUSH ANIME TOP PLATEAU ---
-        const grassColor = (realmType === 'vns') ? 0x5ec429 : 0x48c774;
-        const topGeo = new THREE.CylinderGeometry(3.3, 3.0, 0.85, 24);
-        const topMat = new THREE.MeshToonMaterial({ color: grassColor, roughness: 0.5 });
-        const top = new THREE.Mesh(topGeo, topMat);
+        // --- 1. VOLCANIC STEPPED BASALT PLATFORM (Image 3) ---
+        const basaltMat = new THREE.MeshToonMaterial({ color: 0x1c1917, roughness: 0.85 });
+        const basaltTier2Mat = new THREE.MeshToonMaterial({ color: 0x292524, roughness: 0.8 });
+        const magmaEdgeMat = new THREE.MeshToonMaterial({ color: 0xff5722, emissive: 0xea580c, emissiveIntensity: 0.85 });
+
+        // Tier 1 Base Platform: Hexagonal Basalt Column
+        const topGeo = new THREE.CylinderGeometry(3.4, 3.2, 0.85, 6);
+        const top = new THREE.Mesh(topGeo, basaltMat);
         top.receiveShadow = true;
         island.add(top);
 
-        // Raised grassy hill/terrace for natural topography
-        const hillMat = new THREE.MeshToonMaterial({ color: 0x76de38, roughness: 0.5 });
-        const hill = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 2.1, 0.35, 16), hillMat);
-        hill.position.set(-0.8, 0.5, -0.6);
+        // Glowing Magma Fissure Rim around Tier 1
+        const magmaRim = new THREE.Mesh(new THREE.TorusGeometry(3.35, 0.08, 6, 24), magmaEdgeMat);
+        magmaRim.rotation.x = Math.PI / 2;
+        magmaRim.position.y = 0.4;
+        island.add(magmaRim);
+
+        // Tier 2 Raised Basalt Terrace
+        const hill = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 2.2, 0.45, 6), basaltTier2Mat);
+        hill.position.set(-0.8, 0.55, -0.6);
         hill.receiveShadow = true;
         island.add(hill);
 
-        // --- 2. CLIFF STRATA & CRAGGY ROCK UNDERSIDE ---
-        const earthGeo = new THREE.CylinderGeometry(3.0, 2.5, 1.2, 16);
-        const earthMat = new THREE.MeshToonMaterial({ color: 0x6e492b });
-        const earth = new THREE.Mesh(earthGeo, earthMat);
+        // Basalt Stone Stairs leading to Tier 2
+        for (let st = 0; st < 3; st++) {
+          const step = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.12, 0.35), basaltMat);
+          step.position.set(-0.8, 0.2 + st * 0.12, 0.6 + st * 0.28);
+          island.add(step);
+        }
+
+        // --- 2. UNDERISLAND VOLCANIC BASALT STRATA ---
+        const earth = new THREE.Mesh(new THREE.CylinderGeometry(3.1, 2.5, 1.2, 8), basaltMat);
         earth.position.y = -0.9;
         island.add(earth);
 
-        const rockGeo = new THREE.ConeGeometry(2.5, 3.4, 9);
-        rockGeo.rotateX(Math.PI);
-        const rockMat = new THREE.MeshToonMaterial({ color: 0x3e4c59, roughness: 0.9 });
-        const rock = new THREE.Mesh(rockGeo, rockMat);
+        const rock = new THREE.Mesh(new THREE.ConeGeometry(2.5, 3.4, 6).rotateX(Math.PI), basaltMat);
         rock.position.y = -2.8;
         island.add(rock);
 
-        // Hanging mini stalactite floating crags
-        const miniRock1 = new THREE.Mesh(new THREE.ConeGeometry(0.5, 1.6, 6).rotateX(Math.PI), rockMat);
+        // Hanging mini obsidian stalactites
+        const miniRock1 = new THREE.Mesh(new THREE.ConeGeometry(0.45, 1.8, 5).rotateX(Math.PI), basaltMat);
         miniRock1.position.set(1.4, -2.6, 0.8);
         island.add(miniRock1);
 
-        // --- 3. VEGETATION: STYLIZED TREES & FLOWERS ---
-        const tree = this.createAnimeTree(0.9 + Math.random() * 0.2);
-        tree.position.set(1.4, 0.4, -1.2);
-        island.add(tree);
-
-        // Wildflowers on grass (Pink, Yellow, White dots)
-        const flowerColors = [0xf472b6, 0xfacc15, 0xffffff];
-        for (let f = 0; f < 8; f++) {
-          const fMat = new THREE.MeshToonMaterial({ color: flowerColors[f % 3] });
-          const blossom = new THREE.Mesh(new THREE.SphereGeometry(0.12, 6, 6), fMat);
-          const fAngle = Math.random() * Math.PI * 2;
-          const fDist = 1.0 + Math.random() * 1.8;
-          blossom.position.set(Math.cos(fAngle) * fDist, 0.45, Math.sin(fAngle) * fDist);
-          island.add(blossom);
-        }
+        // --- 3. CORNER BURNING FIRE BRAZIERS (Image 3) ---
+        const brazierStandMat = new THREE.MeshToonMaterial({ color: 0x292524, roughness: 0.9 });
+        const flameMat = new THREE.MeshToonMaterial({ color: 0xfef08a, emissive: 0xf59e0b, emissiveIntensity: 1.25 });
+        const brazierAngles = [Math.PI / 4, 3 * Math.PI / 4, 5 * Math.PI / 4, 7 * Math.PI / 4];
+        brazierAngles.forEach(ang => {
+          const bz = new THREE.Group();
+          const dist = 2.7;
+          bz.position.set(Math.cos(ang) * dist, 0.45, Math.sin(ang) * dist);
+          const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.2, 0.35, 6), brazierStandMat);
+          bz.add(bowl);
+          const fl = new THREE.Mesh(new THREE.OctahedronGeometry(0.22, 1), flameMat);
+          fl.position.y = 0.28;
+          bz.add(fl);
+          island.add(bz);
+        });
 
         // --- 4. VM ENERGY MONOLITH / SHRINE ---
         const shrineMat = new THREE.MeshToonMaterial({
@@ -1605,125 +1971,159 @@ reset() {
       this.rootGroup.add(this.meshyGroup);
       this.rootGroup.add(this.proceduralGroup);
 
-      // 1. PROCEDURAL KOCOROCK (POKEMON ROCK GOLEM - VNS)
+      // 1. PROCEDURAL MAGMA-KOCOROCK (OBSIDIAN MAGMA GOLEM - VNS, Image 1)
       this.kocok = new THREE.Group();
-      // Torso
-      const bodyGeo = new THREE.DodecahedronGeometry(1.6, 1);
-      const bodyMat = new THREE.MeshToonMaterial({ color: 0x92400e });
-      const body = new THREE.Mesh(bodyGeo, bodyMat);
+      const obsidianMat = new THREE.MeshToonMaterial({ color: 0x1c1917, roughness: 0.85 });
+      const magmaSeamMat = new THREE.MeshToonMaterial({ color: 0xff5722, emissive: 0xea580c, emissiveIntensity: 0.85 });
+      const goldenCoreMat = new THREE.MeshToonMaterial({ color: 0xfef08a, emissive: 0xf59e0b, emissiveIntensity: 1.15 });
+
+      // Torso: Faceted Obsidian Rock
+      const bodyGeo = new THREE.DodecahedronGeometry(1.65, 1);
+      const body = new THREE.Mesh(bodyGeo, obsidianMat);
       body.castShadow = true;
       this.kocok.add(body);
 
-      // Chest Glowing Rune Crystal Core
-      const coreGeo = new THREE.OctahedronGeometry(0.55, 0);
-      const coreMat = new THREE.MeshToonMaterial({ color: 0xfbbf24, emissive: 0xf59e0b, emissiveIntensity: 0.85 });
-      const core = new THREE.Mesh(coreGeo, coreMat);
-      core.position.set(0, 0.1, 1.35);
-      this.kocok.add(core);
+      // Magma Belly & Chest Seams (Image 1)
+      const bellyPlate = new THREE.Mesh(new THREE.DodecahedronGeometry(0.95, 0), goldenCoreMat);
+      bellyPlate.position.set(0, -0.15, 1.15);
+      bellyPlate.scale.set(1.1, 1.25, 0.45);
+      this.kocok.add(bellyPlate);
+      this.kocokCore = bellyPlate;
 
-      // Golem Head
-      const headGeo = new THREE.DodecahedronGeometry(0.9, 1);
-      const headMat = new THREE.MeshToonMaterial({ color: 0x78350f });
-      const head = new THREE.Mesh(headGeo, headMat);
-      head.position.set(0, 1.55, 0.2);
+      // Golem Obsidian Head with Fiery Magma Brow
+      const headGeo = new THREE.DodecahedronGeometry(0.95, 1);
+      const head = new THREE.Mesh(headGeo, obsidianMat);
+      head.position.set(0, 1.6, 0.2);
       this.kocok.add(head);
 
-      // Anime Glowing Eyes
-      const eyeMat = new THREE.MeshToonMaterial({ color: 0x38bdf8, emissive: 0x38bdf8, emissiveIntensity: 0.95 });
-      const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.24, 12, 12), eyeMat);
-      eyeL.position.set(-0.35, 1.65, 0.95);
-      const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.24, 12, 12), eyeMat);
-      eyeR.position.set(0.35, 1.65, 0.95);
+      // Fiery Magma Glowing Eyes (Image 1)
+      const eyeMat = new THREE.MeshToonMaterial({ color: 0xfef08a, emissive: 0xf59e0b, emissiveIntensity: 1.4 });
+      const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.22, 10, 10), eyeMat);
+      eyeL.position.set(-0.35, 1.7, 0.95);
+      const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.22, 10, 10), eyeMat);
+      eyeR.position.set(0.35, 1.7, 0.95);
       this.kocok.add(eyeL);
       this.kocok.add(eyeR);
 
-      // Floating Rock Fists
-      const fistGeo = new THREE.DodecahedronGeometry(0.55, 1);
-      const fistMat = new THREE.MeshToonMaterial({ color: 0xa16207 });
-      const fistL = new THREE.Mesh(fistGeo, fistMat);
-      fistL.position.set(-1.8, 0.2, 0.5);
-      const fistR = new THREE.Mesh(fistGeo, fistMat);
-      fistR.position.set(1.8, 0.2, 0.5);
+      // Obsidian Boulder Fists with Magma Knuckles
+      const fistGeo = new THREE.DodecahedronGeometry(0.65, 1);
+      const fistL = new THREE.Mesh(fistGeo, obsidianMat);
+      fistL.position.set(-1.9, 0.2, 0.5);
+      const fistR = new THREE.Mesh(fistGeo, obsidianMat);
+      fistR.position.set(1.9, 0.2, 0.5);
       this.kocok.add(fistL);
       this.kocok.add(fistR);
 
-      // Grand Shaking Staff with Amber Sunstone
-      this.staff = new THREE.Group();
-      const staffPole = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.11, 3.6, 8), new THREE.MeshToonMaterial({ color: 0x451a03 }));
-      this.staff.add(staffPole);
-      const staffGem = new THREE.Mesh(new THREE.OctahedronGeometry(0.55, 0), new THREE.MeshToonMaterial({ color: 0xf59e0b, emissive: 0xf59e0b, emissiveIntensity: 0.8 }));
-      staffGem.position.y = 1.85;
-      this.staff.add(staffGem);
-      this.staff.position.set(2.0, 0.8, 0.6);
-      this.kocok.add(this.staff);
+      // Volcanic Battle Axe (Double-bladed Obsidian Axe with Molten Lava Edge, Image 1 & 3)
+      this.axe = new THREE.Group();
+      const axeHaft = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 3.8, 8), obsidianMat);
+      this.axe.add(axeHaft);
 
-      // 3D Floating Name Tag for Kocorock
-      const tagKocok = this.createFloatingTag('KOCOROCK', 'VNS • Rock Golem', '#f59e0b');
-      tagKocok.position.set(0, 3.7, 0);
+      const axeBladeMat = new THREE.MeshToonMaterial({ color: 0x0c0a09, roughness: 0.7 });
+      const axeEdgeMat = new THREE.MeshToonMaterial({ color: 0xff5722, emissive: 0xea580c, emissiveIntensity: 1.2 });
+
+      const axeBladeL = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.4, 0.18), axeBladeMat);
+      axeBladeL.position.set(-0.7, 1.2, 0);
+      this.axe.add(axeBladeL);
+      const axeEdgeL = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.6, 6), axeEdgeMat);
+      axeEdgeL.position.set(-1.3, 1.2, 0);
+      this.axe.add(axeEdgeL);
+
+      const axeBladeR = new THREE.Mesh(new THREE.BoxGeometry(0.95, 1.2, 0.18), axeBladeMat);
+      axeBladeR.position.set(0.6, 1.2, 0);
+      this.axe.add(axeBladeR);
+      const axeEdgeR = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.4, 6), axeEdgeMat);
+      axeEdgeR.position.set(1.1, 1.2, 0);
+      this.axe.add(axeEdgeR);
+
+      this.axe.position.set(2.1, 0.8, 0.6);
+      this.axe.rotation.z = 0.25;
+      this.kocok.add(this.axe);
+
+      // 3D Floating Name Tag for Magma-Kocorock
+      const tagKocok = this.createFloatingTag('MAGMA KOCOROCK', 'VNS • Obsidian Golem', '#f59e0b');
+      tagKocok.position.set(0, 3.8, 0);
       this.kocok.add(tagKocok);
 
       this.kocok.position.set(-11, 1.6, 2.6);
       this.proceduralGroup.add(this.kocok);
 
-      // 2. PROCEDURAL PIPIMON COLONY (POKEMON BIO SLIME - BFO)
+      // 2. PROCEDURAL AQUA-PIPIMON COLONY (PIXEL WATER DROPLET - BFO, Image 2)
       this.pips = [];
       for (let p = 0; p < 5; p++) {
         const pip = new THREE.Group();
         const isLeader = (p === 0);
         const rad = isLeader ? 1.35 : 0.65;
-        const pGeo = new THREE.SphereGeometry(rad, 20, 20);
-        const pMat = new THREE.MeshToonMaterial({
-          color: isLeader ? 0x22d3ee : 0x67e8f9,
-          emissive: 0x0891b2,
-          emissiveIntensity: 0.35,
-          transparent: true,
-          opacity: 0.94
-        });
-        pip.add(new THREE.Mesh(pGeo, pMat));
 
-        // Anime Expressive Eyes
-        const eyeW = rad * 0.28;
-        const ew = new THREE.Mesh(new THREE.SphereGeometry(eyeW, 10, 10), new THREE.MeshToonMaterial({ color: 0xffffff }));
-        ew.position.set(-rad * 0.35, rad * 0.2, rad * 0.85);
-        const pu = new THREE.Mesh(new THREE.SphereGeometry(eyeW * 0.55, 8, 8), new THREE.MeshToonMaterial({ color: 0x0f172a }));
-        pu.position.set(-rad * 0.35, rad * 0.2, rad * 1.05);
-        pip.add(ew); pip.add(pu);
+        // Teardrop Water Droplet Geometry: Sphere Base + Tapered Cone Peak (Image 2)
+        const dropletBody = new THREE.Group();
+        const baseSphere = new THREE.Mesh(
+          new THREE.SphereGeometry(rad, 20, 20),
+          new THREE.MeshToonMaterial({
+            color: isLeader ? 0x38bdf8 : 0x7dd3fc,
+            emissive: 0x0284c7,
+            emissiveIntensity: 0.45,
+            transparent: true,
+            opacity: 0.92
+          })
+        );
+        dropletBody.add(baseSphere);
 
-        const ew2 = ew.clone(); ew2.position.x = rad * 0.35;
-        const pu2 = pu.clone(); pu2.position.x = rad * 0.35;
-        pip.add(ew2); pip.add(pu2);
+        const tipCone = new THREE.Mesh(
+          new THREE.ConeGeometry(rad * 0.82, rad * 1.25, 20),
+          new THREE.MeshToonMaterial({
+            color: isLeader ? 0x38bdf8 : 0x7dd3fc,
+            emissive: 0x0284c7,
+            emissiveIntensity: 0.45,
+            transparent: true,
+            opacity: 0.92
+          })
+        );
+        tipCone.position.y = rad * 0.72;
+        dropletBody.add(tipCone);
+        pip.add(dropletBody);
 
-        // Kawaii Pink Cheeks
-        const cheekMat = new THREE.MeshToonMaterial({ color: 0xf472b6, opacity: 0.8, transparent: true });
-        const chL = new THREE.Mesh(new THREE.SphereGeometry(eyeW * 0.45, 8, 8), cheekMat);
-        chL.position.set(-rad * 0.55, -rad * 0.05, rad * 0.75);
-        const chR = chL.clone(); chR.position.x = rad * 0.55;
-        pip.add(chL); pip.add(chR);
+        // Pixel-Shaded Kawaii Black Eyes with White Specular Dot (Image 2)
+        const eyeW = rad * 0.24;
+        const eyeGeo = new THREE.BoxGeometry(eyeW, eyeW * 1.3, eyeW * 0.4);
+        const eyePupilMat = new THREE.MeshToonMaterial({ color: 0x0f172a });
+        const eyeDotMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
 
-        // Flagella tail
-        const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.04 * rad, 0.09 * rad, 0.8 * rad, 6), new THREE.MeshToonMaterial({ color: 0x06b6d4 }));
-        tail.position.set(0, -rad * 0.4, -rad * 0.8);
+        const eyeLeft = new THREE.Mesh(eyeGeo, eyePupilMat);
+        eyeLeft.position.set(-rad * 0.32, rad * 0.15, rad * 0.88);
+        const dotL = new THREE.Mesh(new THREE.BoxGeometry(eyeW * 0.4, eyeW * 0.4, eyeW * 0.45), eyeDotMat);
+        dotL.position.set(-rad * 0.36, rad * 0.22, rad * 0.92);
+        pip.add(eyeLeft); pip.add(dotL);
+
+        const eyeRight = new THREE.Mesh(eyeGeo, eyePupilMat);
+        eyeRight.position.set(rad * 0.32, rad * 0.15, rad * 0.88);
+        const dotR = new THREE.Mesh(new THREE.BoxGeometry(eyeW * 0.4, eyeW * 0.4, eyeW * 0.45), eyeDotMat);
+        dotR.position.set(rad * 0.28, rad * 0.22, rad * 0.92);
+        pip.add(eyeRight); pip.add(dotR);
+
+        // Water droplet tail / fin
+        const tail = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.04 * rad, 0.12 * rad, 0.7 * rad, 6),
+          new THREE.MeshToonMaterial({ color: 0x0284c7 })
+        );
+        tail.position.set(0, -rad * 0.4, -rad * 0.75);
         tail.rotation.x = Math.PI / 3;
         pip.add(tail);
 
-        // Golden Crown with jewels for Leader
         let crown = null;
         if (isLeader) {
           crown = new THREE.Group();
-          const crBase = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 0.15, 12), new THREE.MeshToonMaterial({ color: 0xfacc15, emissive: 0xd97706, emissiveIntensity: 0.5 }));
+          const crBase = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.42, 0.42, 0.14, 12),
+            new THREE.MeshToonMaterial({ color: 0x38bdf8, emissive: 0x0ea5e9, emissiveIntensity: 0.6 })
+          );
           crown.add(crBase);
-          for (let c = 0; c < 5; c++) {
-            const spike = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.35, 4), new THREE.MeshToonMaterial({ color: 0xfacc15, emissive: 0xf59e0b, emissiveIntensity: 0.6 }));
-            const a = (c / 5) * Math.PI * 2;
-            spike.position.set(Math.cos(a) * 0.38, 0.25, Math.sin(a) * 0.38);
-            crown.add(spike);
-          }
-          crown.position.set(0, rad + 0.25, 0);
+          crown.position.set(0, rad * 1.5, 0);
           pip.add(crown);
 
-          // 3D Floating Name Tag for Pipimon
-          const tagPip = this.createFloatingTag('PIPIDON', 'BFO • Bio Slime', '#06b6d4');
-          tagPip.position.set(0, 3.4, 0);
+          // 3D Floating Name Tag for Aqua-Pipimon
+          const tagPip = this.createFloatingTag('AQUA PIPIMON', 'BFO • Water Droplet', '#06b6d4');
+          tagPip.position.set(0, 3.6, 0);
           pip.add(tagPip);
 
           pip.position.set(11, 1.5, 2.4);
@@ -1740,59 +2140,46 @@ reset() {
       // 3. LOAD MESHY AI GLB ASSETS (SCALED UP & VIBRANT)
       if (typeof THREE.GLTFLoader !== 'undefined') {
         const loader = new THREE.GLTFLoader();
-        
-        // Kocok GLB (Golem)
         loader.load('./assets/models/kocok.glb', (gltf) => {
           this.meshyKocok = gltf.scene;
           this.meshyKocok.scale.set(3.0, 3.0, 3.0);
           this.meshyKocok.position.set(-11, 1.2, 2.6);
-          
-          // Color tuning: warm vibrant terracotta stone toon finish
           this.meshyKocok.traverse(child => {
             if (child.isMesh) {
               child.castShadow = true;
               child.material = new THREE.MeshToonMaterial({
-                color: 0xc27838,
-                emissive: 0x78350f,
-                emissiveIntensity: 0.18,
+                color: 0x262626,
+                emissive: 0xea580c,
+                emissiveIntensity: 0.35,
                 roughness: 0.8
               });
             }
           });
-
-          // Add 3D Floating Tag
-          const tagM = this.createFloatingTag('KOCOROCK', 'VNS • Rock Golem', '#f59e0b');
+          const tagM = this.createFloatingTag('MAGMA KOCOROCK', 'VNS • Obsidian Golem', '#f59e0b');
           tagM.position.set(0, 1.5, 0);
           this.meshyKocok.add(tagM);
-
           this.meshyGroup.add(this.meshyKocok);
         }, undefined, (err) => console.log('Meshy Kocok GLB load notice:', err));
 
-        // Pip GLB (Bacterium)
         loader.load('./assets/models/pip.glb', (gltf) => {
           this.meshyPip = gltf.scene;
           this.meshyPip.scale.set(2.8, 2.8, 2.8);
           this.meshyPip.position.set(11, 1.3, 2.4);
-
-          // Color tuning: luminous vibrant cyan jelly with golden accent
           this.meshyPip.traverse(child => {
             if (child.isMesh) {
               child.castShadow = true;
               child.material = new THREE.MeshToonMaterial({
-                color: 0x22d3ee,
+                color: 0x38bdf8,
                 transparent: true,
                 opacity: 0.95,
-                emissive: 0x06b6d4,
-                emissiveIntensity: 0.35
+                emissive: 0x0284c7,
+                emissiveIntensity: 0.45
               });
             }
           });
-
-          // Add 3D Floating Tag
-          const tagP = this.createFloatingTag('PIPIDON', 'BFO • Bio Slime', '#06b6d4');
+          const tagP = this.createFloatingTag('AQUA PIPIMON', 'BFO • Water Droplet', '#06b6d4');
           tagP.position.set(0, 1.4, 0);
           this.meshyPip.add(tagP);
-
           this.meshyGroup.add(this.meshyPip);
         }, undefined, (err) => console.log('Meshy Pip GLB load notice:', err));
       }
@@ -2193,6 +2580,35 @@ reset() {
         this.birdGroup.position.x = Math.cos(t * 0.4) * 26;
         this.birdGroup.position.z = Math.sin(t * 0.4) * 22 - 20;
         this.birdGroup.rotation.y = -t * 0.4 + Math.PI / 2;
+      }
+
+      // 7. Animate Volcanic Caldera Embers & Molten Lava Sea (Image 3)
+      if (this.volcanicEmbers && this.emberData) {
+        const pos = this.volcanicEmbers.geometry.attributes.position.array;
+        for (let i = 0; i < this.emberData.length; i++) {
+          const ed = this.emberData[i];
+          ed.y += ed.speedY;
+          ed.x += ed.driftX;
+          ed.z += ed.driftZ;
+          if (ed.y > 22) {
+            ed.y = -5.5;
+            ed.x = (Math.random() - 0.5) * 60;
+            ed.z = (Math.random() - 0.5) * 50;
+          }
+          pos[i * 3] = ed.x;
+          pos[i * 3 + 1] = ed.y;
+          pos[i * 3 + 2] = ed.z;
+        }
+        this.volcanicEmbers.geometry.attributes.position.needsUpdate = true;
+      }
+      if (this.lavaSea) {
+        this.lavaSea.material.emissiveIntensity = 0.75 + Math.sin(t * 2.0) * 0.15;
+      }
+      if (this.braziers) {
+        this.braziers.forEach((flame, idx) => {
+          const fScale = 1.0 + Math.sin(t * 8.0 + idx) * 0.15;
+          flame.scale.set(fScale, fScale * 1.1, fScale);
+        });
       }
 
       // Castle gentle floating breathing animation
@@ -2608,6 +3024,7 @@ reset() {
       this.initDOM();
       this.init3D();
       this.initEvents();
+      this.initGameMode();
       this.syncHUD();
     }
 
@@ -3100,7 +3517,11 @@ reset() {
 
       // Keyboard Shortcuts
       window.addEventListener('keydown', (e) => {
-        if (e.code === 'Space') {
+        if (e.key.toLowerCase() === 'g') {
+          e.preventDefault();
+          this.toggleGameModal();
+          return;
+        } else if (e.code === 'Space') {
         if (e.key.toLowerCase() === 'a') {
           e.preventDefault();
           this.openAblationModal();
@@ -3638,6 +4059,398 @@ reset() {
         tbody.innerHTML = html;
         this.say("Eksperimen 30 kali pengujian selesai! Terbukti VNS dan BFO konsisten mengungguli baseline.");
       }, 100);
+    }
+
+    // ==========================================
+    // 6. EDUCATIONAL GAME MODE: CLOUD DISPATCHER CHALLENGE
+    // "Taklukkan Bottleneck, Maksimalkan Makespan & Kalahkan AI!"
+    // ==========================================
+    initGameMode() {
+      this.gameTasks = [
+        { id: 1, name: 'T1: Render 3D', mi: 1200, color: '#ef4444' },
+        { id: 2, name: 'T2: Enkripsi DB', mi: 850, color: '#f97316' },
+        { id: 3, name: 'T3: Kompresi Video', mi: 980, color: '#f59e0b' },
+        { id: 4, name: 'T4: Indexing Search', mi: 750, color: '#eab308' },
+        { id: 5, name: 'T5: Query Analytics', mi: 600, color: '#10b981' },
+        { id: 6, name: 'T6: Machine Learning', mi: 820, color: '#06b6d4' },
+        { id: 7, name: 'T7: Sync Transaksi', mi: 450, color: '#38bdf8' },
+        { id: 8, name: 'T8: Parsing JSON', mi: 380, color: '#6366f1' },
+        { id: 9, name: 'T9: API Gateway', mi: 320, color: '#a855f7' },
+        { id: 10, name: 'T10: Logging Cache', mi: 150, color: '#ec4899' }
+      ];
+
+      this.gameVMs = [
+        { id: 0, name: 'VM 1: Kilat (Compute-Optimized)', mips: 3500, color: '#ef4444', speed: 3.5 },
+        { id: 1, name: 'VM 2: Seimbang (General Purpose)', mips: 2000, color: '#f59e0b', speed: 2.0 },
+        { id: 2, name: 'VM 3: Hemat (Eco Burst)', mips: 1000, color: '#06b6d4', speed: 1.0 }
+      ];
+
+      // Initial assignment (balanced round-robin)
+      this.gameAssignment = [0, 1, 2, 0, 1, 2, 0, 1, 0, 1];
+      this.gameModal = document.getElementById('game-overlay');
+
+      const btnOpenGame = document.getElementById('btnOpenGame');
+      const btnCloseGame = document.getElementById('btnCloseGame');
+      const btnTestAI = document.getElementById('btnGameTestAI');
+      const btnHintVNS = document.getElementById('btnGameHintVNS');
+      const btnHintBFO = document.getElementById('btnGameHintBFO');
+      const btnPresetAnti = document.getElementById('btnGamePresetAnti');
+      const btnPresetRand = document.getElementById('btnGamePresetRand');
+      const btnPresetOpt = document.getElementById('btnGamePresetOpt');
+
+      if (btnOpenGame) btnOpenGame.addEventListener('click', () => this.toggleGameModal());
+      if (btnCloseGame) btnCloseGame.addEventListener('click', () => this.closeGameModal());
+      if (btnTestAI) btnTestAI.addEventListener('click', () => this.testGameVsAI());
+      if (btnHintVNS) btnHintVNS.addEventListener('click', () => this.giveGameVNSHint());
+      if (btnHintBFO) btnHintBFO.addEventListener('click', () => this.giveGameBFOHint());
+      if (btnPresetAnti) btnPresetAnti.addEventListener('click', () => this.applyGamePreset('anti'));
+      if (btnPresetRand) btnPresetRand.addEventListener('click', () => this.applyGamePreset('rand'));
+      if (btnPresetOpt) btnPresetOpt.addEventListener('click', () => this.applyGamePreset('opt'));
+
+      if (this.gameModal) {
+        this.gameModal.addEventListener('click', (e) => {
+          if (e.target === this.gameModal) this.closeGameModal();
+        });
+      }
+
+      this.updateGameMetrics();
+    }
+
+    openGameModal() {
+      if (this.gameModal) {
+        this.gameModal.classList.add('open');
+        this.renderGameBoard();
+        this.updateGameMetrics();
+        this.say("🎮 Selamat datang di Cloud Dispatcher Challenge! Alokasikan 10 tugas ke 3 VM heterogen dan buktikan kemampuan Anda melawan AI!");
+      }
+    }
+
+    closeGameModal() {
+      if (this.gameModal) this.gameModal.classList.remove('open');
+    }
+
+    toggleGameModal() {
+      if (this.gameModal && this.gameModal.classList.contains('open')) {
+        this.closeGameModal();
+      } else {
+        this.openGameModal();
+      }
+    }
+
+    renderGameBoard() {
+      const container = document.getElementById('game-board-vms');
+      if (!container) return;
+
+      const vmLoads = [0, 0, 0];
+      const vmTasks = [[], [], []];
+
+      this.gameTasks.forEach((t, tIdx) => {
+        const vmIdx = this.gameAssignment[tIdx];
+        vmLoads[vmIdx] += t.mi / this.gameVMs[vmIdx].mips;
+        vmTasks[vmIdx].push({ task: t, idx: tIdx });
+      });
+
+      const maxLoad = Math.max(...vmLoads);
+      const makespan = maxLoad;
+
+      let html = '';
+      this.gameVMs.forEach((vm, vmIdx) => {
+        const load = vmLoads[vmIdx];
+        const isBottleneck = (load === makespan && makespan > 0);
+        const percent = makespan > 0 ? (load / makespan) * 100 : 0;
+
+        html += `
+          <div class="game-vm-col ${isBottleneck ? 'bottleneck-col' : ''}" style="border-top: 4px solid ${vm.color};">
+            <div class="game-vm-hdr">
+              <div style="font-weight:700; color:${vm.color}; font-size:14px;">${vm.name}</div>
+              <div style="font-size:11px; color:#64748b;">Kapasitas: <b>${vm.mips} MIPS</b></div>
+            </div>
+
+            <div class="game-vm-meter">
+              <div class="game-vm-meter-bar" style="width:${percent}%; background:${vm.color};"></div>
+              <div class="game-vm-meter-text">Waktu Selesai: <b>${load.toFixed(2)}s</b></div>
+            </div>
+
+            <div class="game-vm-task-list" id="game-vm-${vmIdx}-tasks">
+        `;
+
+        vmTasks[vmIdx].forEach(item => {
+          const t = item.task;
+          html += `
+            <div class="game-task-pill" style="border-left: 3px solid ${t.color};" title="Klik untuk memindahkan tugas">
+              <span class="game-task-name">${t.name}</span>
+              <span class="game-task-mi">${t.mi} MI</span>
+              <div class="game-task-vm-btns">
+                <button class="${vmIdx === 0 ? 'active' : ''}" onclick="window.app.assignGameTask(${item.idx}, 0)" title="Pindah ke VM 1">1</button>
+                <button class="${vmIdx === 1 ? 'active' : ''}" onclick="window.app.assignGameTask(${item.idx}, 1)" title="Pindah ke VM 2">2</button>
+                <button class="${vmIdx === 2 ? 'active' : ''}" onclick="window.app.assignGameTask(${item.idx}, 2)" title="Pindah ke VM 3">3</button>
+              </div>
+            </div>
+          `;
+        });
+
+        if (vmTasks[vmIdx].length === 0) {
+          html += `<div style="font-size:12px; color:#94a3b8; padding:18px; text-align:center;">Kosong (VM Menganggur)</div>`;
+        }
+
+        html += `
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    assignGameTask(taskIdx, vmIdx) {
+      if (taskIdx >= 0 && taskIdx < this.gameAssignment.length) {
+        this.gameAssignment[taskIdx] = vmIdx;
+        this.renderGameBoard();
+        this.updateGameMetrics();
+
+        // Sound effect plop
+        if (this.soundtrack && this.soundtrack.playCrystalPlace) {
+          this.soundtrack.playCrystalPlace(vmIdx);
+        }
+
+        // Live sync with 3D island
+        if (this.world && this.world.updateMakespanFlags) {
+          const fakeSol = this.gameAssignment.slice(0, this.problem.tasks.length);
+          this.world.updateMakespanFlags(fakeSol, fakeSol);
+        }
+      }
+    }
+
+    updateGameMetrics() {
+      const vmLoads = [0, 0, 0];
+      let totalMI = 0;
+      let totalMIPS = this.gameVMs.reduce((a, b) => a + b.mips, 0);
+
+      this.gameTasks.forEach((t, tIdx) => {
+        const vmIdx = this.gameAssignment[tIdx];
+        vmLoads[vmIdx] += t.mi / this.gameVMs[vmIdx].mips;
+        totalMI += t.mi;
+      });
+
+      const maxLoad = Math.max(...vmLoads);
+      const minLoad = Math.min(...vmLoads);
+      const avgLoad = vmLoads.reduce((a, b) => a + b, 0) / vmLoads.length;
+
+      const makespan = maxLoad;
+      const lowerBound = totalMI / totalMIPS;
+      const gap = lowerBound > 0 ? ((makespan - lowerBound) / lowerBound) * 100 : 0;
+      const doi = avgLoad > 0 ? (maxLoad - minLoad) / avgLoad : 0;
+      const aru = maxLoad > 0 ? (vmLoads.reduce((a, b) => a + b, 0) / (this.gameVMs.length * maxLoad)) * 100 : 0;
+
+      // Update DOM
+      const elMs = document.getElementById('game-metric-makespan');
+      const elLB = document.getElementById('game-metric-lb');
+      const elGap = document.getElementById('game-metric-gap');
+      const elDoI = document.getElementById('game-metric-doi');
+      const elARU = document.getElementById('game-metric-aru');
+      const elRank = document.getElementById('game-metric-rank');
+
+      if (elMs) elMs.innerText = makespan.toFixed(2) + 's';
+      if (elLB) elLB.innerText = lowerBound.toFixed(2) + 's';
+      if (elGap) elGap.innerText = gap.toFixed(1) + '%';
+      if (elDoI) elDoI.innerText = doi.toFixed(2);
+      if (elARU) elARU.innerText = aru.toFixed(1) + '%';
+
+      // Rank calculation
+      let rank = 'Rank C (Bottleneck Alert)';
+      let rankColor = '#ef4444';
+      if (gap <= 8) {
+        rank = 'Rank S 🏆 (Master Dispatcher)';
+        rankColor = '#10b981';
+      } else if (gap <= 18) {
+        rank = 'Rank A 🌟 (Senior Architect)';
+        rankColor = '#06b6d4';
+      } else if (gap <= 32) {
+        rank = 'Rank B ⚡ (Junior Sysadmin)';
+        rankColor = '#f59e0b';
+      }
+
+      if (elRank) {
+        elRank.innerText = rank;
+        elRank.style.color = rankColor;
+      }
+    }
+
+    testGameVsAI() {
+      const resultsDiv = document.getElementById('game-ai-results');
+      if (!resultsDiv) return;
+
+      resultsDiv.innerHTML = '<div style="padding:16px; text-align:center; color:#0284c7;"><b>⏳ Menjalankan 5 Algoritma AI (Paritas 600 NFE)...</b></div>';
+
+      setTimeout(() => {
+        // Convert game tasks & VMs into Problem format
+        const probTasks = this.gameTasks.map(t => ({ id: t.id, name: t.name, length: t.mi }));
+        const probVMs = this.gameVMs.map(v => ({ id: v.id, name: v.name, speed: v.speed, color: v.color }));
+
+        // 1. Player Makespan
+        const playerLoads = [0, 0, 0];
+        this.gameTasks.forEach((t, tIdx) => {
+          playerLoads[this.gameAssignment[tIdx]] += t.mi / this.gameVMs[this.gameAssignment[tIdx]].mips;
+        });
+        const playerMs = Math.max(...playerLoads);
+
+        // 2. Min-Min Heuristic
+        const minMinSol = scheduleMinMin(probTasks, probVMs);
+        const minMinMs = calculateMakespan(minMinSol, probTasks, probVMs);
+
+        // 3. VNS Murni (600 NFE)
+        const vnsEngine = new VNSEngine(probTasks, probVMs);
+        while (vnsEngine.evaluations < 600) vnsEngine.step();
+        const vnsMs = vnsEngine.bestMakespan;
+
+        // 4. BFO Murni (600 NFE)
+        const bfoEngine = new BFOEngine(probTasks, probVMs);
+        while (bfoEngine.evaluations < 600) bfoEngine.step();
+        const bfoMs = bfoEngine.bestMakespan;
+
+        // 5. Hybrid 2: PSO-MinMin (600 NFE)
+        const psoEngine = new PSOMinMinEngine(probTasks, probVMs);
+        while (psoEngine.evaluations < 600) psoEngine.step();
+        const psoMs = psoEngine.bestMakespan;
+
+        // 6. Hybrid 1: Memetic BFO-VNS (600 NFE)
+        const memeticEngine = new MemeticBFOVNSEngine(probTasks, probVMs);
+        while (memeticEngine.evaluations < 600) memeticEngine.step();
+        const memeticMs = memeticEngine.bestMakespan;
+
+        const competitors = [
+          { name: 'Anda (Human Dispatcher)', ms: playerMs, isPlayer: true },
+          { name: 'Heuristik Min-Min', ms: minMinMs, isPlayer: false, tag: 'Deterministik' },
+          { name: 'VNS Murni (Kocorock)', ms: vnsMs, isPlayer: false, tag: 'Trajectory' },
+          { name: 'BFO Murni (Pipimon)', ms: bfoMs, isPlayer: false, tag: 'Swarm' },
+          { name: 'Hybrid 2: PSO-MinMin', ms: psoMs, isPlayer: false, tag: 'Pola B (HRH)' },
+          { name: 'Hybrid 1: Memetic BFO-VNS', ms: memeticMs, isPlayer: false, tag: 'Pola D (LRH)' }
+        ];
+
+        competitors.sort((a, b) => a.ms - b.ms);
+
+        const playerRank = competitors.findIndex(c => c.isPlayer) + 1;
+        const bestMs = competitors[0].ms;
+
+        let tableHtml = `
+          <div style="background:rgba(255,255,255,0.85); border-radius:12px; padding:14px; border:1px solid #cbd5e1; margin-top:12px;">
+            <div style="font-weight:800; font-size:15px; color:#0f172a; margin-bottom:8px;">
+              🏆 Papan Peringkat Turnamen AI Dispatcher:
+            </div>
+            <table style="width:100%; border-collapse:collapse; font-size:13px;">
+              <thead>
+                <tr style="border-bottom:1.5px solid #cbd5e1; text-align:left; color:#475569;">
+                  <th style="padding:6px;">Pos</th>
+                  <th>Kontender</th>
+                  <th>Makespan</th>
+                  <th>Gap ke Terbaik</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+
+        competitors.forEach((c, idx) => {
+          const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+          const gap = ((c.ms - bestMs) / bestMs) * 100;
+          tableHtml += `
+            <tr style="border-bottom:1px solid #f1f5f9; ${c.isPlayer ? 'background:#ecfdf5; font-weight:700;' : ''}">
+              <td style="padding:6px;">${medal}</td>
+              <td>${c.name} ${c.tag ? `<small style="color:#64748b; font-size:10px;">(${c.tag})</small>` : ''}</td>
+              <td style="color:${c.isPlayer ? '#059669' : '#0f172a'};">${c.ms.toFixed(2)}s</td>
+              <td style="color:#64748b;">${gap === 0 ? 'Terbaik 🎯' : '+' + gap.toFixed(1) + '%'}</td>
+            </tr>
+          `;
+        });
+
+        tableHtml += `
+              </tbody>
+            </table>
+            <div style="margin-top:12px; padding:10px; border-radius:8px; background:${playerRank <= 2 ? '#dcfce7' : '#fef3c7'}; color:${playerRank <= 2 ? '#166534' : '#92400e'}; font-size:12px; font-weight:600;">
+              ${playerRank === 1 ? '🎉 LUAR BIASA! Solusi Anda menjadi Juara 1 mengalahkan seluruh AI metaheuristik!' : playerRank <= 3 ? '👏 Hebat! Anda menempati podium Juara #' + playerRank + ' bersaing ketat dengan algoritma hybrid!' : '💡 Coba gunakan saran Shaking VNS untuk memindahkan beban dari VM tersibuk ke VM paling lengang!'}
+            </div>
+          </div>
+        `;
+
+        resultsDiv.innerHTML = tableHtml;
+      }, 100);
+    }
+
+    giveGameVNSHint() {
+      const vmLoads = [0, 0, 0];
+      this.gameTasks.forEach((t, tIdx) => {
+        vmLoads[this.gameAssignment[tIdx]] += t.mi / this.gameVMs[this.gameAssignment[tIdx]].mips;
+      });
+
+      const maxVm = vmLoads.indexOf(Math.max(...vmLoads));
+      const minVm = vmLoads.indexOf(Math.min(...vmLoads));
+
+      // Find best task on maxVm to relocate to minVm
+      let bestTIdx = -1;
+      let bestNewMs = Infinity;
+
+      this.gameTasks.forEach((t, tIdx) => {
+        if (this.gameAssignment[tIdx] === maxVm) {
+          const testLoads = [...vmLoads];
+          testLoads[maxVm] -= t.mi / this.gameVMs[maxVm].mips;
+          testLoads[minVm] += t.mi / this.gameVMs[minVm].mips;
+          const newMs = Math.max(...testLoads);
+          if (newMs < bestNewMs) {
+            bestNewMs = newMs;
+            bestTIdx = tIdx;
+          }
+        }
+      });
+
+      const hintDiv = document.getElementById('game-hint-box');
+      if (hintDiv && bestTIdx !== -1) {
+        const t = this.gameTasks[bestTIdx];
+        hintDiv.innerHTML = `
+          <div style="padding:10px 14px; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; color:#92400e; font-size:12px; margin-top:10px;">
+            <b>💡 Petunjuk Shaking Kocorock (VNS):</b><br>
+            VM ${maxVm + 1} mengalami bottleneck (${vmLoads[maxVm].toFixed(2)}s).<br>
+            Pindahkan <b>${t.name} (${t.mi} MI)</b> dari <b>VM ${maxVm + 1}</b> ke <b>VM ${minVm + 1}</b>!<br>
+            Makespan akan turun dari <b>${vmLoads[maxVm].toFixed(2)}s</b> &rarr; <b>${bestNewMs.toFixed(2)}s</b>.
+            <button onclick="window.app.assignGameTask(${bestTIdx}, ${minVm})" style="margin-left:10px; padding:4px 10px; background:#f59e0b; color:#ffffff; border:none; border-radius:6px; font-weight:700; cursor:pointer;">
+              Terapkan Saran Ini ⚡
+            </button>
+          </div>
+        `;
+      }
+    }
+
+    giveGameBFOHint() {
+      const hintDiv = document.getElementById('game-hint-box');
+      if (hintDiv) {
+        hintDiv.innerHTML = `
+          <div style="padding:10px 14px; background:#ecfeff; border:1px solid #a5f3fc; border-radius:10px; color:#0e7490; font-size:12px; margin-top:10px;">
+            <b>🌱 Petunjuk Kemotaksis Pipimon (BFO):</b><br>
+            Bakteri mencari konsentrasi nutrisi tertinggi (Makespan minimum).<br>
+            Rasio kapasitas MIPS kita adalah <b>3.5 : 2.0 : 1.0</b> (Total 6500 MIPS).<br>
+            Untuk mencapai Lower Bound ideal (0.90s), bagilah total instruksi (5850 MI) secara proporsional:<br>
+            • VM 1 (Kilat): Target ~3150 MI (54% beban)<br>
+            • VM 2 (Seimbang): Target ~1800 MI (31% beban)<br>
+            • VM 3 (Hemat): Target ~900 MI (15% beban)
+          </div>
+        `;
+      }
+    }
+
+    applyGamePreset(type) {
+      if (type === 'anti') {
+        // Anti-pattern: All tasks to VM 1
+        this.gameAssignment = this.gameTasks.map(() => 0);
+        this.say("⚠️ Preset Anti-Pola diaktifkan: Seluruh tugas ditumpuk ke VM 1 tercepat! Terjadi kemacetan parah (bottleneck) dan VM 2 & 3 menganggur total.");
+      } else if (type === 'rand') {
+        this.gameAssignment = this.gameTasks.map(() => Math.floor(Math.random() * 3));
+        this.say("🎲 Preset Acak diaktifkan.");
+      } else if (type === 'opt') {
+        // Optimal balanced assignment
+        this.gameAssignment = [0, 1, 0, 0, 1, 0, 1, 2, 2, 2];
+        this.say("✨ Preset Solusi Optimal Hybrid BFO-VNS diaktifkan!");
+      }
+
+      this.renderGameBoard();
+      this.updateGameMetrics();
     }
   }
 
