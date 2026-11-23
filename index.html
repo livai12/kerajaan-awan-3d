@@ -1299,10 +1299,264 @@
       border-color: #94a3b8;
     }
     .game-btn-primary {
-      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+      background: #c2410c !important;
+      background-color: #c2410c !important;
+      background-image: none !important;
       color: #ffffff !important;
-      border-color: #ea580c !important;
-      box-shadow: 0 4px 12px rgba(234,88,12,0.3);
+      border-top: 2px solid #ea580c !important;
+      border-left: 2px solid #ea580c !important;
+      border-right: 2px solid #7c2d12 !important;
+      border-bottom: 4px solid #431407 !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.7) !important;
+    }
+
+  
+    /* ==============================================================
+       SOLID 3D EMBOSSED STONE / ROCK BUTTONS (ZERO GRADIENT, ZERO TRANSPARENCY)
+       ============================================================== */
+    button, .btn-stone {
+      font: inherit;
+      color: #f5f5f4 !important;
+      background: #262626 !important; /* Solid dark basalt stone */
+      background-color: #262626 !important;
+      background-image: none !important;
+      opacity: 1 !important;
+      border-top: 2px solid #57534e !important;
+      border-left: 2px solid #44403c !important;
+      border-right: 2px solid #1c1917 !important;
+      border-bottom: 4px solid #0c0a09 !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.15) !important;
+      font-weight: 700 !important;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.9) !important;
+      cursor: pointer !important;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.1s ease !important;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      user-select: none;
+    }
+    button:hover, .btn-stone:hover {
+      background: #333333 !important;
+      background-color: #333333 !important;
+    }
+    button:active, .btn-stone:active {
+      transform: translateY(2px) !important;
+      border-bottom: 2px solid #0c0a09 !important;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.8), inset 0 2px 4px rgba(0,0,0,0.6) !important;
+    }
+
+    /* Magma Basalt Stone (Solid Terracotta/Lava Rock) */
+    .stone-magma, button.stone-magma {
+      background: #9a3412 !important;
+      background-color: #9a3412 !important;
+      background-image: none !important;
+      border-top: 2px solid #ea580c !important;
+      border-left: 2px solid #c2410c !important;
+      border-right: 2px solid #7c2d12 !important;
+      border-bottom: 4px solid #431407 !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.7) !important;
+    }
+    .stone-magma:hover, button.stone-magma:hover {
+      background: #b43a14 !important;
+      background-color: #b43a14 !important;
+    }
+    .stone-magma:active, button.stone-magma:active {
+      transform: translateY(2px) !important;
+      border-bottom: 2px solid #431407 !important;
+    }
+
+    /* Ocean Slate Stone (Solid Deep Cyan/Blue Rock) */
+    .stone-ocean, button.stone-ocean {
+      background: #0369a1 !important;
+      background-color: #0369a1 !important;
+      background-image: none !important;
+      border-top: 2px solid #38bdf8 !important;
+      border-left: 2px solid #0284c7 !important;
+      border-right: 2px solid #075985 !important;
+      border-bottom: 4px solid #082f49 !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.7) !important;
+    }
+    .stone-ocean:hover, button.stone-ocean:hover {
+      background: #0284c7 !important;
+      background-color: #0284c7 !important;
+    }
+    .stone-ocean:active, button.stone-ocean:active {
+      transform: translateY(2px) !important;
+      border-bottom: 2px solid #082f49 !important;
+    }
+
+    /* Volcanic Ruby Stone (Solid Crimson Rock for Exit/Close/Danger) */
+    .stone-crimson, button.stone-crimson {
+      background: #b91c1c !important;
+      background-color: #b91c1c !important;
+      background-image: none !important;
+      border-top: 2px solid #f87171 !important;
+      border-left: 2px solid #dc2626 !important;
+      border-right: 2px solid #991b1b !important;
+      border-bottom: 4px solid #450a0a !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.7) !important;
+    }
+    .stone-crimson:hover, button.stone-crimson:hover {
+      background: #dc2626 !important;
+      background-color: #dc2626 !important;
+    }
+    .stone-crimson:active, button.stone-crimson:active {
+      transform: translateY(2px) !important;
+      border-bottom: 2px solid #450a0a !important;
+    }
+
+    /* Jade Emerald Stone (Solid Green Rock for Play/Optimal) */
+    .stone-jade, button.stone-jade {
+      background: #047857 !important;
+      background-color: #047857 !important;
+      background-image: none !important;
+      border-top: 2px solid #34d399 !important;
+      border-left: 2px solid #059669 !important;
+      border-right: 2px solid #065f46 !important;
+      border-bottom: 4px solid #064e3b !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.7) !important;
+    }
+    .stone-jade:hover, button.stone-jade:hover {
+      background: #059669 !important;
+      background-color: #059669 !important;
+    }
+    .stone-jade:active, button.stone-jade:active {
+      transform: translateY(2px) !important;
+      border-bottom: 2px solid #064e3b !important;
+    }
+
+    /* Amber Sandstone (Solid Gold/Brown Rock) */
+    .stone-amber, button.stone-amber {
+      background: #b45309 !important;
+      background-color: #b45309 !important;
+      background-image: none !important;
+      border-top: 2px solid #fbbf24 !important;
+      border-left: 2px solid #d97706 !important;
+      border-right: 2px solid #78350f !important;
+      border-bottom: 4px solid #451a03 !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.7) !important;
+    }
+    .stone-amber:hover, button.stone-amber:hover {
+      background: #d97706 !important;
+      background-color: #d97706 !important;
+    }
+    .stone-amber:active, button.stone-amber:active {
+      transform: translateY(2px) !important;
+      border-bottom: 2px solid #451a03 !important;
+    }
+
+    /* Amethyst Stone (Solid Purple Rock) */
+    .stone-purple, button.stone-purple {
+      background: #6b21a8 !important;
+      background-color: #6b21a8 !important;
+      background-image: none !important;
+      border-top: 2px solid #c084fc !important;
+      border-left: 2px solid #9333ea !important;
+      border-right: 2px solid #581c87 !important;
+      border-bottom: 4px solid #3b0764 !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.7) !important;
+    }
+    .stone-purple:hover, button.stone-purple:hover {
+      background: #7e22ce !important;
+      background-color: #7e22ce !important;
+    }
+    .stone-purple:active, button.stone-purple:active {
+      transform: translateY(2px) !important;
+      border-bottom: 2px solid #3b0764 !important;
+    }
+
+    /* Segmented Tray & Buttons */
+    .seg {
+      background: #171717 !important;
+      border: 1px solid #333333 !important;
+      border-radius: 8px !important;
+      padding: 3px !important;
+      gap: 3px !important;
+    }
+    .seg button {
+      background: #262626 !important;
+      color: #a8a29e !important;
+      border-top: 1px solid #44403c !important;
+      border-bottom: 3px solid #0c0a09 !important;
+      border-radius: 6px !important;
+      height: 30px !important;
+    }
+    .seg button.on {
+      background: #44403c !important;
+      color: #ffffff !important;
+      border-top: 1px solid #78716c !important;
+      border-bottom: 3px solid #1c1917 !important;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.2) !important;
+    }
+
+    /* Round Buttons & Dock Icons */
+    .round {
+      border-radius: 8px !important;
+      background: #262626 !important;
+      border-top: 2px solid #525252 !important;
+      border-bottom: 4px solid #0a0a0a !important;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.6) !important;
+      color: #f5f5f4 !important;
+    }
+    .round:hover {
+      background: #333333 !important;
+    }
+    .round.on {
+      background: #0369a1 !important;
+      border-top: 2px solid #38bdf8 !important;
+      border-bottom: 4px solid #082f49 !important;
+      color: #ffffff !important;
+    }
+
+    /* Bottom Dock Bar */
+    .dock {
+      background: #171717 !important;
+      border: 2px solid #333333 !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.85) !important;
+      border-radius: 12px !important;
+    }
+    .ib {
+      background: #262626 !important;
+      border-top: 2px solid #525252 !important;
+      border-bottom: 3px solid #0a0a0a !important;
+      border-radius: 8px !important;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.6) !important;
+      color: #f5f5f4 !important;
+    }
+    .ib:hover {
+      background: #333333 !important;
+    }
+    .ib.main {
+      background: #047857 !important;
+      border-top: 2px solid #34d399 !important;
+      border-bottom: 4px solid #064e3b !important;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.8) !important;
+      color: #ffffff !important;
+    }
+    .ib.main:hover {
+      background: #059669 !important;
+    }
+    .spd-pill {
+      background: #262626 !important;
+      border-top: 1px solid #44403c !important;
+      border-bottom: 2px solid #0c0a09 !important;
+      border-radius: 6px !important;
+      color: #a8a29e !important;
+    }
+    .spd-pill.on {
+      background: #44403c !important;
+      color: #ffffff !important;
+      border-top: 1px solid #78716c !important;
+      border-bottom: 2px solid #1c1917 !important;
     }
 
   </style>
@@ -1365,27 +1619,27 @@
 
     <!-- Action Buttons (Responsive Pills fitting cleanly on screen) -->
     <div style="display:flex; align-items:center; gap:5px; flex-shrink:0;">
-      <button id="btnOpenTheater" style="height:32px; padding:0 12px; border-radius:10px; display:inline-flex; align-items:center; gap:5px; font-weight:700; font-size:11.5px; color:#0369a1; white-space:nowrap; background:linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); border:1px solid #38bdf8; box-shadow:0 2px 8px rgba(2,132,199,0.25); cursor:pointer;" title="Buka Teater Holografik & Bioskop Edukatif [T]">
+      <button id="btnOpenTheater" class="stone-ocean" style="height:34px; padding:0 12px; font-size:11.5px; white-space:nowrap;" title="Buka Teater Holografik & Bioskop Edukatif [T]">
         <span>🏛️ Teater [T]</span>
       </button>
 
-      <button id="btnOpenPOV" style="height:32px; padding:0 12px; border-radius:10px; display:inline-flex; align-items:center; gap:5px; font-weight:700; font-size:11.5px; color:#b45309; white-space:nowrap; background:linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border:1px solid #f59e0b; box-shadow:0 2px 8px rgba(245,158,11,0.25); cursor:pointer;" title="Mode Jelajah First-Person POV Kastil [V]">
+      <button id="btnOpenPOV" class="stone-amber" style="height:34px; padding:0 12px; font-size:11.5px; white-space:nowrap;" title="Mode Jelajah First-Person POV Kastil [V]">
         <span>🚶 POV Kastil [V]</span>
       </button>
 
-      <button id="btnOpenGame" style="height:32px; padding:0 12px; border-radius:10px; display:inline-flex; align-items:center; gap:5px; font-weight:700; font-size:11.5px; color:#c2410c; white-space:nowrap; background:linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%); border:1px solid #f97316; box-shadow:0 2px 8px rgba(234,88,12,0.2); cursor:pointer;" title="Buka Game Edukatif: Cloud Dispatcher Challenge [G]">
+      <button id="btnOpenGame" class="stone-magma" style="height:34px; padding:0 12px; font-size:11.5px; white-space:nowrap;" title="Buka Game Edukatif: Cloud Dispatcher Challenge [G]">
         <span>🎮 Game [G]</span>
       </button>
 
-      <button id="btnOpenAblation" style="height:32px; padding:0 12px; border-radius:10px; display:inline-flex; align-items:center; gap:5px; font-weight:700; font-size:11.5px; color:#0f766e; white-space:nowrap; background:linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%); border:1px solid #5eead4; box-shadow:0 2px 8px rgba(13,148,136,0.15); cursor:pointer;" title="Buka Panel Uji Ilmiah Studi Ablasi 30x Run [A]">
+      <button id="btnOpenAblation" class="stone-jade" style="height:34px; padding:0 12px; font-size:11.5px; white-space:nowrap;" title="Buka Panel Uji Ilmiah Studi Ablasi 30x Run [A]">
         <span>📊 Ablasi [A]</span>
       </button>
 
-      <button id="btnOpenEduHub" style="height:32px; padding:0 12px; border-radius:10px; display:inline-flex; align-items:center; gap:5px; font-weight:700; font-size:11.5px; color:#4338ca; white-space:nowrap; background:linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); border:1px solid #a5b4fc; box-shadow:0 2px 8px rgba(99,102,241,0.15); cursor:pointer;" title="Buka Pusat Belajar: Taksonomi Talbi & 5 Pola Hibridisasi [E]">
+      <button id="btnOpenEduHub" class="stone-purple" style="height:34px; padding:0 12px; font-size:11.5px; white-space:nowrap;" title="Buka Pusat Belajar: Taksonomi Talbi & 5 Pola Hibridisasi [E]">
         <span>🎓 Edu Hub [E]</span>
       </button>
 
-      <button id="btnAudienceQuiz" style="height:32px; padding:0 12px; border-radius:10px; display:inline-flex; align-items:center; gap:5px; font-weight:700; font-size:11.5px; color:#92400e; white-space:nowrap; background:linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border:1px solid #fcd34d; box-shadow:0 2px 8px rgba(245,158,11,0.18); cursor:pointer;" title="Mode Interaktif: Uji Audiens & Bedah Konsep [Q]">
+      <button id="btnAudienceQuiz" class="stone-amber" style="height:34px; padding:0 12px; font-size:11.5px; white-space:nowrap;" title="Mode Interaktif: Uji Audiens & Bedah Konsep [Q]">
         <span>🎯 Drill [Q]</span>
       </button>
 
@@ -1753,7 +2007,7 @@
             <span>🎲</span> Tunjuk Teman:
           </span>
           <input type="text" id="inputPeerPool" value="Presensi 1 - 35" style="height:32px; padding:0 10px; border-radius:8px; border:1px solid #cbd5e1; font-size:12.5px; width:160px; outline:none;" title="Ketik nomor presensi atau nama teman">
-          <button id="btnRollPeer" style="height:32px; padding:0 14px; border-radius:8px; background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:#ffffff; border:none; font-weight:700; font-size:12px; cursor:pointer; box-shadow:0 2px 6px rgba(245,158,11,0.25);">🎲 Putar / Kocok!</button>
+          <button id="btnRollPeer" class="stone-amber" style="height:32px; padding:0 14px; border-radius:8px; font-size:12px; cursor:pointer;">🎲 Putar / Kocok!</button>
         </div>
         <div id="peerRollDisplay" style="font-weight:800; font-size:13.5px; color:#0369a1; background:#e0f2fe; padding:6px 14px; border-radius:10px; border:1px solid #bae6fd; min-width:180px; text-align:center;">
           Silakan putar untuk menunjuk teman
@@ -2394,7 +2648,7 @@
     </div>
   </div>
 
-  <script src="./src/bundle.js"></script>
+  
 
 
   <!-- FIRST-PERSON POV HUD OVERLAY -->
@@ -2428,23 +2682,23 @@
   <!-- ============================================================== -->
   <!-- 1. ABYSSAL WELCOME GATE (ENTRY WITH LAVA THEME & ELEVENLABS SCRIPT) -->
   <!-- ============================================================== -->
-  <div id="abyssal-welcome-gate" style="position:fixed; inset:0; z-index:120; background:radial-gradient(circle at 50% 40%, rgba(35,16,10,0.88) 0%, rgba(10,5,3,0.98) 100%); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:24px; color:#ffffff; transition:opacity 0.8s ease, transform 0.8s ease;">
+  <div id="abyssal-welcome-gate" onclick="if(event.target.id==='abyssal-welcome-gate') window.enterAbyssalDirectly ? window.enterAbyssalDirectly() : null" style="position:fixed; inset:0; z-index:120; background:radial-gradient(circle at 50% 40%, #1f0f08 0%, #0a0503 100%); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:24px; color:#ffffff; transition:opacity 0.6s ease; pointer-events:auto;">
     <div style="font-size:12px; font-weight:800; letter-spacing:4px; color:#f59e0b; text-transform:uppercase; margin-bottom:10px; display:flex; align-items:center; gap:8px;">
       <span style="font-size:16px;">🌊</span> KEDALAMAN 11.000 METER DI BAWAH LAUT <span style="font-size:16px;">🌋</span>
     </div>
-    <h1 style="font-size:clamp(26px, 5vw, 46px); font-weight:900; background:linear-gradient(135deg, #fef08a 0%, #f97316 45%, #38bdf8 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin:0 0 14px; text-shadow:0 0 40px rgba(249,115,22,0.5);">
+    <h1 style="font-size:clamp(26px, 5vw, 46px); font-weight:900; color:#fb923c; margin:0 0 14px; text-shadow:0 4px 18px rgba(0,0,0,0.9);">
       ABYSSAL GRID 3D: SINTESIS HIBRIDA
     </h1>
-    <div style="background:rgba(15, 23, 42, 0.7); border:1px solid rgba(245, 158, 11, 0.35); border-radius:16px; padding:12px 20px; max-width:620px; margin-bottom:24px; box-shadow:0 8px 30px rgba(0,0,0,0.4);">
-      <p style="font-size:13.5px; color:#cbd5e1; line-height:1.6; margin:0; font-style:italic;">
+    <div style="background:#18181b; border:2px solid #57534e; border-radius:12px; padding:14px 22px; max-width:620px; margin-bottom:28px; box-shadow:0 8px 32px rgba(0,0,0,0.7);">
+      <p style="font-size:13.5px; color:#e2e8f0; line-height:1.6; margin:0; font-style:italic;">
         <span style="color:#f59e0b; font-weight:700;">[whispering]</span> Kedalaman sebelas ribu meter di bawah laut. <span style="color:#38bdf8; font-weight:700;">[mysterious]</span> Selamat datang di markas Abyssal Grid Three-D!<br>
-        <span style="color:#94a3b8; font-size:12px; font-style:normal;">Dua penguasa palung—<b>Magma-Kocorock (VNS)</b> dan <b>Aqua-Pipimon (BFO)</b>—menunggumu di dalam kastil.</span>
+        <span style="color:#a1a1aa; font-size:12px; font-style:normal;">Dua penguasa palung—<b>Magma-Kocorock (VNS)</b> dan <b>Aqua-Pipimon (BFO)</b>—menunggumu di dalam kastil.</span>
       </p>
     </div>
-    <button id="btnEnterAbyssal" style="padding:15px 36px; background:linear-gradient(135deg, #ea580c 0%, #f59e0b 50%, #0284c7 100%); color:#ffffff; font-weight:800; font-size:15px; border:none; border-radius:30px; box-shadow:0 8px 32px rgba(234,88,12,0.6), 0 0 24px rgba(56,189,248,0.5); cursor:pointer; display:flex; align-items:center; gap:10px; transition:transform 0.2s, box-shadow 0.2s;">
-      <span style="font-size:20px;">🌋</span>
+    <button id="btnEnterAbyssal" class="stone-magma" onclick="window.enterAbyssalDirectly ? window.enterAbyssalDirectly() : null" style="position:relative; z-index:130; pointer-events:auto; padding:18px 48px; font-size:16px; border-radius:12px; box-shadow:0 6px 0 #431407, 0 12px 30px rgba(0,0,0,0.85); display:inline-flex; align-items:center; gap:12px; cursor:pointer;" title="Klik atau tekan [Enter / Spasi] untuk Masuk">
+      <span style="font-size:22px;">🌋</span>
       <span>Masuk ke Markas Abyssal (Putar Musik Lava)</span>
-      <span style="font-size:20px;">🔊</span>
+      <span style="font-size:22px;">🔊</span>
     </button>
   </div>
 
@@ -2497,10 +2751,10 @@
       <p style="margin:0;"><b style="color:#f59e0b;">🌋 Magma-Kocorock:</b> <i>"Di sana, kami berdua akan menjadi gurumu, lengkap dengan layar bioskop interaktif dan mini-game seru! Ayo, tekan tombol Ikuti Tur sekarang!"</i></p>
     </div>
     <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-      <button id="btnAcceptTour" style="padding:12px 26px; background:linear-gradient(135deg, #0284c7 0%, #38bdf8 100%); color:#ffffff; font-weight:800; font-size:13.5px; border:none; border-radius:14px; cursor:pointer; box-shadow:0 4px 18px rgba(2,132,199,0.5); display:inline-flex; align-items:center; gap:8px;">
+      <button id="btnAcceptTour" class="stone-ocean" style="padding:14px 28px; font-size:13.5px; border-radius:10px;">
         <span>🚀 Ikuti Tur Teater Bersama Kami</span>
       </button>
-      <button id="btnDeclineTour" style="padding:12px 20px; background:rgba(255,255,255,0.1); color:#cbd5e1; font-weight:700; font-size:13px; border:1px solid rgba(255,255,255,0.22); border-radius:14px; cursor:pointer;">
+      <button id="btnDeclineTour" class="btn-stone" style="padding:14px 24px; font-size:13.5px; border-radius:10px;">
         <span>🚶 Jelajah Bebas di Kastil</span>
       </button>
     </div>
@@ -2630,5 +2884,6 @@
     </div>
 
   </div>
+  <script src="./src/bundle.js"></script>
 </body>
 </html>

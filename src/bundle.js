@@ -5240,7 +5240,7 @@
             VM ${maxVm + 1} mengalami bottleneck (${vmLoads[maxVm].toFixed(2)}s).<br>
             Pindahkan <b>${t.name} (${t.mi} MI)</b> dari <b>VM ${maxVm + 1}</b> ke <b>VM ${minVm + 1}</b>!<br>
             Makespan akan turun dari <b>${vmLoads[maxVm].toFixed(2)}s</b> &rarr; <b>${bestNewMs.toFixed(2)}s</b>.
-            <button onclick="window.app.assignGameTask(${bestTIdx}, ${minVm})" style="margin-left:10px; padding:4px 10px; background:#f59e0b; color:#ffffff; border:none; border-radius:6px; font-weight:700; cursor:pointer;">
+            <button class="stone-amber" onclick="window.app.assignGameTask(${bestTIdx}, ${minVm})" style="margin-left:10px; padding:4px 10px; font-size:11px; border-radius:6px; cursor:pointer;">
               Terapkan Saran Ini ⚡
             </button>
           </div>
@@ -5286,6 +5286,38 @@
     // ==============================================================
     // ABYSSAL INTRO GATE & NPC WALKTHROUGH INVITATION
     // ==============================================================
+    enterAbyssalFromGate() {
+      if (this.hasEnteredAbyssal) return;
+      this.hasEnteredAbyssal = true;
+
+      // 1. Play Lava infernal Web Audio soundtrack (ducked for speech clarity)
+      if (this.soundtrack) {
+        try {
+          this.soundtrack.start();
+          this.soundtrack.duck();
+        } catch (e) {
+          console.warn('Soundtrack start failed:', e);
+        }
+      }
+      if (this.btnMusic) {
+        this.btnMusic.classList.add('on');
+        this.btnMusic.setAttribute('title', 'Musik Fantasi Awan: AKTIF (Klik untuk Mematikan)');
+      }
+
+      // 2. Smoothly fade out welcome gate so player enters the castle
+      const gate = document.getElementById('abyssal-welcome-gate');
+      if (gate) {
+        gate.style.opacity = '0';
+        gate.style.pointerEvents = 'none';
+        setTimeout(() => {
+          gate.style.display = 'none';
+        }, 600);
+      }
+
+      // 3. Play sequential real ElevenLabs audio prologue
+      this.playPrologueSequence();
+    }
+
     initAbyssalIntro() {
       const gate = document.getElementById('abyssal-welcome-gate');
       const btnEnter = document.getElementById('btnEnterAbyssal');
@@ -5293,26 +5325,34 @@
       const btnAccept = document.getElementById('btnAcceptTour');
       const btnDecline = document.getElementById('btnDeclineTour');
 
+      const triggerEnter = (e) => {
+        if (e) {
+          e.stopPropagation();
+        }
+        this.enterAbyssalFromGate();
+      };
+
       if (btnEnter) {
-        btnEnter.addEventListener('click', () => {
-          // 1. Play Lava infernal Web Audio soundtrack (ducked for speech clarity)
-          if (this.soundtrack) {
-            this.soundtrack.start();
-          }
+        btnEnter.addEventListener('click', triggerEnter);
+        btnEnter.addEventListener('touchstart', triggerEnter, { passive: true });
+      }
 
-          // 2. Smoothly fade out welcome gate so player enters the castle
-          if (gate) {
-            gate.style.opacity = '0';
-            gate.style.pointerEvents = 'none';
-            setTimeout(() => {
-              gate.style.display = 'none';
-            }, 800);
+      if (gate) {
+        gate.addEventListener('click', (e) => {
+          if (e.target === gate || e.target.closest('#btnEnterAbyssal')) {
+            triggerEnter(e);
           }
-
-          // 3. Play sequential real ElevenLabs audio prologue
-          this.playPrologueSequence();
         });
       }
+
+      window.addEventListener('keydown', (e) => {
+        if (!this.hasEnteredAbyssal && (e.key === 'Enter' || e.key === ' ')) {
+          this.enterAbyssalFromGate();
+        }
+      });
+
+      // Global reference for onclick attribute
+      window.enterAbyssalDirectly = () => this.enterAbyssalFromGate();
 
       if (btnAccept) {
         btnAccept.addEventListener('click', () => {
@@ -6240,17 +6280,17 @@
               </p>
               
               <div style="display:flex; justify-content:center; gap:12px; margin-bottom:20px; flex-wrap:wrap;">
-                <button id="btnTheaterPresetAnti" style="padding:10px 18px; background:rgba(239,68,68,0.25); border:1.5px solid #ef4444; border-radius:12px; color:#fca5a5; font-size:12px; font-weight:700; cursor:pointer;">
+                <button id="btnTheaterPresetAnti" class="stone-crimson" style="padding:10px 18px; border-radius:8px; font-size:12px; cursor:pointer;">
                   ⚠️ Uji Anti-Pola (Bottleneck VM 1)
                 </button>
-                <button id="btnTheaterPresetRand" style="padding:10px 18px; background:rgba(245,158,11,0.25); border:1.5px solid #f59e0b; border-radius:12px; color:#fde68a; font-size:12px; font-weight:700; cursor:pointer;">
+                <button id="btnTheaterPresetRand" class="stone-amber" style="padding:10px 18px; border-radius:8px; font-size:12px; cursor:pointer;">
                   🎲 Uji Preset Acak (Random)
                 </button>
-                <button id="btnTheaterPresetOpt" style="padding:10px 18px; background:rgba(16,185,129,0.25); border:1.5px solid #10b981; border-radius:12px; color:#6ee7b7; font-size:12px; font-weight:700; cursor:pointer;">
+                <button id="btnTheaterPresetOpt" class="stone-jade" style="padding:10px 18px; border-radius:8px; font-size:12px; cursor:pointer;">
                   ✨ Uji Solusi Optimal Hybrid
                 </button>
-                <button id="btnTheaterOpenFullGame" style="padding:10px 22px; background:linear-gradient(135deg, #ea580c 0%, #38bdf8 100%); border:none; border-radius:12px; color:#ffffff; font-size:12px; font-weight:800; cursor:pointer; box-shadow:0 4px 16px rgba(234,88,12,0.4);">
-                  🚀 Buka Mini-Game Interaktif Lengkap [G]
+                <button id="btnTheaterOpenFullGame" class="stone-magma" style="padding:10px 22px; border-radius:8px; font-size:12px; cursor:pointer;">
+                  🎮 Mainkan Game Lengkap di Kastil
                 </button>
               </div>
 
@@ -6376,8 +6416,41 @@
 
   }
 
-  // Launch on ready
-  window.addEventListener('DOMContentLoaded', () => {
-    window.app = new AppMaster();
-  });
+  // Safe global fallback for entrance button
+  window.enterAbyssalDirectly = function() {
+    if (window.app && typeof window.app.enterAbyssalFromGate === 'function') {
+      window.app.enterAbyssalFromGate();
+    } else {
+      if (!window.app && typeof AppMaster !== 'undefined') {
+        try {
+          window.app = new AppMaster();
+          if (window.app.enterAbyssalFromGate) {
+            window.app.enterAbyssalFromGate();
+            return;
+          }
+        } catch (e) {
+          console.error('Error auto-booting AppMaster:', e);
+        }
+      }
+      const gate = document.getElementById('abyssal-welcome-gate');
+      if (gate) {
+        gate.style.opacity = '0';
+        gate.style.pointerEvents = 'none';
+        setTimeout(() => { gate.style.display = 'none'; }, 600);
+      }
+    }
+  };
+
+  // Resilient Launch: Handles loading, interactive, and complete document states
+  function bootApp() {
+    if (!window.app && typeof AppMaster !== 'undefined') {
+      window.app = new AppMaster();
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootApp);
+  } else {
+    bootApp();
+  }
 })();
