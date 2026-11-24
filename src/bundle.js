@@ -1211,8 +1211,15 @@
       this.scene.fog = new THREE.Fog(0x160c09, 18, 110);
 
       this.camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
-      this.camera.position.set(0, 19, 40);
-      this.camera.lookAt(this.camTarget);
+      if (this.cameraMode === 'fps') {
+        this.camera.position.set(0, 1.85, 10);
+        this.camera.rotation.order = 'YXZ';
+        this.camera.rotation.set(-0.02, 0, 0);
+        if (this.controls) this.controls.enabled = false;
+      } else {
+        this.camera.position.set(0, 19, 40);
+        this.camera.lookAt(this.camTarget);
+      }
       this.scene.add(this.camera);
 
       // 1. Volcanic Ambient Light (Warm Magma Glow from Below)
@@ -2463,52 +2470,38 @@
     }
 
     updateSpeechBubbles() {
-      const dom = this.renderer.domElement;
-      if (!dom) return;
-      const w = dom.clientWidth;
-      const h = dom.clientHeight;
-      if (!w || !h) return;
+      if (!this.camera) return;
+      const w = window.innerWidth || 1280;
+      const h = window.innerHeight || 720;
 
-      const projectPos = (pos3D) => {
-        const v = pos3D.clone().project(this.camera);
-        const sx = Math.max(120, Math.min(w - 120, (v.x * 0.5 + 0.5) * w));
-        const sy = Math.max(50, Math.min(h - 70, (-(v.y * 0.5) + 0.5) * h));
-        return {
-          x: sx,
-          y: sy,
-          visible: v.z < 1
-        };
+      const updateSingleBubble = (obj, id, offsetY) => {
+        const b = document.getElementById(id);
+        if (!b) return;
+
+        if (!obj) {
+          b.classList.remove('open');
+          return;
+        }
+        if (!this._bubbleV3) this._bubbleV3 = new THREE.Vector3();
+        obj.getWorldPosition(this._bubbleV3);
+        this._bubbleV3.y += offsetY;
+        this._bubbleV3.project(this.camera);
+
+        if (this._bubbleV3.z >= 1.0) {
+          b.classList.remove('open');
+          return;
+        }
+        const sx = Math.max(130, Math.min(w - 130, (this._bubbleV3.x * 0.5 + 0.5) * w));
+        const sy = Math.max(45, Math.min(h - 60, (-(this._bubbleV3.y * 0.5) + 0.5) * h));
+        b.style.left = `${Math.round(sx)}px`;
+        b.style.top = `${Math.round(sy)}px`;
       };
 
-      // Kocorock bubble position
       const kocokObj = (this.charMode === 'meshy' && this.meshyKocok) ? this.meshyKocok : this.kocok;
-      if (kocokObj) {
-        const worldPos = new THREE.Vector3();
-        kocokObj.getWorldPosition(worldPos);
-        worldPos.y += (this.charMode === 'meshy') ? 4.5 : 3.6;
-        const p = projectPos(worldPos);
-        const b = document.getElementById('bubble-kocorock');
-        if (b) {
-          b.style.left = `${p.x}px`;
-          b.style.top = `${p.y}px`;
-          if (!p.visible) b.classList.remove('open');
-        }
-      }
+      updateSingleBubble(kocokObj, 'bubble-kocorock', (this.charMode === 'meshy') ? 4.5 : 3.6);
 
-      // Pipimon bubble position
-      const pipObj = (this.charMode === 'meshy' && this.meshyPip) ? this.meshyPip : (this.pips ? this.pips[0] : null);
-      if (pipObj) {
-        const worldPos = new THREE.Vector3();
-        pipObj.getWorldPosition(worldPos);
-        worldPos.y += (this.charMode === 'meshy') ? 4.2 : 3.4;
-        const p = projectPos(worldPos);
-        const b = document.getElementById('bubble-pipimon');
-        if (b) {
-          b.style.left = `${p.x}px`;
-          b.style.top = `${p.y}px`;
-          if (!p.visible) b.classList.remove('open');
-        }
-      }
+      const pipObj = (this.charMode === 'meshy' && this.meshyPip) ? this.meshyPip : (this.leaderPip || (this.pips && this.pips[0]));
+      updateSingleBubble(pipObj, 'bubble-pipimon', (this.charMode === 'meshy') ? 4.2 : 3.4);
     }
 
     animateKocokShake(k, targetVmIdx = null, customText = null) {
@@ -2719,19 +2712,31 @@
 
     initFPSControls() {
       // 1. WASD & Arrow Keys Keyboard Input Handling
+      this.fpsKeys = { forward: false, backward: false, left: false, right: false, jump: false, sprint: false };
+      this.isPointerLocked = false;
+      this.isMouseDown = false;
+      this.prevMouseX = null;
+      this.prevMouseY = null;
+      this.prevTouchX = null;
+      this.prevTouchY = null;
+      this._lastProxCheckTime = 0;
+      this._currentProxLandmark = null;
+
       window.addEventListener('keydown', (e) => {
         if (this.cameraMode !== 'fps') return;
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+
         const code = e.code;
         const key = e.key ? e.key.toLowerCase() : '';
 
-        // WASD & Arrow Keys movement
-        if (code === 'KeyW' || code === 'ArrowUp' || key === 'w') this.fpsKeys.forward = true;
-        if (code === 'KeyS' || code === 'ArrowDown' || key === 's') this.fpsKeys.backward = true;
-        if (code === 'KeyA' || code === 'ArrowLeft' || key === 'a') this.fpsKeys.left = true;
-        if (code === 'KeyD' || code === 'ArrowRight' || key === 'd') this.fpsKeys.right = true;
+        // Movement keys: Support code, lowercase key, uppercase key, and arrow keys
+        if (code === 'KeyW' || key === 'w' || code === 'ArrowUp') this.fpsKeys.forward = true;
+        if (code === 'KeyS' || key === 's' || code === 'ArrowDown') this.fpsKeys.backward = true;
+        if (code === 'KeyA' || key === 'a' || code === 'ArrowLeft') this.fpsKeys.left = true;
+        if (code === 'KeyD' || key === 'd' || code === 'ArrowRight') this.fpsKeys.right = true;
 
         // Sprinting
-        if (code === 'ShiftLeft' || code === 'ShiftRight') this.fpsPlayer.isSprinting = true;
+        if (code === 'ShiftLeft' || code === 'ShiftRight' || e.shiftKey) this.fpsPlayer.isSprinting = true;
 
         // Jump physics
         if (code === 'Space') {
@@ -2739,13 +2744,13 @@
           if (this.fpsPlayer.isGrounded) {
             this.fpsPlayer.jumpVelocity = 8.8;
             this.fpsPlayer.isGrounded = false;
-            if (window.app && window.app.soundtrack && window.app.soundtrack.playChime) {
+            if (window.app && window.app.soundtrack && typeof window.app.soundtrack.playChime === 'function') {
               window.app.soundtrack.playChime(523.25, 0, 0.35, 0.12);
             }
           }
         }
 
-        // Exit POV mode with Escape (V is handled centrally by AppMaster to prevent double-toggle)
+        // Exit POV mode with Escape
         if (e.key === 'Escape') {
           e.preventDefault();
           this.toggleCameraMode('orbit');
@@ -2756,19 +2761,34 @@
         if (this.cameraMode !== 'fps') return;
         const code = e.code;
         const key = e.key ? e.key.toLowerCase() : '';
-        if (code === 'KeyW' || code === 'ArrowUp' || key === 'w') this.fpsKeys.forward = false;
-        if (code === 'KeyS' || code === 'ArrowDown' || key === 's') this.fpsKeys.backward = false;
-        if (code === 'KeyA' || code === 'ArrowLeft' || key === 'a') this.fpsKeys.left = false;
-        if (code === 'KeyD' || code === 'ArrowRight' || key === 'd') this.fpsKeys.right = false;
-        if (code === 'ShiftLeft' || code === 'ShiftRight') this.fpsPlayer.isSprinting = false;
+
+        if (code === 'KeyW' || key === 'w' || code === 'ArrowUp') this.fpsKeys.forward = false;
+        if (code === 'KeyS' || key === 's' || code === 'ArrowDown') this.fpsKeys.backward = false;
+        if (code === 'KeyA' || key === 'a' || code === 'ArrowLeft') this.fpsKeys.left = false;
+        if (code === 'KeyD' || key === 'd' || code === 'ArrowRight') this.fpsKeys.right = false;
+        if (code === 'ShiftLeft' || code === 'ShiftRight' || !e.shiftKey) this.fpsPlayer.isSprinting = false;
       });
 
-      // 2. Mouse Look / Pointer Lock handling
+      // Clear all keys on blur to prevent stuck keys
+      window.addEventListener('blur', () => {
+        this.fpsKeys = { forward: false, backward: false, left: false, right: false, jump: false, sprint: false };
+        this.isMouseDown = false;
+        this.prevMouseX = null;
+        this.prevMouseY = null;
+        this.prevTouchX = null;
+        this.prevTouchY = null;
+      });
+
+      // 2. Mouse Look / Pointer Lock + Seamless Click-and-Drag handling
       const dom = this.renderer.domElement;
+
+      // Pointer lock request on canvas click
       dom.addEventListener('click', () => {
         if (this.cameraMode === 'fps' && document.pointerLockElement !== dom) {
-          dom.requestPointerLock = dom.requestPointerLock || dom.mozRequestPointerLock;
-          if (dom.requestPointerLock) dom.requestPointerLock();
+          try {
+            dom.requestPointerLock = dom.requestPointerLock || dom.mozRequestPointerLock;
+            if (dom.requestPointerLock) dom.requestPointerLock();
+          } catch (_) {}
         }
       });
 
@@ -2776,14 +2796,75 @@
         this.isPointerLocked = (document.pointerLockElement === dom);
       });
 
+      // Mouse drag fallback (works smoothly whether pointer lock is granted or not!)
+      window.addEventListener('mousedown', (e) => {
+        if (this.cameraMode !== 'fps') return;
+        if (e.target.closest('button, input, select, textarea, a, #theater-overlay, #edu-modal, #drill-modal, #game-modal, #ablation-modal, #prologue-dialog-box')) return;
+        this.isMouseDown = true;
+        this.prevMouseX = e.clientX;
+        this.prevMouseY = e.clientY;
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+          document.activeElement.blur();
+        }
+      });
+
+      window.addEventListener('mouseup', () => {
+        this.isMouseDown = false;
+        this.prevMouseX = null;
+        this.prevMouseY = null;
+      });
+
       window.addEventListener('mousemove', (e) => {
         if (this.cameraMode !== 'fps') return;
-        // Move with Pointer Lock OR with Mouse Drag
-        if (this.isPointerLocked || e.buttons === 1) {
-          const sens = 0.0024;
-          this.fpsPlayer.yaw -= (e.movementX || 0) * sens;
-          this.fpsPlayer.pitch = Math.max(-1.35, Math.min(1.35, this.fpsPlayer.pitch - (e.movementY || 0) * sens));
+
+        let dx = 0;
+        let dy = 0;
+
+        if (this.isPointerLocked) {
+          dx = (typeof e.movementX === 'number') ? e.movementX : 0;
+          dy = (typeof e.movementY === 'number') ? e.movementY : 0;
+        } else if (this.isMouseDown || (e.buttons & 1) === 1) {
+          if (this.prevMouseX !== null && this.prevMouseY !== null) {
+            dx = e.clientX - this.prevMouseX;
+            dy = e.clientY - this.prevMouseY;
+          }
+          this.prevMouseX = e.clientX;
+          this.prevMouseY = e.clientY;
         }
+
+        if (dx !== 0 || dy !== 0) {
+          const sens = 0.0024;
+          this.fpsPlayer.yaw -= dx * sens;
+          this.fpsPlayer.pitch = Math.max(-1.4, Math.min(1.4, this.fpsPlayer.pitch - dy * sens));
+        }
+      });
+
+      // Touch drag support for mobile / touchpads
+      window.addEventListener('touchstart', (e) => {
+        if (this.cameraMode !== 'fps') return;
+        if (e.target.closest('button, input, select, textarea, a, #theater-overlay, #edu-modal, #drill-modal, #game-modal, #ablation-modal, #prologue-dialog-box')) return;
+        if (e.touches && e.touches.length > 0) {
+          this.prevTouchX = e.touches[0].clientX;
+          this.prevTouchY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+
+      window.addEventListener('touchmove', (e) => {
+        if (this.cameraMode !== 'fps') return;
+        if (e.touches && e.touches.length > 0 && this.prevTouchX !== null) {
+          const dx = e.touches[0].clientX - this.prevTouchX;
+          const dy = e.touches[0].clientY - this.prevTouchY;
+          this.prevTouchX = e.touches[0].clientX;
+          this.prevTouchY = e.touches[0].clientY;
+          const sens = 0.003;
+          this.fpsPlayer.yaw -= dx * sens;
+          this.fpsPlayer.pitch = Math.max(-1.4, Math.min(1.4, this.fpsPlayer.pitch - dy * sens));
+        }
+      }, { passive: true });
+
+      window.addEventListener('touchend', () => {
+        this.prevTouchX = null;
+        this.prevTouchY = null;
       });
     }
 
@@ -2796,23 +2877,36 @@
 
       if (nextMode === 'fps') {
         if (this.controls) this.controls.enabled = false;
-        this.fpsPlayer.position.set(0, 0, 10); // Inside castle grand hall with full view of Dais & Rulers
-        this.fpsPlayer.yaw = 0; // Facing North toward Throne & Hybrid Core
-        this.fpsPlayer.pitch = -0.02;
+        this.fpsKeys = { forward: false, backward: false, left: false, right: false, jump: false, sprint: false };
+        this.lastFrameTime = performance.now();
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+          document.activeElement.blur();
+        }
+
+        // Place inside Grand Hall entrance facing north towards the grand altar
+        this.fpsPlayer.position.set(0, 0, 14);
         this.fpsPlayer.velocity.set(0, 0, 0);
+        this.fpsPlayer.yaw = 0;
+        this.fpsPlayer.pitch = -0.02;
         this.fpsPlayer.isGrounded = true;
 
         if (this.explorerTorch) this.explorerTorch.visible = true;
         if (btnTop) {
-          btnTop.style.background = 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)';
-          btnTop.style.borderColor = '#f59e0b';
+          btnTop.classList.remove('stone-charcoal');
+          btnTop.classList.add('stone-amber');
+          btnTop.innerHTML = '<span>🚶 POV Aktif [V]</span>';
+          btnTop.style.boxShadow = '0 0 16px rgba(245,158,11,0.85), 0 4px 0 #78350f';
         }
         if (povHUD) povHUD.style.display = 'block';
 
         if (window.app && window.app.say) {
-          window.app.say("🚶 Mode Jelajah First-Person POV AKTIF! Gunakan W, A, S, D untuk berjalan ke Singgasana Hybrid di ujung lorong, Mouse untuk melihat sekeliling, dan Spasi untuk melompat!");
+          window.app.say("🚶 Mode Jelajah POV AKTIF! Gunakan W, A, S, D untuk berjalan menyusuri karpet kastil, Mouse untuk melihat sekeliling, dan Spasi untuk melompat!");
         }
       } else {
+        this.fpsKeys = { forward: false, backward: false, left: false, right: false, jump: false, sprint: false };
+        if (document.exitPointerLock && document.pointerLockElement) {
+          try { document.exitPointerLock(); } catch (_) {}
+        }
         if (this.controls) {
           this.controls.enabled = true;
           this.controls.target.copy(this.camTarget);
@@ -2823,85 +2917,97 @@
 
         if (this.explorerTorch) this.explorerTorch.visible = false;
         if (btnTop) {
-          btnTop.style.background = 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)';
-          btnTop.style.borderColor = '#cbd5e1';
+          btnTop.classList.remove('stone-amber');
+          btnTop.classList.add('stone-charcoal');
+          btnTop.innerHTML = '<span>🚶 POV Kastil [V]</span>';
+          btnTop.style.boxShadow = '';
         }
         if (povHUD) povHUD.style.display = 'none';
-
-        if (document.exitPointerLock) document.exitPointerLock();
+        const proxBox = document.getElementById('pov-proximity-box');
+        if (proxBox) proxBox.style.display = 'none';
 
         if (window.app && window.app.say) {
-          window.app.say("📷 Beralih kembali ke Mode Tinjauan Orbit 3D.");
+          window.app.say("🌐 Mode Orbit Bebas AKTIF! Drag mouse untuk memutar 360°, scroll untuk zoom in/out.");
         }
       }
     }
 
     getGroundHeight(x, z) {
-      // 1. Altar Dais at Far End (z <= -25)
       if (z <= -25 && Math.abs(x) <= 11) return 2.0;
-
-      // 2. Ceremonial Steps leading up to Altar (z between -25 and -22)
       if (z > -25 && z < -22 && Math.abs(x) <= 9) {
-        const progress = (-22 - z) / 3.0; // 0.0 at -22, 1.0 at -25
+        const progress = (-22 - z) / 3.0;
         return progress * 2.0;
       }
-
-      // 3. Main Grand Castle Hall Floor
       if (z >= -22 && z <= 24 && Math.abs(x) <= 12.5) return 0.0;
-
-      // 4. Fallback default
       return 0.0;
     }
 
     updateFPS(delta) {
       const p = this.fpsPlayer;
-      const speed = p.isSprinting ? 15.0 : 8.8;
+      const dt = Math.min(0.045, Math.max(0.001, delta));
 
       // Directional vectors from yaw
-      const forward = new THREE.Vector3(-Math.sin(p.yaw), 0, -Math.cos(p.yaw));
-      const right = new THREE.Vector3(Math.cos(p.yaw), 0, -Math.sin(p.yaw));
+      const cy = Math.cos(p.yaw);
+      const sy = Math.sin(p.yaw);
+      const fwdX = -sy;
+      const fwdZ = -cy;
+      const rgtX = cy;
+      const rgtZ = -sy;
 
-      const moveDir = new THREE.Vector3(0, 0, 0);
-      if (this.fpsKeys.forward) moveDir.add(forward);
-      if (this.fpsKeys.backward) moveDir.sub(forward);
-      if (this.fpsKeys.right) moveDir.add(right);
-      if (this.fpsKeys.left) moveDir.sub(right);
+      let inputX = 0;
+      let inputZ = 0;
+      if (this.fpsKeys.forward) { inputX += fwdX; inputZ += fwdZ; }
+      if (this.fpsKeys.backward) { inputX -= fwdX; inputZ -= fwdZ; }
+      if (this.fpsKeys.right) { inputX += rgtX; inputZ += rgtZ; }
+      if (this.fpsKeys.left) { inputX -= rgtX; inputZ -= rgtZ; }
 
-      const isMoving = moveDir.lengthSq() > 0.001;
-      if (isMoving) {
-        moveDir.normalize();
-        p.position.x += moveDir.x * speed * delta;
-        p.position.z += moveDir.z * speed * delta;
+      const inputLen = Math.hypot(inputX, inputZ);
+      if (inputLen > 0.0001) {
+        inputX /= inputLen;
+        inputZ /= inputLen;
+      }
 
-        // Head bobbing and rhythmic basalt footsteps
-        if (p.isGrounded) {
-          const prevStep = p.walkStep;
-          p.walkStep += delta * (p.isSprinting ? 14 : 9.5);
+      // Smooth responsive acceleration & friction (prevents lag and stutter)
+      const targetSpeed = p.isSprinting ? 18.0 : 11.5;
+      const targetVx = inputX * targetSpeed;
+      const targetVz = inputZ * targetSpeed;
 
-          if (Math.sin(prevStep) <= 0 && Math.sin(p.walkStep) > 0) {
-            if (window.app && window.app.soundtrack && window.app.soundtrack.playFootstep) {
-              window.app.soundtrack.playFootstep();
-            }
+      const accel = inputLen > 0.0001 ? 32.0 : 24.0;
+      p.velocity.x = THREE.MathUtils.lerp(p.velocity.x, targetVx, Math.min(1.0, accel * dt));
+      p.velocity.z = THREE.MathUtils.lerp(p.velocity.z, targetVz, Math.min(1.0, accel * dt));
+
+      p.position.x += p.velocity.x * dt;
+      p.position.z += p.velocity.z * dt;
+
+      // Head bobbing & footsteps
+      const currentSpeed = Math.hypot(p.velocity.x, p.velocity.z);
+      if (currentSpeed > 0.5 && p.isGrounded) {
+        p.walkStep += dt * (p.isSprinting ? 15.0 : 10.5);
+        if (!this._lastFootStep || p.walkStep - this._lastFootStep > Math.PI) {
+          this._lastFootStep = p.walkStep;
+          if (window.app && window.app.soundtrack && typeof window.app.soundtrack.playFootstep === 'function') {
+            window.app.soundtrack.playFootstep();
           }
         }
       } else {
         p.walkStep = 0;
+        this._lastFootStep = 0;
       }
 
       // Boundaries inside Castle Grand Hall
-      p.position.x = Math.max(-11.2, Math.min(11.2, p.position.x));
-      p.position.z = Math.max(-30.5, Math.min(21.5, p.position.z));
+      p.position.x = Math.max(-10.8, Math.min(10.8, p.position.x));
+      p.position.z = Math.max(-30.5, Math.min(22.0, p.position.z));
 
-      // Auto-trigger NPCs leaping forward when player walks down the hallway
-      if (!this.hasNpcApproached && p.position.z < 9.5) {
+      // Auto-trigger NPCs leaping forward when player walks down hallway past z = 9.0
+      if (!this.hasNpcApproached && p.position.z < 9.0) {
         this.npcApproachPlayer();
       }
 
       // Gravity and Ground Physics
       const groundY = this.getGroundHeight(p.position.x, p.position.z);
       if (!p.isGrounded) {
-        p.jumpVelocity -= 22.0 * delta;
-        p.position.y += p.jumpVelocity * delta;
+        p.jumpVelocity -= 24.0 * dt;
+        p.position.y += p.jumpVelocity * dt;
 
         if (p.position.y <= groundY) {
           p.position.y = groundY;
@@ -2909,11 +3015,11 @@
           p.isGrounded = true;
         }
       } else {
-        p.position.y = THREE.MathUtils.lerp(p.position.y, groundY, 0.25);
+        p.position.y = THREE.MathUtils.lerp(p.position.y, groundY, 0.3);
       }
 
       // Apply Head Bobbing
-      const bobY = isMoving && p.isGrounded ? Math.sin(p.walkStep) * 0.08 : 0;
+      const bobY = (currentSpeed > 0.5 && p.isGrounded) ? Math.sin(p.walkStep) * 0.06 : 0;
       this.camera.position.set(p.position.x, p.position.y + p.eyeHeight + bobY, p.position.z);
 
       // Camera Aim Rotation
@@ -2924,13 +3030,16 @@
 
       // Animate Handheld Torch
       if (this.torchFlame && this.torchLight) {
-        const fl = 1.0 + Math.sin(performance.now() * 0.015) * 0.15;
-        this.torchFlame.scale.set(fl, fl * 1.1, fl);
-        this.torchLight.intensity = 1.6 + Math.sin(performance.now() * 0.012) * 0.35;
+        const fl = 1.0 + Math.sin(performance.now() * 0.015) * 0.12;
+        this.torchFlame.scale.set(fl, fl * 1.08, fl);
       }
 
-      // Check Proximity to Landmarks & Update HUD Box
-      this.checkFPSProximity();
+      // Throttled proximity check (10Hz instead of 60Hz to eliminate DOM thrashing)
+      const nowTime = performance.now();
+      if (!this._lastProxCheckTime || nowTime - this._lastProxCheckTime > 90) {
+        this._lastProxCheckTime = nowTime;
+        this.checkFPSProximity();
+      }
     }
 
     checkFPSProximity() {
@@ -2938,11 +3047,14 @@
       const box = document.getElementById('pov-proximity-box');
       if (!box) return;
 
-      // 1. Magma-Kocorock (Left on Dais, x = -3.8, z = -28.5)
+      let currentLandmark = null;
+      let landmarkHtml = '';
+
+      // 1. Magma-Kocorock
       const distKocok = Math.hypot(p.x - (-3.8), p.z - (-28.5));
       if (distKocok < 5.2) {
-        box.style.display = 'block';
-        box.innerHTML = `
+        currentLandmark = 'kocorock';
+        landmarkHtml = `
           <div style="font-weight:800; color:#f59e0b; font-size:14px; display:flex; align-items:center; justify-content:center; gap:6px;">
             <span>🌋</span> <span>MAGMA-KOCOROCK • PAKAR VNS (VARIABLE NEIGHBORHOOD SEARCH)</span>
           </div>
@@ -2955,17 +3067,13 @@
             • <b>Target Objektif:</b> Memangkas puncak Makespan teoretis: <code>C_max = max(Load_j / MIPS_j)</code>.
           </div>
         `;
-        if (this.showBubble) {
-          this.showBubble('kocorock', '🔥 Salam penjelajah! Aku Magma-Kocorock! Kapak obsidianku mengeliminasi antrean bottleneck dengan Shaking bertingkat!', 3500);
-        }
-        return;
       }
 
-      // 2. Aqua-Pipimon (Right on Dais, x = 3.8, z = -28.5)
+      // 2. Aqua-Pipimon
       const distPip = Math.hypot(p.x - 3.8, p.z - (-28.5));
-      if (distPip < 5.2) {
-        box.style.display = 'block';
-        box.innerHTML = `
+      if (!currentLandmark && distPip < 5.2) {
+        currentLandmark = 'pipimon';
+        landmarkHtml = `
           <div style="font-weight:800; color:#38bdf8; font-size:14px; display:flex; align-items:center; justify-content:center; gap:6px;">
             <span>💧</span> <span>AQUA-PIPIMON • RATU BFO (BACTERIAL FORAGING OPTIMIZATION)</span>
           </div>
@@ -2978,17 +3086,13 @@
             • <b>Eliminasi-Dispersi:</b> Mengacak sebagian bakteri agar optimasi tidak terjebak di optimum lokal!
           </div>
         `;
-        if (this.showBubble) {
-          this.showBubble('pipimon', '💧 Halo petualang! Aku Aqua-Pipimon! Koloni kami memindai ruang solusi global dengan kemotaksis cerdas!', 3500);
-        }
-        return;
       }
 
-      // 3. Center Dais: Reaktor Sintesis Hibrida (Memetic BFO-VNS, x = 0, z = -28.5)
+      // 3. Center Dais: Reaktor Sintesis Hibrida
       const distToThrone = Math.hypot(p.x, p.z - (-28.5));
-      if (distToThrone < 6.8) {
-        box.style.display = 'block';
-        box.innerHTML = `
+      if (!currentLandmark && distToThrone < 6.8) {
+        currentLandmark = 'reactor';
+        landmarkHtml = `
           <div style="font-weight:800; color:#fbbf24; font-size:14px; display:flex; align-items:center; justify-content:center; gap:6px;">
             <span>⚡</span> <span>REAKTOR SINTESIS HIBRIDA (MEMETIC BFO-VNS: 1 + 1 > 2)</span>
           </div>
@@ -3000,53 +3104,57 @@
             • <b>Hasil Uji Empiris:</b> Memangkas Makespan sebesar <b>34.8%</b>, utilisasi CPU <b>92.4%</b>, dan Degree of Imbalance mendekati nol!
           </div>
         `;
-        return;
       }
 
-      // 4. Near VM 1 (x = -5.5, z = 8)
+      // 4. Near VM 1
       const distVM1 = Math.hypot(p.x - (-5.5), p.z - 8);
-      if (distVM1 < 4.8) {
-        box.style.display = 'block';
-        box.innerHTML = `
+      if (!currentLandmark && distVM1 < 4.8) {
+        currentLandmark = 'vm1';
+        landmarkHtml = `
           <div style="font-weight:800; color:#ef4444; font-size:13px;">📍 VM 1: Kuil Kilat (Compute-Optimized)</div>
           <div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">Kapasitas: <b>3500 MIPS</b> (54% total kapasitas cluster). Mesin tercepat namun rentan memicu bottleneck jika tugas menumpuk!</div>
         `;
-        return;
       }
 
-      // 5. Near VM 2 (x = 0, z = -2)
+      // 5. Near VM 2
       const distVM2 = Math.hypot(p.x, p.z - (-2));
-      if (distVM2 < 4.8) {
-        box.style.display = 'block';
-        box.innerHTML = `
+      if (!currentLandmark && distVM2 < 4.8) {
+        currentLandmark = 'vm2';
+        landmarkHtml = `
           <div style="font-weight:800; color:#eab308; font-size:13px;">📍 VM 2: Kuil Seimbang (General Purpose)</div>
           <div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">Kapasitas: <b>2000 MIPS</b> (31% total kapasitas cluster). Titik tumpu penyeimbang beban kerja heterogen.</div>
         `;
-        return;
       }
 
-      // 6. Near VM 3 (x = 5.5, z = -12)
+      // 6. Near VM 3
       const distVM3 = Math.hypot(p.x - 5.5, p.z - (-12));
-      if (distVM3 < 4.8) {
-        box.style.display = 'block';
-        box.innerHTML = `
+      if (!currentLandmark && distVM3 < 4.8) {
+        currentLandmark = 'vm3';
+        landmarkHtml = `
           <div style="font-weight:800; color:#06b6d4; font-size:13px;">📍 VM 3: Kuil Hemat (Eco Burst)</div>
           <div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">Kapasitas: <b>1000 MIPS</b> (15% total kapasitas cluster). Mesin hemat energi untuk tugas komputasi ringan.</div>
         `;
-        return;
       }
 
       // 7. Hallway entrance
-      if (p.z > 12) {
-        box.style.display = 'block';
-        box.innerHTML = `
+      if (!currentLandmark && p.z > 14) {
+        currentLandmark = 'entrance';
+        landmarkHtml = `
           <div style="font-weight:800; color:#f59e0b; font-size:12.5px;">🏰 Lorong Kastil Sintesis Hibrida</div>
           <div style="font-size:11px; color:#94a3b8; margin-top:2px;">Gunakan <b>W, A, S, D</b> untuk berjalan lurus menyusuri karpet runik menuju Singgasana Kocorock & Pipimon di ujung kastil!</div>
         `;
-        return;
       }
 
-      box.style.display = 'none';
+      // Only update DOM if landmark changed (ZERO DOM thrashing!)
+      if (currentLandmark !== this._currentProxLandmark) {
+        this._currentProxLandmark = currentLandmark;
+        if (currentLandmark) {
+          box.style.display = 'block';
+          box.innerHTML = landmarkHtml;
+        } else {
+          box.style.display = 'none';
+        }
+      }
     }
 
     animate() {
@@ -3419,9 +3527,9 @@
       };
 
       // Stage 1: Jump halfway down the grand hall towards entrance
-      movePip(new THREE.Vector3(2.0, 0.4, -10.0), 3.2, 520, () => {
-        // Stage 2: Leap right in front of player POV camera (landing at z = 6.0)
-        movePip(new THREE.Vector3(1.2, 0.2, 6.0), 2.8, 480, () => {
+      movePip(new THREE.Vector3(2.4, 0.4, -8.0), 3.2, 500, () => {
+        // Stage 2: Leap to royal greeting post on the right side of the carpet at z = 3.5
+        movePip(new THREE.Vector3(2.4, 0.2, 3.5), 2.8, 460, () => {
           if (pip) pip.rotation.y = Math.PI;
           if (this.meshyPip) this.meshyPip.rotation.y = Math.PI;
           this.showBubble('pipimon', "Pipi-pipi! Hai kamu yang ada di sana! Selamat datang di markas kami!", 4500);
@@ -3429,10 +3537,11 @@
         });
       });
 
-      moveKocok(new THREE.Vector3(-2.2, 0.3, -10.0), 3.0, 560, () => {
-        moveKocok(new THREE.Vector3(-1.6, 0.2, 5.5), 2.6, 520, () => {
-          if (kocok) kocok.rotation.y = Math.PI + 0.15;
-          if (this.meshyKocok) this.meshyKocok.rotation.y = Math.PI + 0.15;
+      moveKocok(new THREE.Vector3(-2.4, 0.3, -8.0), 3.0, 520, () => {
+        // Stage 2: Leap to royal greeting post on the left side of the carpet at z = 3.5
+        moveKocok(new THREE.Vector3(-2.4, 0.2, 3.5), 2.6, 480, () => {
+          if (kocok) kocok.rotation.y = Math.PI;
+          if (this.meshyKocok) this.meshyKocok.rotation.y = Math.PI;
           this.showBubble('kocorock', "Salam hangat dari Palung Abyssal! Mari kita selesaikan krisis komputasi ini!", 4500);
         });
       });
