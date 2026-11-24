@@ -2389,6 +2389,11 @@
     }
 
     pokemonHopKocorock(targetVmIdx = null) {
+      // If in castle hall, POV mode, or characters have approached, stomp in place on dais or front of player!
+      if (this.cameraMode === 'fps' || this.hasNpcApproached || !this.islandsLeft || this.islandsLeft.length === 0) {
+        this.animateKocokStaffStompInPlace();
+        return;
+      }
       const idx = (targetVmIdx !== null && targetVmIdx >= 0 && targetVmIdx < this.islandsLeft.length)
         ? targetVmIdx
         : Math.floor(Math.random() * this.islandsLeft.length);
@@ -2466,9 +2471,11 @@
 
       const projectPos = (pos3D) => {
         const v = pos3D.clone().project(this.camera);
+        const sx = Math.max(120, Math.min(w - 120, (v.x * 0.5 + 0.5) * w));
+        const sy = Math.max(50, Math.min(h - 70, (-(v.y * 0.5) + 0.5) * h));
         return {
-          x: (v.x * 0.5 + 0.5) * w,
-          y: (-(v.y * 0.5) + 0.5) * h,
+          x: sx,
+          y: sy,
           visible: v.z < 1
         };
       };
@@ -2478,7 +2485,7 @@
       if (kocokObj) {
         const worldPos = new THREE.Vector3();
         kocokObj.getWorldPosition(worldPos);
-        worldPos.y += (this.charMode === 'meshy') ? 4.5 : 4.0;
+        worldPos.y += (this.charMode === 'meshy') ? 4.5 : 3.6;
         const p = projectPos(worldPos);
         const b = document.getElementById('bubble-kocorock');
         if (b) {
@@ -2493,7 +2500,7 @@
       if (pipObj) {
         const worldPos = new THREE.Vector3();
         pipObj.getWorldPosition(worldPos);
-        worldPos.y += (this.charMode === 'meshy') ? 4.2 : 3.8;
+        worldPos.y += (this.charMode === 'meshy') ? 4.2 : 3.4;
         const p = projectPos(worldPos);
         const b = document.getElementById('bubble-pipimon');
         if (b) {
@@ -2884,6 +2891,11 @@
       // Boundaries inside Castle Grand Hall
       p.position.x = Math.max(-11.2, Math.min(11.2, p.position.x));
       p.position.z = Math.max(-30.5, Math.min(21.5, p.position.z));
+
+      // Auto-trigger NPCs leaping forward when player walks down the hallway
+      if (!this.hasNpcApproached && p.position.z < 9.5) {
+        this.npcApproachPlayer();
+      }
 
       // Gravity and Ground Physics
       const groundY = this.getGroundHeight(p.position.x, p.position.z);
@@ -4465,6 +4477,10 @@
       this.isPlaying = !this.isPlaying;
       this.playIcon.style.display = this.isPlaying ? 'none' : 'block';
       this.pauseIcon.style.display = this.isPlaying ? 'block' : 'none';
+      // If characters have not approached player yet, leap forward now!
+      if (this.isPlaying && this.world && typeof this.world.npcApproachPlayer === 'function' && !this.world.hasNpcApproached) {
+        this.world.npcApproachPlayer();
+      }
       if (this.isPlaying) this.loop();
     }
 
@@ -5309,6 +5325,11 @@
       this.hasEnteredAbyssal = true;
       this.voiceEnabled = false;
 
+      // Resume Web Audio API AudioContext immediately on user click gesture
+      if (this.soundtrack && this.soundtrack.ctx && this.soundtrack.ctx.state === 'suspended') {
+        this.soundtrack.ctx.resume().catch(() => {});
+      }
+
       // 1. Play Lava infernal Web Audio soundtrack (ducked for speech clarity)
       if (this.soundtrack) {
         try {
@@ -5946,23 +5967,33 @@
       const pSpeech = document.getElementById('mascot-pipimon-speech');
 
       const setMascotsSpeaking = (speakerType, text) => {
-        if (!kMascot || !pMascot) return;
+        const cKocok = document.getElementById('corner-chibi-kocorock');
+        const cPip = document.getElementById('corner-chibi-pipimon');
+
         if (speakerType === 'kocorock') {
-          kMascot.classList.add('is-speaking');
-          pMascot.classList.remove('is-speaking');
+          if (kMascot) kMascot.classList.add('is-speaking');
+          if (pMascot) pMascot.classList.remove('is-speaking');
+          if (cKocok) cKocok.classList.add('is-speaking');
+          if (cPip) cPip.classList.remove('is-speaking');
           if (kSpeech && text) kSpeech.textContent = `"${text}"`;
         } else if (speakerType === 'pipimon') {
-          pMascot.classList.add('is-speaking');
-          kMascot.classList.remove('is-speaking');
+          if (pMascot) pMascot.classList.add('is-speaking');
+          if (kMascot) kMascot.classList.remove('is-speaking');
+          if (cPip) cPip.classList.add('is-speaking');
+          if (cKocok) cKocok.classList.remove('is-speaking');
           if (pSpeech && text) pSpeech.textContent = `"${text}"`;
         } else if (speakerType === 'both') {
-          kMascot.classList.add('is-speaking');
-          pMascot.classList.add('is-speaking');
+          if (kMascot) kMascot.classList.add('is-speaking');
+          if (pMascot) pMascot.classList.add('is-speaking');
+          if (cKocok) cKocok.classList.add('is-speaking');
+          if (cPip) cPip.classList.add('is-speaking');
           if (kSpeech && text) kSpeech.textContent = `"${text}"`;
           if (pSpeech && text) pSpeech.textContent = `"${text}"`;
         } else {
-          kMascot.classList.remove('is-speaking');
-          pMascot.classList.remove('is-speaking');
+          if (kMascot) kMascot.classList.remove('is-speaking');
+          if (pMascot) pMascot.classList.remove('is-speaking');
+          if (cKocok) cKocok.classList.remove('is-speaking');
+          if (cPip) cPip.classList.remove('is-speaking');
         }
       };
 

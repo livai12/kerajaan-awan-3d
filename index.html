@@ -1,15 +1,19 @@
 <!doctype html>
 <html lang="id">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Cloud Hybrid Synthesis Lab 2099 — Memetic BFO-VNS &amp; Seeded-BFO</title>
-  <meta name="description" content="Visualisasi 3D Interaktif Optimasi Cloud Task Scheduling dengan Variable Neighborhood Search (Kocorock/VNS) dan Bacterial Foraging Optimization (Pipimon/BFO).">
+  <meta name="description"
+    content="Visualisasi 3D Interaktif Optimasi Cloud Task Scheduling dengan Variable Neighborhood Search (Kocorock/VNS) dan Bacterial Foraging Optimization (Pipimon/BFO).">
 
   <!-- Google Fonts: Fraunces (Editorial Italic Serif) & Inter (Modern UI Sans) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,300;1,9..144,400;1,9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,300;1,9..144,400;1,9..144,600&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
 
   <style>
     :root {
@@ -30,8 +34,18 @@
       --sans: 'Inter', system-ui, -apple-system, sans-serif;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; overflow: hidden; width: 100%; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+      width: 100%;
+    }
 
     @media (max-width: 960px) {
       .theater-stage-grid {
@@ -43,7 +57,8 @@
       font: 13px/1.45 var(--sans);
       color: var(--ink);
       -webkit-font-smoothing: antialiased;
-      background: linear-gradient(180deg, #090d16 0%, #0f172a 28%, #1e1b4b 58%, #0f766e 82%, #0284c7 100%); color: #f8fafc;
+      background: linear-gradient(180deg, #090d16 0%, #0f172a 28%, #1e1b4b 58%, #0f766e 82%, #0284c7 100%);
+      color: #f8fafc;
       user-select: none;
     }
 
@@ -67,15 +82,47 @@
       cursor: grab;
       z-index: 0;
     }
-    #gl:active { cursor: grabbing; }
+
+    #gl:active {
+      cursor: grabbing;
+    }
 
     /* Button and UI resets */
-    button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
-    svg { width: 18px; height: 18px; fill: currentColor; stroke: none; }
-    .round svg, .seg svg, .ib svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    button {
+      font: inherit;
+      color: inherit;
+      border: 0;
+      background: none;
+      cursor: pointer;
+    }
+
+    svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+      stroke: none;
+    }
+
+    .round svg,
+    .seg svg,
+    .ib svg {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
 
     /* Glassmorphism Classes */
-    .glass, .card, .pill, .seg, .round, #sheet, #narr, .dock, .modal-card {
+    .glass,
+    .card,
+    .pill,
+    .seg,
+    .round,
+    #sheet,
+    #narr,
+    .dock,
+    .modal-card {
       background: var(--panel);
       backdrop-filter: blur(14px) saturate(1.3);
       -webkit-backdrop-filter: blur(14px) saturate(1.3);
@@ -101,8 +148,14 @@
       overflow-x: auto;
       scrollbar-width: none;
     }
-    .top::-webkit-scrollbar { display: none; }
-    .top > * { pointer-events: auto; }
+
+    .top::-webkit-scrollbar {
+      display: none;
+    }
+
+    .top>* {
+      pointer-events: auto;
+    }
 
     .brand {
       background: var(--panel);
@@ -115,12 +168,14 @@
       margin-right: auto;
       flex-shrink: 0;
     }
+
     .brand .name {
       display: block;
       font: italic 600 20px/1.1 var(--serif);
       letter-spacing: -0.3px;
       color: var(--ink);
     }
+
     .brand .sub {
       display: block;
       margin-top: 3px;
@@ -136,6 +191,7 @@
       border-radius: 14px;
       gap: 3px;
     }
+
     .seg button {
       padding: 0 12px;
       height: 34px;
@@ -148,7 +204,11 @@
       font-weight: 600;
       transition: all 0.2s;
     }
-    .seg button:hover { color: var(--ink); }
+
+    .seg button:hover {
+      color: var(--ink);
+    }
+
     .seg button.on {
       background: #ffffff;
       color: var(--ink);
@@ -163,10 +223,12 @@
       place-items: center;
       transition: all 0.2s;
     }
+
     .round:hover {
       background: #ffffff;
       transform: translateY(-1px);
     }
+
     .round.on {
       background: #ffffff;
       color: var(--jade);
@@ -185,8 +247,14 @@
       z-index: 5;
       transition: opacity 0.4s, transform 0.5s;
     }
-    .card.left { left: 20px; }
-    .card.right { right: 20px; }
+
+    .card.left {
+      left: 20px;
+    }
+
+    .card.right {
+      right: 20px;
+    }
 
     .card .mascot-art {
       width: 68px;
@@ -196,13 +264,17 @@
       filter: drop-shadow(0 6px 12px rgba(30, 45, 60, 0.18));
       transition: transform 0.3s ease;
     }
-    .card:hover .mascot-art { transform: scale(1.06) rotate(-2deg); }
+
+    .card:hover .mascot-art {
+      transform: scale(1.06) rotate(-2deg);
+    }
 
     .card .card-body {
       flex: 1;
       display: flex;
       flex-direction: column;
     }
+
     .card h2 {
       font: italic 600 17px/1.1 var(--serif);
       margin-bottom: 5px;
@@ -210,6 +282,7 @@
       align-items: center;
       justify-content: space-between;
     }
+
     .card h2 small {
       font: 700 10px var(--sans);
       letter-spacing: 1.2px;
@@ -217,20 +290,28 @@
       border-radius: 6px;
       color: #fff;
     }
-    #cardVNS h2 small { background: var(--ember); }
-    #cardBFO h2 small { background: var(--jade); }
+
+    #cardVNS h2 small {
+      background: var(--ember);
+    }
+
+    #cardBFO h2 small {
+      background: var(--jade);
+    }
 
     .nums {
       display: flex;
       gap: 12px;
       margin-bottom: 8px;
     }
+
     .num-col b {
       display: block;
       font: 700 14px var(--sans);
       font-variant-numeric: tabular-nums;
       color: var(--ink);
     }
+
     .num-col span {
       font-size: 10px;
       color: var(--ink2);
@@ -250,6 +331,7 @@
       border: 1px solid rgba(255, 255, 255, 0.6);
       min-height: 38px;
     }
+
     .stage b {
       flex: none;
       width: 18px;
@@ -262,11 +344,23 @@
       font-size: 10px;
       margin-top: 1px;
     }
-    .stage span { opacity: 0.9; }
+
+    .stage span {
+      opacity: 0.9;
+    }
 
     /* VIEW STATES FOR MASCOT CARDS */
-    body[data-view="vns"] #cardBFO { opacity: 0; pointer-events: none; transform: translateX(20px); }
-    body[data-view="bfo"] #cardVNS { opacity: 0; pointer-events: none; transform: translateX(-20px); }
+    body[data-view="vns"] #cardBFO {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(20px);
+    }
+
+    body[data-view="bfo"] #cardVNS {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(-20px);
+    }
 
     /* CONVERGENCE CHART (BOTTOM LEFT) */
     #chart-wrap {
@@ -278,6 +372,7 @@
       flex-direction: column;
       gap: 4px;
     }
+
     #chart {
       width: 180px;
       height: 56px;
@@ -285,8 +380,9 @@
       display: block;
       background: rgba(15, 23, 42, 0.78);
       border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
     }
+
     .chartkey {
       font-size: 10px;
       color: var(--ink2);
@@ -295,15 +391,27 @@
       gap: 10px;
       padding-left: 2px;
     }
-    .chartkey span { display: inline-flex; align-items: center; gap: 4px; }
+
+    .chartkey span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
     .chartkey i {
       width: 12px;
       height: 3px;
       border-radius: 2px;
       display: inline-block;
     }
-    .chartkey i.vns { background: var(--ember); }
-    .chartkey i.bfo { background: var(--jade); }
+
+    .chartkey i.vns {
+      background: var(--ember);
+    }
+
+    .chartkey i.bfo {
+      background: var(--jade);
+    }
 
     /* AWAN NARRATOR CARD (CENTER LOWER) */
     #narr {
@@ -320,36 +428,50 @@
       z-index: 6;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
+
     .narr-cloud {
       width: 44px;
       height: 44px;
       flex: none;
       animation: floatCloud 3.5s ease-in-out infinite;
     }
+
     @keyframes floatCloud {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-4px); }
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-4px);
+      }
     }
+
     .narr-content {
       flex: 1;
       display: flex;
       flex-direction: column;
       gap: 3px;
     }
+
     .narr-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
+
     .narr-header .title {
       font: italic 600 14px/1 var(--serif);
       color: var(--ink);
     }
+
     .narr-tools {
       display: flex;
       align-items: center;
       gap: 6px;
     }
+
     .narr-btn {
       font-size: 10px;
       font-weight: 600;
@@ -359,10 +481,12 @@
       color: var(--ink2);
       transition: all 0.15s;
     }
+
     .narr-btn:hover {
       background: #ffffff;
       color: var(--ink);
     }
+
     .narr-text {
       font-size: 12.5px;
       line-height: 1.45;
@@ -383,6 +507,7 @@
       border-radius: 999px;
       z-index: 7;
     }
+
     .dock .divider {
       width: 1px;
       height: 22px;
@@ -399,10 +524,12 @@
       color: var(--ink);
       transition: all 0.2s;
     }
+
     .ib:hover {
       background: #ffffff;
       transform: translateY(-1px);
     }
+
     .ib.main {
       width: 44px;
       height: 44px;
@@ -410,10 +537,12 @@
       color: #ffffff;
       box-shadow: 0 4px 14px rgba(31, 45, 44, 0.25);
     }
+
     .ib.main:hover {
       background: #334a49;
       transform: scale(1.05);
     }
+
     .ib.main svg {
       width: 20px;
       height: 20px;
@@ -424,6 +553,7 @@
       display: flex;
       gap: 2px;
     }
+
     .spd-pill {
       font-size: 11px;
       font-weight: 600;
@@ -432,7 +562,11 @@
       color: var(--ink2);
       transition: all 0.15s;
     }
-    .spd-pill:hover { color: var(--ink); }
+
+    .spd-pill:hover {
+      color: var(--ink);
+    }
+
     .spd-pill.on {
       background: #ffffff;
       color: var(--ink);
@@ -455,7 +589,10 @@
       overflow-y: auto;
       transition: all 0.3s ease;
     }
-    #pane2D.open { display: flex; }
+
+    #pane2D.open {
+      display: flex;
+    }
 
     .pane2D-header {
       display: flex;
@@ -464,6 +601,7 @@
       border-bottom: 1px solid var(--line);
       padding-bottom: 8px;
     }
+
     .pane2D-header h3 {
       font: italic 600 16px/1 var(--serif);
       color: var(--ink);
@@ -480,20 +618,24 @@
       cursor: pointer;
       transition: all 0.15s ease;
     }
+
     .vm-strip:hover {
       background: #ffffff;
       border-color: #38bdf8;
     }
+
     .vm-strip.busiest {
       border-color: #f87171;
       background: #fff5f5;
     }
+
     .vm-strip-title {
       display: flex;
       justify-content: space-between;
       font-size: 11px;
       font-weight: 600;
     }
+
     .vm-meter {
       position: relative;
       height: 18px;
@@ -502,6 +644,7 @@
       overflow: hidden;
       display: flex;
     }
+
     .gem-block {
       height: 100%;
       border-right: 1px solid rgba(255, 255, 255, 0.4);
@@ -512,11 +655,18 @@
       font-size: 9px;
       font-weight: 700;
       color: #ffffff;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
       transition: transform 0.15s;
     }
-    .gem-block:hover { filter: brightness(1.2); }
-    .gem-block.selected { outline: 2px solid #000; z-index: 5; }
+
+    .gem-block:hover {
+      filter: brightness(1.2);
+    }
+
+    .gem-block.selected {
+      outline: 2px solid #000;
+      z-index: 5;
+    }
 
     /* SLIDE MODAL / SHEET (TOUR & ACADEMIC RIGOR) */
     #sheet-overlay {
@@ -530,7 +680,10 @@
       place-items: center;
       padding: 20px;
     }
-    #sheet-overlay.open { display: grid; }
+
+    #sheet-overlay.open {
+      display: grid;
+    }
 
     .sheet-card {
       width: min(840px, 94vw);
@@ -544,9 +697,17 @@
       overflow: hidden;
       animation: sheetPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
+
     @keyframes sheetPop {
-      from { opacity: 0; transform: translateY(14px) scale(0.98); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
+      from {
+        opacity: 0;
+        transform: translateY(14px) scale(0.98);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
 
     .sheet-top {
@@ -557,14 +718,17 @@
       justify-content: space-between;
       background: #ffffff;
     }
+
     .sheet-top h2 {
       font: italic 600 22px/1.1 var(--serif);
       color: var(--ink);
     }
+
     .sheet-nav-dots {
       display: flex;
       gap: 6px;
     }
+
     .nav-dot {
       width: 8px;
       height: 8px;
@@ -573,6 +737,7 @@
       cursor: pointer;
       transition: all 0.2s;
     }
+
     .nav-dot.on {
       background: var(--ink);
       width: 22px;
@@ -586,11 +751,25 @@
       line-height: 1.6;
     }
 
-    .sheet-slide { display: none; }
-    .sheet-slide.on { display: block; animation: fadeInSlide 0.25s ease; }
+    .sheet-slide {
+      display: none;
+    }
+
+    .sheet-slide.on {
+      display: block;
+      animation: fadeInSlide 0.25s ease;
+    }
+
     @keyframes fadeInSlide {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .sheet-slide h3 {
@@ -598,12 +777,16 @@
       color: var(--ink);
       margin-bottom: 8px;
     }
+
     .sheet-slide p {
       font-size: 13.5px;
       color: #3d4b49;
       margin-bottom: 12px;
     }
-    .sheet-slide b { color: var(--ink); }
+
+    .sheet-slide b {
+      color: var(--ink);
+    }
 
     .sheet-footer {
       padding: 14px 24px;
@@ -613,6 +796,7 @@
       justify-content: space-between;
       background: #faf8f5;
     }
+
     .btn-sheet {
       padding: 9px 18px;
       border-radius: 999px;
@@ -620,10 +804,24 @@
       font-size: 13px;
       transition: all 0.15s;
     }
-    .btn-sheet.sec { color: var(--ink2); }
-    .btn-sheet.sec:hover { color: var(--ink); background: rgba(31,45,44,0.06); }
-    .btn-sheet.pri { background: var(--ink); color: #ffffff; }
-    .btn-sheet.pri:hover { background: #334a49; }
+
+    .btn-sheet.sec {
+      color: var(--ink2);
+    }
+
+    .btn-sheet.sec:hover {
+      color: var(--ink);
+      background: rgba(31, 45, 44, 0.06);
+    }
+
+    .btn-sheet.pri {
+      background: var(--ink);
+      color: #ffffff;
+    }
+
+    .btn-sheet.pri:hover {
+      background: #334a49;
+    }
 
     /* TABLES & QUIZ INSIDE SHEET */
     table.data-tbl {
@@ -636,16 +834,20 @@
       overflow: hidden;
       border: 1px solid var(--line);
     }
-    table.data-tbl th, table.data-tbl td {
+
+    table.data-tbl th,
+    table.data-tbl td {
       padding: 9px 12px;
       border-bottom: 1px solid var(--line);
       text-align: left;
     }
+
     table.data-tbl th {
       background: #f4f6f6;
       font-weight: 700;
       color: var(--ink);
     }
+
     table.data-tbl tr.highlight {
       background: #f0fdf4;
     }
@@ -657,16 +859,19 @@
       padding: 14px 16px;
       margin-bottom: 14px;
     }
+
     .quiz-q {
       font-weight: 600;
       font-size: 13px;
       margin-bottom: 8px;
     }
+
     .quiz-choices {
       display: flex;
       flex-direction: column;
       gap: 6px;
     }
+
     .q-opt {
       text-align: left;
       padding: 8px 12px;
@@ -676,11 +881,25 @@
       font-size: 12px;
       transition: all 0.15s;
     }
-    .q-opt:hover { border-color: var(--ink2); }
-    .q-opt.correct { background: #dcfce7; border-color: #86efac; color: #166534; font-weight: 600; }
-    .q-opt.incorrect { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
 
-        /* PEER DRILL & AUDIENCE QUIZ MODAL */
+    .q-opt:hover {
+      border-color: var(--ink2);
+    }
+
+    .q-opt.correct {
+      background: #dcfce7;
+      border-color: #86efac;
+      color: #166534;
+      font-weight: 600;
+    }
+
+    .q-opt.incorrect {
+      background: #fee2e2;
+      border-color: #fca5a5;
+      color: #991b1b;
+    }
+
+    /* PEER DRILL & AUDIENCE QUIZ MODAL */
     #drill-overlay {
       position: fixed;
       inset: 0;
@@ -692,7 +911,11 @@
       place-items: center;
       padding: 16px;
     }
-    #drill-overlay.open { display: grid; }
+
+    #drill-overlay.open {
+      display: grid;
+    }
+
     .drill-card {
       width: min(920px, 95vw);
       max-height: 90vh;
@@ -705,6 +928,7 @@
       overflow: hidden;
       animation: sheetPop 0.28s cubic-bezier(0.16, 1, 0.3, 1);
     }
+
     .drill-top {
       padding: 16px 24px;
       background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
@@ -713,6 +937,7 @@
       align-items: center;
       justify-content: space-between;
     }
+
     .drill-top-title {
       font: italic 700 21px/1.2 var(--serif);
       color: #92400e;
@@ -720,6 +945,7 @@
       align-items: center;
       gap: 10px;
     }
+
     .drill-roulette-bar {
       padding: 12px 24px;
       background: #f8fafc;
@@ -730,6 +956,7 @@
       justify-content: space-between;
       gap: 12px;
     }
+
     .drill-nav-tabs {
       display: flex;
       gap: 8px;
@@ -738,6 +965,7 @@
       border-bottom: 1px solid #e2e8f0;
       overflow-x: auto;
     }
+
     .drill-tab-btn {
       padding: 8px 14px;
       border-radius: 10px;
@@ -750,20 +978,34 @@
       white-space: nowrap;
       transition: all 0.15s;
     }
-    .drill-tab-btn:hover { background: #f8fafc; color: #0f172a; }
+
+    .drill-tab-btn:hover {
+      background: #f8fafc;
+      color: #0f172a;
+    }
+
     .drill-tab-btn.on {
       background: #0284c7;
       color: #ffffff;
       border-color: #0284c7;
       box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
     }
+
     .drill-body {
       padding: 22px 26px;
       overflow-y: auto;
       flex: 1;
     }
-    .drill-case { display: none; }
-    .drill-case.on { display: block; animation: fadeInSlide 0.2s ease; }
+
+    .drill-case {
+      display: none;
+    }
+
+    .drill-case.on {
+      display: block;
+      animation: fadeInSlide 0.2s ease;
+    }
+
     .drill-q-box {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
@@ -772,6 +1014,7 @@
       padding: 16px 20px;
       margin-bottom: 18px;
     }
+
     .drill-q-text {
       font-size: 15px;
       font-weight: 700;
@@ -779,11 +1022,13 @@
       line-height: 1.5;
       margin-bottom: 10px;
     }
+
     .drill-actions {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
     }
+
     .drill-btn-act {
       height: 34px;
       padding: 0 14px;
@@ -797,30 +1042,42 @@
       border: none;
       transition: all 0.15s;
     }
+
     .drill-btn-cam {
       background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
       color: #ffffff;
       box-shadow: 0 2px 6px rgba(2, 132, 199, 0.2);
     }
-    .drill-btn-cam:hover { opacity: 0.92; transform: translateY(-1px); }
+
+    .drill-btn-cam:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+
     .drill-btn-speak {
       background: #ffffff;
       color: #0f172a;
       border: 1px solid #cbd5e1;
     }
-    .drill-btn-speak:hover { background: #f8fafc; }
+
+    .drill-btn-speak:hover {
+      background: #f8fafc;
+    }
+
     .drill-breakdown-levels {
       display: flex;
       flex-direction: column;
       gap: 12px;
       margin-top: 14px;
     }
+
     .drill-level-card {
       border: 1px solid #e2e8f0;
       border-radius: 14px;
       overflow: hidden;
       background: #ffffff;
     }
+
     .drill-level-hdr {
       padding: 10px 16px;
       font-size: 12.5px;
@@ -831,10 +1088,31 @@
       cursor: pointer;
       user-select: none;
     }
-    .drill-level-hdr.l1 { background: #f0fdf4; color: #166534; border-bottom: 1px solid #bbf7d0; }
-    .drill-level-hdr.l2 { background: #f0f9ff; color: #0369a1; border-bottom: 1px solid #bae6fd; }
-    .drill-level-hdr.l3 { background: #faf5ff; color: #6b21a8; border-bottom: 1px solid #e9d5ff; }
-    .drill-level-hdr.defense { background: #fff7ed; color: #9a3412; border-bottom: 1px solid #fed7aa; }
+
+    .drill-level-hdr.l1 {
+      background: #f0fdf4;
+      color: #166534;
+      border-bottom: 1px solid #bbf7d0;
+    }
+
+    .drill-level-hdr.l2 {
+      background: #f0f9ff;
+      color: #0369a1;
+      border-bottom: 1px solid #bae6fd;
+    }
+
+    .drill-level-hdr.l3 {
+      background: #faf5ff;
+      color: #6b21a8;
+      border-bottom: 1px solid #e9d5ff;
+    }
+
+    .drill-level-hdr.defense {
+      background: #fff7ed;
+      color: #9a3412;
+      border-bottom: 1px solid #fed7aa;
+    }
+
     .drill-level-body {
       padding: 14px 18px;
       font-size: 13px;
@@ -863,11 +1141,23 @@
       gap: 8px;
       animation: popStory 0.35s ease;
     }
-    #story-overlay.open { display: flex; }
-    @keyframes popStory {
-      from { opacity: 0; transform: translate(-50%, 15px); }
-      to { opacity: 1; transform: translate(-50%, 0); }
+
+    #story-overlay.open {
+      display: flex;
     }
+
+    @keyframes popStory {
+      from {
+        opacity: 0;
+        transform: translate(-50%, 15px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+
     .story-header {
       display: flex;
       justify-content: space-between;
@@ -877,16 +1167,19 @@
       letter-spacing: 1.5px;
       color: #94a3b8;
     }
+
     .story-subtitles {
       font: italic 400 17px/1.5 var(--serif);
       color: #fef08a;
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     }
+
     .story-controls {
       display: flex;
       justify-content: flex-end;
       gap: 8px;
     }
+
     .story-btn {
       padding: 4px 12px;
       border-radius: 8px;
@@ -896,48 +1189,86 @@
       color: #ffffff;
       transition: all 0.15s;
     }
-    .story-btn:hover { background: rgba(255, 255, 255, 0.3); }
+
+    .story-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
 
     /* RESPONSIVENESS */
     @media (max-width: 1100px) {
-      .card.left { left: 16px; width: 280px; }
-      .card.right { right: 16px; width: 280px; }
-      #chart-wrap { display: none; }
+      .card.left {
+        left: 16px;
+        width: 280px;
+      }
+
+      .card.right {
+        right: 16px;
+        width: 280px;
+      }
+
+      #chart-wrap {
+        display: none;
+      }
     }
+
     @media (max-width: 768px) {
-      .top { padding: 12px 14px; }
-      .brand .name { font-size: 20px; }
-      .card { position: fixed; top: 76px; width: calc(50vw - 20px); }
-      #narr { bottom: 78px; width: calc(100vw - 28px); }
-      #pane2D { width: calc(100vw - 32px); right: 16px; bottom: 82px; }
+      .top {
+        padding: 12px 14px;
+      }
+
+      .brand .name {
+        font-size: 20px;
+      }
+
+      .card {
+        position: fixed;
+        top: 76px;
+        width: calc(50vw - 20px);
+      }
+
+      #narr {
+        bottom: 78px;
+        width: calc(100vw - 28px);
+      }
+
+      #pane2D {
+        width: calc(100vw - 32px);
+        right: 16px;
+        bottom: 82px;
+      }
     }
+
     /* 3D Character Speech Bubble (Comic & Game Style) */
     .char-bubble {
       position: fixed;
       pointer-events: none;
-      z-index: 45;
+      z-index: 85;
       transform: translate(-50%, -100%) scale(0);
       transform-origin: bottom center;
       transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
       opacity: 0;
-      max-width: 280px;
-      padding: 10px 14px 12px;
+      max-width: 320px;
+      padding: 12px 16px 14px;
       border-radius: 18px;
-      background: rgba(255, 255, 255, 0.96);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18), 0 0 0 2px rgba(255, 255, 255, 0.95);
+      background: #ffffff;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), 0 4px 0 rgba(0, 0, 0, 0.3);
       font-family: inherit;
+      color: #0f172a;
     }
+
     .char-bubble.open {
       transform: translate(-50%, -100%) scale(1);
       opacity: 1;
     }
+
     .char-bubble.kocorock {
       border-top: 3.5px solid #f59e0b;
     }
+
     .char-bubble.pipimon {
       border-top: 3.5px solid #06b6d4;
     }
+
     .char-bubble .bubble-speaker {
       display: flex;
       align-items: center;
@@ -947,20 +1278,31 @@
       color: #0f172a;
       margin-bottom: 4px;
     }
+
     .char-bubble .bubble-tag {
       font-size: 9px;
       padding: 1px 6px;
       border-radius: 10px;
       font-weight: 800;
     }
-    .char-bubble.kocorock .bubble-tag { background: #fef3c7; color: #b45309; }
-    .char-bubble.pipimon .bubble-tag { background: #cffafe; color: #0e7490; }
+
+    .char-bubble.kocorock .bubble-tag {
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    .char-bubble.pipimon .bubble-tag {
+      background: #cffafe;
+      color: #0e7490;
+    }
+
     .char-bubble .bubble-msg {
       font-size: 12.5px;
       line-height: 1.4;
       font-weight: 600;
       color: #1e293b;
     }
+
     .char-bubble .bubble-tail {
       position: absolute;
       bottom: -9px;
@@ -972,9 +1314,10 @@
       border-right: 9px solid transparent;
       border-top: 9px solid rgba(255, 255, 255, 0.96);
     }
-  
+
     /* HYBRID REAKTOR & ABLATION STUDY STYLES */
-    #ablation-overlay, #eduhub-overlay {
+    #ablation-overlay,
+    #eduhub-overlay {
       position: fixed;
       inset: 0;
       background: rgba(15, 23, 42, 0.55);
@@ -985,7 +1328,11 @@
       place-items: center;
       padding: 16px;
     }
-    #ablation-overlay.open, #eduhub-overlay.open { display: grid; }
+
+    #ablation-overlay.open,
+    #eduhub-overlay.open {
+      display: grid;
+    }
 
     .hybrid-modal-card {
       width: min(960px, 95vw);
@@ -999,6 +1346,7 @@
       overflow: hidden;
       animation: sheetPop 0.28s cubic-bezier(0.16, 1, 0.3, 1);
     }
+
     .hybrid-modal-hdr {
       padding: 16px 24px;
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
@@ -1008,6 +1356,7 @@
       justify-content: space-between;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
+
     .hybrid-modal-title {
       font: italic 700 20px/1.2 var(--serif);
       color: #38bdf8;
@@ -1015,6 +1364,7 @@
       align-items: center;
       gap: 10px;
     }
+
     .hybrid-modal-body {
       padding: 20px 24px;
       overflow-y: auto;
@@ -1023,12 +1373,14 @@
       flex-direction: column;
       gap: 16px;
     }
+
     .ablation-tbl {
       width: 100%;
       border-collapse: collapse;
       font-size: 12px;
       text-align: left;
     }
+
     .ablation-tbl th {
       background: #f1f5f9;
       padding: 10px 12px;
@@ -1036,18 +1388,22 @@
       color: #334155;
       border-bottom: 2px solid #cbd5e1;
     }
+
     .ablation-tbl td {
       padding: 10px 12px;
       border-bottom: 1px solid #e2e8f0;
       color: #1e293b;
     }
+
     .ablation-tbl tr.highlight-memetic {
       background: #f0fdfa;
       font-weight: 600;
     }
+
     .ablation-tbl tr.highlight-seeded {
       background: #fefce8;
     }
+
     .badge-pola {
       display: inline-block;
       padding: 2px 7px;
@@ -1056,9 +1412,21 @@
       font-weight: 800;
       letter-spacing: 0.5px;
     }
-    .badge-pola-d { background: #ccfbf1; color: #0f766e; }
-    .badge-pola-b { background: #fef3c7; color: #b45309; }
-    .badge-baseline { background: #f1f5f9; color: #475569; }
+
+    .badge-pola-d {
+      background: #ccfbf1;
+      color: #0f766e;
+    }
+
+    .badge-pola-b {
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    .badge-baseline {
+      background: #f1f5f9;
+      color: #475569;
+    }
 
     /* EDU HUB TABS */
     .eduhub-tabs {
@@ -1069,6 +1437,7 @@
       border-bottom: 1px solid #e2e8f0;
       overflow-x: auto;
     }
+
     .eduhub-tab-btn {
       padding: 8px 14px;
       border-radius: 10px;
@@ -1084,17 +1453,31 @@
       white-space: nowrap;
       transition: all 0.2s;
     }
-    .eduhub-tab-btn:hover { color: #0f172a; border-color: #94a3b8; }
+
+    .eduhub-tab-btn:hover {
+      color: #0f172a;
+      border-color: #94a3b8;
+    }
+
     .eduhub-tab-btn.active {
       background: #0284c7;
       color: #ffffff;
       border-color: #0284c7;
       box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
     }
-    .eduhub-pane { display: none; }
-    .eduhub-pane.active { display: flex; flex-direction: column; gap: 14px; animation: sheetPop 0.2s ease; }
 
-  
+    .eduhub-pane {
+      display: none;
+    }
+
+    .eduhub-pane.active {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      animation: sheetPop 0.2s ease;
+    }
+
+
     /* ==========================================
        GAME EDUKATIF: CLOUD DISPATCHER CHALLENGE
        ========================================== */
@@ -1110,9 +1493,11 @@
       justify-content: center;
       padding: 16px;
     }
+
     #game-overlay.open {
       display: flex;
     }
+
     .game-modal-card {
       background: rgba(255, 255, 255, 0.96);
       border-radius: 20px;
@@ -1125,6 +1510,7 @@
       display: flex;
       flex-direction: column;
     }
+
     .game-modal-hdr {
       display: flex;
       align-items: center;
@@ -1135,6 +1521,7 @@
       border-top-left-radius: 20px;
       border-top-right-radius: 20px;
     }
+
     .game-modal-title {
       display: flex;
       align-items: center;
@@ -1142,6 +1529,7 @@
       font-size: 18px;
       font-weight: 800;
     }
+
     .game-hud-bar {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -1150,13 +1538,15 @@
       background: #f8fafc;
       border-bottom: 1px solid #e2e8f0;
     }
+
     .game-hud-item {
       background: #ffffff;
       padding: 10px 14px;
       border-radius: 12px;
       border: 1px solid #e2e8f0;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
     }
+
     .game-hud-label {
       font-size: 11px;
       color: #64748b;
@@ -1164,21 +1554,27 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
+
     .game-hud-val {
       font-size: 18px;
       font-weight: 800;
       color: #0f172a;
       margin-top: 2px;
     }
+
     .game-board-vms {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 16px;
       padding: 20px 24px;
     }
+
     @media (max-width: 768px) {
-      .game-board-vms { grid-template-columns: 1fr; }
+      .game-board-vms {
+        grid-template-columns: 1fr;
+      }
     }
+
     .game-vm-col {
       background: #f8fafc;
       border-radius: 14px;
@@ -1187,14 +1583,16 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
       transition: all 0.2s ease;
     }
+
     .game-vm-col.bottleneck-col {
       background: #fff1f2;
       border-color: #fecdd3;
       box-shadow: 0 0 16px rgba(239, 68, 68, 0.2);
     }
+
     .game-vm-meter {
       height: 22px;
       background: #e2e8f0;
@@ -1202,10 +1600,12 @@
       position: relative;
       overflow: hidden;
     }
+
     .game-vm-meter-bar {
       height: 100%;
       transition: width 0.3s ease;
     }
+
     .game-vm-meter-text {
       position: absolute;
       inset: 0;
@@ -1216,12 +1616,14 @@
       font-weight: 700;
       color: #0f172a;
     }
+
     .game-vm-task-list {
       display: flex;
       flex-direction: column;
       gap: 6px;
       min-height: 140px;
     }
+
     .game-task-pill {
       background: #ffffff;
       padding: 8px 12px;
@@ -1231,13 +1633,15 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
+
     .game-task-name {
       font-size: 12px;
       font-weight: 700;
       color: #1e293b;
     }
+
     .game-task-mi {
       font-size: 11px;
       font-weight: 600;
@@ -1246,10 +1650,12 @@
       padding: 2px 6px;
       border-radius: 6px;
     }
+
     .game-task-vm-btns {
       display: flex;
       gap: 4px;
     }
+
     .game-task-vm-btns button {
       width: 22px;
       height: 22px;
@@ -1265,11 +1671,13 @@
       justify-content: center;
       padding: 0;
     }
+
     .game-task-vm-btns button.active {
       background: #0284c7;
       color: #ffffff;
       border-color: #0284c7;
     }
+
     .game-toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -1279,6 +1687,7 @@
       border-top: 1px solid #e2e8f0;
       align-items: center;
     }
+
     .game-toolbar button {
       height: 36px;
       padding: 0 14px;
@@ -1294,293 +1703,167 @@
       color: #1e293b;
       transition: all 0.15s ease;
     }
+
     .game-toolbar button:hover {
       background: #f8fafc;
       border-color: #94a3b8;
     }
-    .game-btn-primary {
-      background: #c2410c !important;
-      background-color: #c2410c !important;
-      background-image: none !important;
-      color: #ffffff !important;
-      border-top: 2px solid #ea580c !important;
-      border-left: 2px solid #ea580c !important;
-      border-right: 2px solid #7c2d12 !important;
-      border-bottom: 4px solid #431407 !important;
-      border-radius: 8px !important;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.7) !important;
-    }
 
+    .game-btn-primary {
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+      color: #ffffff !important;
+      border-color: #ea580c !important;
+      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+    }
   
     /* ==============================================================
-       SOLID 3D EMBOSSED STONE / ROCK BUTTONS (ZERO GRADIENT, ZERO TRANSPARENCY)
+       SOLID EMBOSSED STONE BUTTONS (Menimbul Kayak Batu - Non-Transparent)
        ============================================================== */
-    button, .btn-stone {
-      font: inherit;
-      color: #f5f5f4 !important;
-      background: #262626 !important; /* Solid dark basalt stone */
-      background-color: #262626 !important;
-      background-image: none !important;
-      opacity: 1 !important;
-      border-top: 2px solid #57534e !important;
-      border-left: 2px solid #44403c !important;
-      border-right: 2px solid #1c1917 !important;
-      border-bottom: 4px solid #0c0a09 !important;
-      border-radius: 8px !important;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.15) !important;
-      font-weight: 700 !important;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.9) !important;
+    .stone-btn, .stone-ocean, .stone-amber, .stone-crimson, .stone-charcoal, .stone-teal, .stone-indigo, .stone-magma, .stone-orange, .stone-bronze {
+      position: relative !important;
+      font-family: inherit !important;
+      font-weight: 800 !important;
       cursor: pointer !important;
-      transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.1s ease !important;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      user-select: none;
+      border-radius: 9px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 6px !important;
+      text-decoration: none !important;
+      user-select: none !important;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, border-bottom-width 0.1s ease !important;
     }
-    button:hover, .btn-stone:hover {
-      background: #333333 !important;
-      background-color: #333333 !important;
-    }
-    button:active, .btn-stone:active {
+    .stone-btn:active, .stone-ocean:active, .stone-amber:active, .stone-crimson:active, .stone-charcoal:active, .stone-teal:active, .stone-indigo:active, .stone-magma:active, .stone-orange:active, .stone-bronze:active {
       transform: translateY(2px) !important;
-      border-bottom: 2px solid #0c0a09 !important;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.8), inset 0 2px 4px rgba(0,0,0,0.6) !important;
+      border-bottom-width: 2px !important;
     }
-
-    /* Magma Basalt Stone (Solid Terracotta/Lava Rock) */
-    .stone-magma, button.stone-magma {
-      background: #9a3412 !important;
-      background-color: #9a3412 !important;
-      background-image: none !important;
-      border-top: 2px solid #ea580c !important;
-      border-left: 2px solid #c2410c !important;
-      border-right: 2px solid #7c2d12 !important;
-      border-bottom: 4px solid #431407 !important;
-      color: #ffffff !important;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.7) !important;
-    }
-    .stone-magma:hover, button.stone-magma:hover {
-      background: #b43a14 !important;
-      background-color: #b43a14 !important;
-    }
-    .stone-magma:active, button.stone-magma:active {
-      transform: translateY(2px) !important;
-      border-bottom: 2px solid #431407 !important;
-    }
-
-    /* Ocean Slate Stone (Solid Deep Cyan/Blue Rock) */
-    .stone-ocean, button.stone-ocean {
-      background: #0369a1 !important;
-      background-color: #0369a1 !important;
-      background-image: none !important;
-      border-top: 2px solid #38bdf8 !important;
-      border-left: 2px solid #0284c7 !important;
-      border-right: 2px solid #075985 !important;
-      border-bottom: 4px solid #082f49 !important;
-      color: #ffffff !important;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.7) !important;
-    }
-    .stone-ocean:hover, button.stone-ocean:hover {
+    .stone-ocean {
       background: #0284c7 !important;
-      background-color: #0284c7 !important;
-    }
-    .stone-ocean:active, button.stone-ocean:active {
-      transform: translateY(2px) !important;
-      border-bottom: 2px solid #082f49 !important;
-    }
-
-    /* Volcanic Ruby Stone (Solid Crimson Rock for Exit/Close/Danger) */
-    .stone-crimson, button.stone-crimson {
-      background: #b91c1c !important;
-      background-color: #b91c1c !important;
-      background-image: none !important;
-      border-top: 2px solid #f87171 !important;
-      border-left: 2px solid #dc2626 !important;
-      border-right: 2px solid #991b1b !important;
-      border-bottom: 4px solid #450a0a !important;
       color: #ffffff !important;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.7) !important;
+      border: 2px solid #38bdf8 !important;
+      border-bottom: 4px solid #0369a1 !important;
+      box-shadow: 0 4px 0 #075985, 0 6px 14px rgba(0,0,0,0.5) !important;
     }
-    .stone-crimson:hover, button.stone-crimson:hover {
-      background: #dc2626 !important;
-      background-color: #dc2626 !important;
-    }
-    .stone-crimson:active, button.stone-crimson:active {
-      transform: translateY(2px) !important;
-      border-bottom: 2px solid #450a0a !important;
-    }
-
-    /* Jade Emerald Stone (Solid Green Rock for Play/Optimal) */
-    .stone-jade, button.stone-jade {
-      background: #047857 !important;
-      background-color: #047857 !important;
-      background-image: none !important;
-      border-top: 2px solid #34d399 !important;
-      border-left: 2px solid #059669 !important;
-      border-right: 2px solid #065f46 !important;
-      border-bottom: 4px solid #064e3b !important;
-      color: #ffffff !important;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.7) !important;
-    }
-    .stone-jade:hover, button.stone-jade:hover {
-      background: #059669 !important;
-      background-color: #059669 !important;
-    }
-    .stone-jade:active, button.stone-jade:active {
-      transform: translateY(2px) !important;
-      border-bottom: 2px solid #064e3b !important;
-    }
-
-    /* Amber Sandstone (Solid Gold/Brown Rock) */
-    .stone-amber, button.stone-amber {
-      background: #b45309 !important;
-      background-color: #b45309 !important;
-      background-image: none !important;
-      border-top: 2px solid #fbbf24 !important;
-      border-left: 2px solid #d97706 !important;
-      border-right: 2px solid #78350f !important;
-      border-bottom: 4px solid #451a03 !important;
-      color: #ffffff !important;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.7) !important;
-    }
-    .stone-amber:hover, button.stone-amber:hover {
+    .stone-amber {
       background: #d97706 !important;
-      background-color: #d97706 !important;
+      color: #ffffff !important;
+      border: 2px solid #fbbf24 !important;
+      border-bottom: 4px solid #92400e !important;
+      box-shadow: 0 4px 0 #78350f, 0 6px 14px rgba(0,0,0,0.5) !important;
     }
-    .stone-amber:active, button.stone-amber:active {
-      transform: translateY(2px) !important;
-      border-bottom: 2px solid #451a03 !important;
+    .stone-orange {
+      background: #ea580c !important;
+      color: #ffffff !important;
+      border: 2px solid #fb923c !important;
+      border-bottom: 4px solid #9a3412 !important;
+      box-shadow: 0 4px 0 #7c2d12, 0 6px 14px rgba(0,0,0,0.5) !important;
+    }
+    .stone-crimson {
+      background: #dc2626 !important;
+      color: #ffffff !important;
+      border: 2px solid #f87171 !important;
+      border-bottom: 4px solid #991b1b !important;
+      box-shadow: 0 4px 0 #7f1d1d, 0 6px 14px rgba(0,0,0,0.5) !important;
+    }
+    .stone-charcoal {
+      background: #27272a !important;
+      color: #f4f4f5 !important;
+      border: 2px solid #52525b !important;
+      border-bottom: 4px solid #18181b !important;
+      box-shadow: 0 4px 0 #09090b, 0 6px 14px rgba(0,0,0,0.5) !important;
+    }
+    .stone-teal {
+      background: #0f766e !important;
+      color: #ffffff !important;
+      border: 2px solid #14b8a6 !important;
+      border-bottom: 4px solid #115e59 !important;
+      box-shadow: 0 4px 0 #134e4a, 0 6px 14px rgba(0,0,0,0.5) !important;
+    }
+    .stone-indigo {
+      background: #4338ca !important;
+      color: #ffffff !important;
+      border: 2px solid #818cf8 !important;
+      border-bottom: 4px solid #312e81 !important;
+      box-shadow: 0 4px 0 #1e1b4b, 0 6px 14px rgba(0,0,0,0.5) !important;
+    }
+    .stone-bronze {
+      background: #92400e !important;
+      color: #ffffff !important;
+      border: 2px solid #f59e0b !important;
+      border-bottom: 4px solid #78350f !important;
+      box-shadow: 0 4px 0 #451a03, 0 6px 14px rgba(0,0,0,0.5) !important;
+    }
+    .stone-magma {
+      background: #ea580c !important;
+      color: #ffffff !important;
+      border: 2px solid #fdba74 !important;
+      border-bottom: 6px solid #7c2d12 !important;
+      box-shadow: 0 6px 0 #431407, 0 12px 28px rgba(0,0,0,0.7) !important;
     }
 
-    /* Amethyst Stone (Solid Purple Rock) */
-    .stone-purple, button.stone-purple {
-      background: #6b21a8 !important;
-      background-color: #6b21a8 !important;
-      background-image: none !important;
-      border-top: 2px solid #c084fc !important;
-      border-left: 2px solid #9333ea !important;
-      border-right: 2px solid #581c87 !important;
-      border-bottom: 4px solid #3b0764 !important;
-      color: #ffffff !important;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.7) !important;
+    /* Corner Chibi Avatar Animations in RPG Dialogue Bar */
+    #corner-chibi-kocorock.is-speaking {
+      transform: scale(1.15) translateY(-3px);
+      border-color: #f97316 !important;
+      box-shadow: 0 0 22px #f97316, 0 6px 12px rgba(0,0,0,0.8) !important;
+      animation: cornerKocokTalk 0.3s infinite alternate;
     }
-    .stone-purple:hover, button.stone-purple:hover {
-      background: #7e22ce !important;
-      background-color: #7e22ce !important;
+    #corner-chibi-pipimon.is-speaking {
+      transform: scale(1.15) translateY(-3px);
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 22px #38bdf8, 0 6px 12px rgba(0,0,0,0.8) !important;
+      animation: cornerPipTalk 0.28s infinite alternate;
     }
-    .stone-purple:active, button.stone-purple:active {
-      transform: translateY(2px) !important;
-      border-bottom: 2px solid #3b0764 !important;
+    @keyframes cornerKocokTalk {
+      0% { transform: scale(1.15) translateY(-3px) rotate(-3deg); }
+      100% { transform: scale(1.18) translateY(-6px) rotate(3deg); }
     }
-
-    /* Segmented Tray & Buttons */
-    .seg {
-      background: #171717 !important;
-      border: 1px solid #333333 !important;
-      border-radius: 8px !important;
-      padding: 3px !important;
-      gap: 3px !important;
-    }
-    .seg button {
-      background: #262626 !important;
-      color: #a8a29e !important;
-      border-top: 1px solid #44403c !important;
-      border-bottom: 3px solid #0c0a09 !important;
-      border-radius: 6px !important;
-      height: 30px !important;
-    }
-    .seg button.on {
-      background: #44403c !important;
-      color: #ffffff !important;
-      border-top: 1px solid #78716c !important;
-      border-bottom: 3px solid #1c1917 !important;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.2) !important;
+    @keyframes cornerPipTalk {
+      0% { transform: scale(1.15) translateY(-3px) scaleY(0.96); }
+      100% { transform: scale(1.18) translateY(-7px) scaleY(1.08); }
     }
 
-    /* Round Buttons & Dock Icons */
-    .round {
-      border-radius: 8px !important;
-      background: #262626 !important;
-      border-top: 2px solid #525252 !important;
-      border-bottom: 4px solid #0a0a0a !important;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.6) !important;
-      color: #f5f5f4 !important;
+    /* Mascot Art Zoom on Talking */
+    .theater-mascot-card.is-speaking .mascot-chibi-art {
+      animation: mascotBounceTalk 0.3s ease-in-out infinite alternate !important;
     }
-    .round:hover {
-      background: #333333 !important;
-    }
-    .round.on {
-      background: #0369a1 !important;
-      border-top: 2px solid #38bdf8 !important;
-      border-bottom: 4px solid #082f49 !important;
-      color: #ffffff !important;
-    }
-
-    /* Bottom Dock Bar */
-    .dock {
-      background: #171717 !important;
-      border: 2px solid #333333 !important;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.85) !important;
-      border-radius: 12px !important;
-    }
-    .ib {
-      background: #262626 !important;
-      border-top: 2px solid #525252 !important;
-      border-bottom: 3px solid #0a0a0a !important;
-      border-radius: 8px !important;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.6) !important;
-      color: #f5f5f4 !important;
-    }
-    .ib:hover {
-      background: #333333 !important;
-    }
-    .ib.main {
-      background: #047857 !important;
-      border-top: 2px solid #34d399 !important;
-      border-bottom: 4px solid #064e3b !important;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.8) !important;
-      color: #ffffff !important;
-    }
-    .ib.main:hover {
-      background: #059669 !important;
-    }
-    .spd-pill {
-      background: #262626 !important;
-      border-top: 1px solid #44403c !important;
-      border-bottom: 2px solid #0c0a09 !important;
-      border-radius: 6px !important;
-      color: #a8a29e !important;
-    }
-    .spd-pill.on {
-      background: #44403c !important;
-      color: #ffffff !important;
-      border-top: 1px solid #78716c !important;
-      border-bottom: 2px solid #1c1917 !important;
+    @keyframes mascotBounceTalk {
+      0% { transform: translateY(0) scale(1); }
+      100% { transform: translateY(-6px) scale(1.06); }
     }
 
   </style>
 
   <!-- Three.js, GLTFLoader & OrbitControls (Offline Vendor with CDN fallback) -->
-  <script src="./vendor/three.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js';"></script>
-  <script src="./vendor/GLTFLoader.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';"></script>
-  <script src="./vendor/OrbitControls.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js';"></script>
+  <script src="./vendor/three.min.js"
+    onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js';"></script>
+  <script src="./vendor/GLTFLoader.js"
+    onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';"></script>
+  <script src="./vendor/OrbitControls.js"
+    onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js';"></script>
 </head>
+
 <body data-view="both">
 
   <!-- 3D WebGL Canvas -->
   <canvas id="gl"></canvas>
 
   <!-- 360 Camera Hint Pill -->
-  <div id="orbit-hint" style="display:none; position:fixed; top:64px; left:50%; transform:translateX(-50%); z-index:30; background:rgba(15, 23, 42, 0.88); backdrop-filter:blur(10px); padding:5px 14px; border-radius:20px; font-size:11px; font-weight:600; color:#cbd5e1; border:1px solid rgba(255,255,255,0.15); box-shadow:0 4px 14px rgba(0,0,0,0.3); pointer-events:none; transition:opacity 0.6s ease; align-items:center; gap:6px;">
-    <svg viewBox="0 0 24 24" style="width:14px; height:14px; stroke:#38bdf8; fill:none;"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+  <div id="orbit-hint"
+    style="display:none; position:fixed; top:64px; left:50%; transform:translateX(-50%); z-index:30; background:rgba(15, 23, 42, 0.88); backdrop-filter:blur(10px); padding:5px 14px; border-radius:20px; font-size:11px; font-weight:600; color:#cbd5e1; border:1px solid rgba(255,255,255,0.15); box-shadow:0 4px 14px rgba(0,0,0,0.3); pointer-events:none; transition:opacity 0.6s ease; align-items:center; gap:6px;">
+    <svg viewBox="0 0 24 24" style="width:14px; height:14px; stroke:#38bdf8; fill:none;">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="2" y1="12" x2="22" y2="12"></line>
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+    </svg>
     <span><b>Kamera 360°:</b> Drag mouse untuk putar • Scroll zoom • Tekan [V] untuk kembali masuk ke Kastil</span>
   </div>
 
   <!-- 3D Character Speech Bubbles (Comic & Pokemon Style) -->
   <div id="bubble-kocorock" class="char-bubble kocorock">
     <div class="bubble-speaker">
-      <span class="chip-vns" style="font-size:9.5px; font-weight:800; background:var(--ember-bg); color:var(--ember); padding:1px 5px; border-radius:4px;">VNS</span>
+      <span class="chip-vns"
+        style="font-size:9.5px; font-weight:800; background:var(--ember-bg); color:var(--ember); padding:1px 5px; border-radius:4px;">VNS</span>
       <span>Kocorock</span>
       <span class="bubble-tag">Rock Golem</span>
     </div>
@@ -1590,7 +1873,8 @@
 
   <div id="bubble-pipimon" class="char-bubble pipimon">
     <div class="bubble-speaker">
-      <span class="chip-bfo" style="font-size:9.5px; font-weight:800; background:var(--jade-bg); color:var(--jade); padding:1px 5px; border-radius:4px;">BFO</span>
+      <span class="chip-bfo"
+        style="font-size:9.5px; font-weight:800; background:var(--jade-bg); color:var(--jade); padding:1px 5px; border-radius:4px;">BFO</span>
       <span>Pipimon</span>
       <span class="bubble-tag">Bio Slime</span>
     </div>
@@ -1602,7 +1886,8 @@
   <div class="top">
     <!-- Brand Title -->
     <div class="brand" style="padding:5px 12px; border-radius:12px; margin-right:4px;">
-      <span class="name" style="font-size:14px; font-weight:800; color:#38bdf8; display:flex; align-items:center; gap:5px;">
+      <span class="name"
+        style="font-size:14px; font-weight:800; color:#38bdf8; display:flex; align-items:center; gap:5px;">
         <span>⚡</span> <span>Cloud Hybrid Lab</span>
       </span>
     </div>
@@ -1619,48 +1904,73 @@
 
     <!-- Action Buttons (Responsive Pills fitting cleanly on screen) -->
     <div style="display:flex; align-items:center; gap:5px; flex-shrink:0;">
-      <button id="btnOpenTheater" class="stone-ocean" style="height:34px; padding:0 12px; font-size:11.5px; white-space:nowrap;" title="Buka Teater Holografik & Bioskop Edukatif [T]">
+      <button id="btnOpenTheater" class="stone-ocean"
+        style="height:34px; padding:0 14px; font-size:12px; white-space:nowrap; cursor:pointer;"
+        title="Buka Teater Holografik & Bioskop Edukatif [T]">
         <span>🏛️ Teater [T]</span>
       </button>
 
-      <button id="btnOpenPOV" class="stone-amber" style="height:34px; padding:0 12px; font-size:11.5px; white-space:nowrap;" title="Mode Jelajah First-Person POV Kastil [V]">
+      <button id="btnOpenPOV" class="stone-amber"
+        style="height:34px; padding:0 14px; font-size:12px; white-space:nowrap; cursor:pointer;"
+        title="Mode Jelajah First-Person POV Kastil [V]">
         <span>🚶 POV Kastil [V]</span>
       </button>
 
-      <button id="btnOpenGame" class="stone-magma" style="height:34px; padding:0 12px; font-size:11.5px; white-space:nowrap;" title="Buka Game Edukatif: Cloud Dispatcher Challenge [G]">
+      <button id="btnOpenGame" class="stone-orange"
+        style="height:34px; padding:0 14px; font-size:12px; white-space:nowrap; cursor:pointer;"
+        title="Buka Game Edukatif: Cloud Dispatcher Challenge [G]">
         <span>🎮 Game [G]</span>
       </button>
 
-      <button id="btnOpenAblation" class="stone-jade" style="height:34px; padding:0 12px; font-size:11.5px; white-space:nowrap;" title="Buka Panel Uji Ilmiah Studi Ablasi 30x Run [A]">
+      <button id="btnOpenAblation" class="stone-teal"
+        style="height:34px; padding:0 14px; font-size:12px; white-space:nowrap; cursor:pointer;"
+        title="Buka Panel Uji Ilmiah Studi Ablasi 30x Run [A]">
         <span>📊 Ablasi [A]</span>
       </button>
 
-      <button id="btnOpenEduHub" class="stone-purple" style="height:34px; padding:0 12px; font-size:11.5px; white-space:nowrap;" title="Buka Pusat Belajar: Taksonomi Talbi & 5 Pola Hibridisasi [E]">
+      <button id="btnOpenEduHub" class="stone-indigo"
+        style="height:34px; padding:0 14px; font-size:12px; white-space:nowrap; cursor:pointer;"
+        title="Buka Pusat Belajar: Taksonomi Talbi & 5 Pola Hibridisasi [E]">
         <span>🎓 Edu Hub [E]</span>
       </button>
 
-      <button id="btnAudienceQuiz" class="stone-amber" style="height:34px; padding:0 12px; font-size:11.5px; white-space:nowrap;" title="Mode Interaktif: Uji Audiens & Bedah Konsep [Q]">
+      <button id="btnAudienceQuiz" class="stone-bronze"
+        style="height:34px; padding:0 14px; font-size:12px; white-space:nowrap; cursor:pointer;"
+        title="Mode Interaktif: Uji Audiens & Bedah Konsep [Q]">
         <span>🎯 Drill [Q]</span>
       </button>
 
       <!-- Utility Icons -->
       <button class="round" id="btnMusic" title="Musik Latar Horor/Tegang (On/Off)" style="width:32px; height:32px;">
-        <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+        <svg viewBox="0 0 24 24">
+          <path d="M9 18V5l12-2v13"></path>
+          <circle cx="6" cy="18" r="3"></circle>
+          <circle cx="18" cy="16" r="3"></circle>
+        </svg>
       </button>
 
-      <a href="presentasi.html" id="btnGoPresentasi" class="round" title="Slide Presentasi Lengkap" style="width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none; color:inherit;">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M8 12h8M8 8h8M8 16h4"></path></svg>
+      <a href="presentasi.html" id="btnGoPresentasi" class="round" title="Slide Presentasi Lengkap"
+        style="width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none; color:inherit;">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+          <path d="M8 12h8M8 8h8M8 16h4"></path>
+        </svg>
       </a>
 
       <button class="round" id="btnFullscreen" title="Layar Penuh [F]" style="width:32px; height:32px;">
-        <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+        <svg viewBox="0 0 24 24">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3">
+          </path>
+        </svg>
       </button>
     </div>
   </div>
 
   <!-- MASCOT CARD LEFT: MECHA-KOCOROCK (VNS) -->
-  <div class="card left" id="cardVNS" style="background:rgba(15, 23, 42, 0.88); border:1.5px solid #f59e0b; color:#ffffff;">
-    <img src="assets/images/card-kocorock-magma.svg" class="mascot-art" alt="Magma-Kocorock" style="width:72px; height:72px; object-fit:contain; border-radius:12px; border:1px solid #f59e0b; background:#180c06; padding:3px; box-shadow:0 0 14px rgba(234,88,12,0.35);">
+  <div class="card left" id="cardVNS"
+    style="background:rgba(15, 23, 42, 0.88); border:1.5px solid #f59e0b; color:#ffffff;">
+    <img src="assets/images/card-kocorock-magma.svg" class="mascot-art" alt="Magma-Kocorock"
+      style="width:72px; height:72px; object-fit:contain; border-radius:12px; border:1px solid #f59e0b; background:#180c06; padding:3px; box-shadow:0 0 14px rgba(234,88,12,0.35);">
 
     <div class="card-body">
       <h2>
@@ -1681,7 +1991,8 @@
           <span style="color:#94a3b8;">Evaluasi (NFE)</span>
         </div>
       </div>
-      <div class="stage" id="vns-stage" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1;">
+      <div class="stage" id="vns-stage"
+        style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1;">
         <b style="background:#f59e0b; color:#0f172a;">1</b>
         <span id="vns-stage-text">Mecha-Kocorock siaga di node bottleneck untuk goncangan radius k = 1.</span>
       </div>
@@ -1689,7 +2000,8 @@
   </div>
 
   <!-- MASCOT CARD RIGHT: AERO-PIPI (BFO) -->
-  <div class="card right" id="cardBFO" style="background:rgba(4, 47, 46, 0.88); border:1.5px solid #0d9488; color:#ffffff;">
+  <div class="card right" id="cardBFO"
+    style="background:rgba(4, 47, 46, 0.88); border:1.5px solid #0d9488; color:#ffffff;">
     <div class="card-body">
       <h2>
         <span style="color:#ffffff;">Aqua-Pipimon</span>
@@ -1709,13 +2021,15 @@
           <span style="color:#94a3b8;">Evaluasi (NFE)</span>
         </div>
       </div>
-      <div class="stage" id="bfo-stage" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1;">
+      <div class="stage" id="bfo-stage"
+        style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1;">
         <b style="background:#0d9488; color:#ffffff;">1</b>
         <span id="bfo-stage-text">Armada Bio-Swarm Aero-Pipi memindai gradien manifold global.</span>
       </div>
     </div>
 
-    <img src="assets/images/card-pipimon-water.svg" class="mascot-art" alt="Aero-Pipimon" style="width:72px; height:72px; object-fit:contain; border-radius:12px; border:1px solid #0d9488; background:#041f1e; padding:3px; box-shadow:0 0 12px rgba(13,148,136,0.25);">
+    <img src="assets/images/card-pipimon-water.svg" class="mascot-art" alt="Aero-Pipimon"
+      style="width:72px; height:72px; object-fit:contain; border-radius:12px; border:1px solid #0d9488; background:#041f1e; padding:3px; box-shadow:0 0 12px rgba(13,148,136,0.25);">
   </div>
 
   <!-- CONVERGENCE CHART (BOTTOM LEFT) -->
@@ -1730,12 +2044,13 @@
   <!-- AWAN NARRATOR CARD (LOWER CENTER) -->
   <div id="narr" class="glass">
     <svg class="narr-cloud" viewBox="0 0 64 64">
-      <path d="M 18 44 A 12 12 0 0 1 20 22 A 16 16 0 0 1 48 24 A 12 12 0 0 1 48 44 Z" fill="#ffffff" filter="drop-shadow(0 3px 6px rgba(0,0,0,0.12))"/>
-      <circle cx="28" cy="34" r="2" fill="#334155"/>
-      <circle cx="40" cy="34" r="2" fill="#334155"/>
-      <path d="M 31 38 Q 34 41 37 38" fill="none" stroke="#334155" stroke-width="1.5" stroke-linecap="round"/>
-      <circle cx="24" cy="37" r="2.5" fill="#fca5a5" opacity="0.6"/>
-      <circle cx="44" cy="37" r="2.5" fill="#fca5a5" opacity="0.6"/>
+      <path d="M 18 44 A 12 12 0 0 1 20 22 A 16 16 0 0 1 48 24 A 12 12 0 0 1 48 44 Z" fill="#ffffff"
+        filter="drop-shadow(0 3px 6px rgba(0,0,0,0.12))" />
+      <circle cx="28" cy="34" r="2" fill="#334155" />
+      <circle cx="40" cy="34" r="2" fill="#334155" />
+      <path d="M 31 38 Q 34 41 37 38" fill="none" stroke="#334155" stroke-width="1.5" stroke-linecap="round" />
+      <circle cx="24" cy="37" r="2.5" fill="#fca5a5" opacity="0.6" />
+      <circle cx="44" cy="37" r="2.5" fill="#fca5a5" opacity="0.6" />
     </svg>
 
     <div class="narr-content">
@@ -1747,7 +2062,8 @@
         </div>
       </div>
       <div class="narr-text" id="narr-text">
-        Halo! Tekan <strong>[Spasi]</strong> atau tombol Play untuk mulai menyaksikan Kocorock dan Pipimon berlomba menyeimbangkan beban pulau.
+        Halo! Tekan <strong>[Spasi]</strong> atau tombol Play untuk mulai menyaksikan Kocorock dan Pipimon berlomba
+        menyeimbangkan beban pulau.
       </div>
     </div>
   </div>
@@ -1756,18 +2072,29 @@
   <div class="dock glass">
     <!-- Play / Pause -->
     <button class="ib main" id="btnPlay" title="Mulai / Jeda [Spasi]">
-      <svg id="playIcon" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
-      <svg id="pauseIcon" style="display:none;" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+      <svg id="playIcon" viewBox="0 0 24 24">
+        <polygon points="6 3 20 12 6 21 6 3"></polygon>
+      </svg>
+      <svg id="pauseIcon" style="display:none;" viewBox="0 0 24 24">
+        <rect x="6" y="4" width="4" height="16"></rect>
+        <rect x="14" y="4" width="4" height="16"></rect>
+      </svg>
     </button>
 
     <!-- Step -->
     <button class="ib" id="btnStep" title="Langkah Berikutnya (Step)">
-      <svg viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+      <svg viewBox="0 0 24 24">
+        <polygon points="5 4 15 12 5 20 5 4"></polygon>
+        <line x1="19" y1="5" x2="19" y2="19"></line>
+      </svg>
     </button>
 
     <!-- Reset -->
     <button class="ib" id="btnReset" title="Reset Ulang Simulasi">
-      <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+      <svg viewBox="0 0 24 24">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+        <path d="M3 3v5h5"></path>
+      </svg>
     </button>
 
     <div class="divider"></div>
@@ -1784,7 +2111,8 @@
 
     <!-- Problem Presets -->
     <div class="seg" style="padding:2px; border-radius:999px;">
-      <button class="on" data-preset="12" style="height:28px; padding:0 8px; border-radius:999px; font-size:11px;">12 Task</button>
+      <button class="on" data-preset="12" style="height:28px; padding:0 8px; border-radius:999px; font-size:11px;">12
+        Task</button>
       <button data-preset="24" style="height:28px; padding:0 8px; border-radius:999px; font-size:11px;">24 Task</button>
     </div>
   </div>
@@ -1858,13 +2186,15 @@
         <div class="sheet-slide" data-idx="1">
           <h3>Eksplorasi Masalah: Cloud Task Scheduling</h3>
           <p>
-            Dalam komputasi awan, task dengan beragam beban kerja (workload) harus dialokasikan ke sejumlah Virtual Machine (VM) heterogen yang memiliki kecepatan komputasi (MIPS) berbeda.
+            Dalam komputasi awan, task dengan beragam beban kerja (workload) harus dialokasikan ke sejumlah Virtual
+            Machine (VM) heterogen yang memiliki kecepatan komputasi (MIPS) berbeda.
           </p>
           <p>
             <b>Makespan:</b> Waktu selesai dari VM yang paling terakhir menyelesaikan tugasnya.
             Tujuan optimasi adalah meminimalkan makespan:
           </p>
-          <div style="background:#f4f6f6; border-radius:8px; padding:10px 14px; font-family:monospace; margin:8px 0; font-size:13px;">
+          <div
+            style="background:#f4f6f6; border-radius:8px; padding:10px 14px; font-family:monospace; margin:8px 0; font-size:13px;">
             Minimalkan Makespan = min max_{j ∈ VM} ( Total_Workload_j / Speed_j )
           </div>
           <p>
@@ -1877,9 +2207,12 @@
         <div class="sheet-slide" data-idx="2">
           <h3>Fase Algoritma VNS bersama Kocok</h3>
           <ol style="padding-left:20px; display:flex; flex-direction:column; gap:8px; font-size:13px;">
-            <li><b>Shaking k:</b> Mengguncang k penempatan task secara acak untuk melompat keluar dari jebakan optimum lokal.</li>
-            <li><b>Local Search (Move & Swap):</b> Mengevaluasi pemindahan task dari VM tersibuk ke VM terlonggar secara deterministik.</li>
-            <li><b>Penerimaan Solusi:</b> Jika makespan membaik, solusi diterima dan k direset ke 1. Jika tidak membaik, nilai k dinaikkan (k = k + 1) untuk memperluas radius goncangan berikutnya.</li>
+            <li><b>Shaking k:</b> Mengguncang k penempatan task secara acak untuk melompat keluar dari jebakan optimum
+              lokal.</li>
+            <li><b>Local Search (Move & Swap):</b> Mengevaluasi pemindahan task dari VM tersibuk ke VM terlonggar secara
+              deterministik.</li>
+            <li><b>Penerimaan Solusi:</b> Jika makespan membaik, solusi diterima dan k direset ke 1. Jika tidak membaik,
+              nilai k dinaikkan (k = k + 1) untuk memperluas radius goncangan berikutnya.</li>
           </ol>
         </div>
 
@@ -1887,9 +2220,12 @@
         <div class="sheet-slide" data-idx="3">
           <h3>Fase Algoritma BFO bersama Koloni Pip</h3>
           <ol style="padding-left:20px; display:flex; flex-direction:column; gap:8px; font-size:13px;">
-            <li><b>Kemotaksis (Tumble & Swim):</b> Setiap Pip mencoba perubahan penempatan task acak. Jika makespan turun, Pip berenang searah hingga langkah N_s.</li>
-            <li><b>Reproduksi:</b> Separuh koloni dengan performa terburuk gugur, separuh koloni terbaik membelah diri.</li>
-            <li><b>Eliminasi & Dispersi:</b> Dengan probabilitas P_ed, Pip dieliminasi dan dilempar ke solusi acak agar koloni tidak mengalami konvergensi dini.</li>
+            <li><b>Kemotaksis (Tumble & Swim):</b> Setiap Pip mencoba perubahan penempatan task acak. Jika makespan
+              turun, Pip berenang searah hingga langkah N_s.</li>
+            <li><b>Reproduksi:</b> Separuh koloni dengan performa terburuk gugur, separuh koloni terbaik membelah diri.
+            </li>
+            <li><b>Eliminasi & Dispersi:</b> Dengan probabilitas P_ed, Pip dieliminasi dan dilempar ke solusi acak agar
+              koloni tidak mengalami konvergensi dini.</li>
             <li><b>Elitisme Mahkota:</b> Pip terbaik selalu dilindungi dan mengenakan mahkota emas.</li>
           </ol>
         </div>
@@ -1898,10 +2234,12 @@
         <div class="sheet-slide" data-idx="4">
           <h3>Eksperimen Adil: Rigor Akademik 30x Pengulangan</h3>
           <p>
-            Membandingkan VNS dan BFO dengan baseline (Random, Round Robin, Greedy LPT) pada <b>anggaran evaluasi fitness yang setara</b> (600 evaluasi).
+            Membandingkan VNS dan BFO dengan baseline (Random, Round Robin, Greedy LPT) pada <b>anggaran evaluasi
+              fitness yang setara</b> (600 evaluasi).
           </p>
           <div style="margin-bottom:8px;">
-            <button class="btn-sheet pri" id="btnRunBenchmark" style="font-size:12px; padding:6px 14px;">▶️ Jalankan 30x Uji Independen</button>
+            <button class="btn-sheet pri" id="btnRunBenchmark" style="font-size:12px; padding:6px 14px;">▶️ Jalankan 30x
+              Uji Independen</button>
           </div>
           <table class="data-tbl">
             <thead>
@@ -1914,11 +2252,41 @@
               </tr>
             </thead>
             <tbody id="tblBenchmark">
-              <tr><td>Random</td><td>94.5s</td><td>± 11.2s</td><td>76.0s</td><td>118.5s</td></tr>
-              <tr><td>Round Robin</td><td>82.3s</td><td>± 0.0s</td><td>82.3s</td><td>82.3s</td></tr>
-              <tr><td>Greedy LPT</td><td>68.4s</td><td>± 0.0s</td><td>68.4s</td><td>68.4s</td></tr>
-              <tr class="highlight"><td><b>VNS (Kocok)</b></td><td><b>61.2s</b></td><td>± 2.1s</td><td>58.0s</td><td>65.4s</td></tr>
-              <tr class="highlight"><td><b>BFO (Pip)</b></td><td><b>63.8s</b></td><td>± 3.4s</td><td>59.5s</td><td>69.1s</td></tr>
+              <tr>
+                <td>Random</td>
+                <td>94.5s</td>
+                <td>± 11.2s</td>
+                <td>76.0s</td>
+                <td>118.5s</td>
+              </tr>
+              <tr>
+                <td>Round Robin</td>
+                <td>82.3s</td>
+                <td>± 0.0s</td>
+                <td>82.3s</td>
+                <td>82.3s</td>
+              </tr>
+              <tr>
+                <td>Greedy LPT</td>
+                <td>68.4s</td>
+                <td>± 0.0s</td>
+                <td>68.4s</td>
+                <td>68.4s</td>
+              </tr>
+              <tr class="highlight">
+                <td><b>VNS (Kocok)</b></td>
+                <td><b>61.2s</b></td>
+                <td>± 2.1s</td>
+                <td>58.0s</td>
+                <td>65.4s</td>
+              </tr>
+              <tr class="highlight">
+                <td><b>BFO (Pip)</b></td>
+                <td><b>63.8s</b></td>
+                <td>± 3.4s</td>
+                <td>59.5s</td>
+                <td>69.1s</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -1928,13 +2296,18 @@
           <h3>Sitasi Paper Tugas & Adaptasi Ruang Diskret</h3>
           <ul style="padding-left:18px; display:flex; flex-direction:column; gap:10px; font-size:12.5px;">
             <li>
-              <b>Paper No. 57 (BFO):</b> Passino, K. M. (2002). <em>Biomimicry of bacterial foraging for distributed optimization and control</em>. IEEE Control Systems Magazine, serta adaptasi diskret cloud task scheduling (2026).
+              <b>Paper No. 57 (BFO):</b> Passino, K. M. (2002). <em>Biomimicry of bacterial foraging for distributed
+                optimization and control</em>. IEEE Control Systems Magazine, serta adaptasi diskret cloud task
+              scheduling (2026).
             </li>
             <li>
-              <b>Paper No. 58 (VNS):</b> Mladenović, N., & Hansen, P. (1997). <em>Variable neighborhood search</em>. Computers & Operations Research, serta formulasi makespan multi-objective cloud heterogen (2024).
+              <b>Paper No. 58 (VNS):</b> Mladenović, N., & Hansen, P. (1997). <em>Variable neighborhood search</em>.
+              Computers & Operations Research, serta formulasi makespan multi-objective cloud heterogen (2024).
             </li>
             <li>
-              <b>Adaptasi Diskret:</b> BFO biologis bekerja di ruang kontinu. Dalam cloud scheduling, solusi direpresentasikan sebagai array pemetaan task ke VM. Tumble diwujudkan sebagai operator mutasi stochastic neighbor sampling.
+              <b>Adaptasi Diskret:</b> BFO biologis bekerja di ruang kontinu. Dalam cloud scheduling, solusi
+              direpresentasikan sebagai array pemetaan task ke VM. Tumble diwujudkan sebagai operator mutasi stochastic
+              neighbor sampling.
             </li>
           </ul>
         </div>
@@ -1945,14 +2318,16 @@
           <div class="quiz-box">
             <div class="quiz-q">1. Kenapa nilai k pada VNS dinaikkan saat solusi baru ditolak?</div>
             <div class="quiz-choices">
-              <button class="q-opt" data-correct="true">Untuk memperluas radius pencarian (shaking) agar keluar dari lembah lokal.</button>
+              <button class="q-opt" data-correct="true">Untuk memperluas radius pencarian (shaking) agar keluar dari
+                lembah lokal.</button>
               <button class="q-opt" data-correct="false">Untuk mempersempit pencarian ke solusi yang sudah ada.</button>
             </div>
           </div>
           <div class="quiz-box">
             <div class="quiz-q">2. Mengapa fase Eliminasi-Dispersi BFO penting dalam optimasi awan?</div>
             <div class="quiz-choices">
-              <button class="q-opt" data-correct="true">Mencegah koloni terjebak dan konvergen dini pada optimum lokal.</button>
+              <button class="q-opt" data-correct="true">Mencegah koloni terjebak dan konvergen dini pada optimum
+                lokal.</button>
               <button class="q-opt" data-correct="false">Menghapus task yang tidak selesai dari memori cloud.</button>
             </div>
           </div>
@@ -1971,7 +2346,9 @@
   <div id="story-overlay">
     <div class="story-header">
       <span id="story-step-indicator">Bab 1: Titah Sang Awanchu</span>
-      <span id="story-speaker-badge" style="display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.18); padding:3px 12px; border-radius:14px; font-weight:700; color:#facc15; font-size:12px;">Kocorock &amp; Pipimon</span>
+      <span id="story-speaker-badge"
+        style="display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.18); padding:3px 12px; border-radius:14px; font-weight:700; color:#facc15; font-size:12px;">Kocorock
+        &amp; Pipimon</span>
     </div>
     <div class="story-subtitles" id="story-subtitles-text">
       "Halo teman-teman! Aku Kocorock si golem batu, dan ini sahabatku Pipimon..."
@@ -1983,7 +2360,7 @@
     </div>
   </div>
 
-    <!-- INTERACTIVE PEER-DRILL OVERLAY: UJI AUDIENS & BEDAH KONSEP -->
+  <!-- INTERACTIVE PEER-DRILL OVERLAY: UJI AUDIENS & BEDAH KONSEP -->
   <div id="drill-overlay">
     <div class="drill-card">
       <div class="drill-top">
@@ -1991,12 +2368,17 @@
           <span style="font-size:24px;">✨</span>
           <div>
             <div style="font-size:18px; font-weight:800; color:#92400e;">Tanya Teman &amp; Bedah Konsep Awan</div>
-            <div style="font-size:12px; font-weight:600; color:#b45309;">Tunjuk teman untuk menjelaskan kembali materi, lalu bedah bersama jika masih bingung!</div>
+            <div style="font-size:12px; font-weight:600; color:#b45309;">Tunjuk teman untuk menjelaskan kembali materi,
+              lalu bedah bersama jika masih bingung!</div>
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:11px; background:#fef3c7; color:#92400e; padding:4px 10px; border-radius:8px; font-weight:700; border:1px solid #fde68a;">Shortcut [Q]</span>
-          <button id="btnCloseDrill" style="height:32px; padding:0 12px; border-radius:8px; background:#ef4444; color:#ffffff; border:none; font-weight:700; font-size:12px; cursor:pointer;">✕ Tutup</button>
+          <span
+            style="font-size:11px; background:#fef3c7; color:#92400e; padding:4px 10px; border-radius:8px; font-weight:700; border:1px solid #fde68a;">Shortcut
+            [Q]</span>
+          <button id="btnCloseDrill"
+            style="height:32px; padding:0 12px; border-radius:8px; background:#ef4444; color:#ffffff; border:none; font-weight:700; font-size:12px; cursor:pointer;">✕
+            Tutup</button>
         </div>
       </div>
 
@@ -2006,39 +2388,52 @@
           <span style="font-weight:700; font-size:13px; color:#1e293b; display:flex; align-items:center; gap:5px;">
             <span>🎲</span> Tunjuk Teman:
           </span>
-          <input type="text" id="inputPeerPool" value="Presensi 1 - 35" style="height:32px; padding:0 10px; border-radius:8px; border:1px solid #cbd5e1; font-size:12.5px; width:160px; outline:none;" title="Ketik nomor presensi atau nama teman">
-          <button id="btnRollPeer" class="stone-amber" style="height:32px; padding:0 14px; border-radius:8px; font-size:12px; cursor:pointer;">🎲 Putar / Kocok!</button>
+          <input type="text" id="inputPeerPool" value="Presensi 1 - 35"
+            style="height:32px; padding:0 10px; border-radius:8px; border:1px solid #cbd5e1; font-size:12.5px; width:160px; outline:none;"
+            title="Ketik nomor presensi atau nama teman">
+          <button id="btnRollPeer" class="stone-amber" style="height:32px; padding:0 14px; font-size:12px;">🎲
+            Putar / Kocok!</button>
         </div>
-        <div id="peerRollDisplay" style="font-weight:800; font-size:13.5px; color:#0369a1; background:#e0f2fe; padding:6px 14px; border-radius:10px; border:1px solid #bae6fd; min-width:180px; text-align:center;">
+        <div id="peerRollDisplay"
+          style="font-weight:800; font-size:13.5px; color:#0369a1; background:#e0f2fe; padding:6px 14px; border-radius:10px; border:1px solid #bae6fd; min-width:180px; text-align:center;">
           Silakan putar untuk menunjuk teman
         </div>
       </div>
 
       <!-- Navigasi 4 Kasus Uji (Grid 4 Kolom Rapi Tanpa Scrollbar) -->
-      <div class="drill-nav-tabs" id="drillTabs" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; padding:10px 24px; background:#f1f5f9; border-bottom:1px solid #e2e8f0;">
+      <div class="drill-nav-tabs" id="drillTabs"
+        style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; padding:10px 24px; background:#f1f5f9; border-bottom:1px solid #e2e8f0;">
         <button class="drill-tab-btn on" data-case="0" style="text-align:center; padding:8px 6px;">
-          🏝️ 1. Makespan &amp; Pulau<br><span style="font-size:10px; opacity:0.85; font-weight:500;">(Slide 2 &amp; 6)</span>
+          🏝️ 1. Makespan &amp; Pulau<br><span style="font-size:10px; opacity:0.85; font-weight:500;">(Slide 2 &amp;
+            6)</span>
         </button>
         <button class="drill-tab-btn" data-case="1" style="text-align:center; padding:8px 6px;">
           🪨 2. Shaking Kocorock<br><span style="font-size:10px; opacity:0.85; font-weight:500;">(Slide 3 - VNS)</span>
         </button>
         <button class="drill-tab-btn" data-case="2" style="text-align:center; padding:8px 6px;">
-          🦠 3. Kemotaksis Pipimon<br><span style="font-size:10px; opacity:0.85; font-weight:500;">(Slide 4 - BFO)</span>
+          🦠 3. Kemotaksis Pipimon<br><span style="font-size:10px; opacity:0.85; font-weight:500;">(Slide 4 -
+            BFO)</span>
         </button>
         <button class="drill-tab-btn" data-case="3" style="text-align:center; padding:8px 6px;">
-          📏 4. Garis Laser Ideal<br><span style="font-size:10px; opacity:0.85; font-weight:500;">(Slide 2 &amp; 6)</span>
+          📏 4. Garis Laser Ideal<br><span style="font-size:10px; opacity:0.85; font-weight:500;">(Slide 2 &amp;
+            6)</span>
         </button>
       </div>
 
       <div class="drill-body">
         <!-- KASUS 1: BOTTLENECK & MAKESPAN -->
         <div class="drill-case on" id="drillCase0">
-          <div class="drill-q-box" style="background:#fffbeb; border:1px solid #fef3c7; border-left:5px solid #f59e0b; border-radius:14px; padding:16px 20px; margin-bottom:18px;">
+          <div class="drill-q-box"
+            style="background:#fffbeb; border:1px solid #fef3c7; border-left:5px solid #f59e0b; border-radius:14px; padding:16px 20px; margin-bottom:18px;">
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
-              <span style="font-size:11.5px; font-weight:800; color:#d97706; text-transform:uppercase;">Pertanyaan untuk Teman (Kasus 1)</span>
-              <a href="presentasi.html" target="_blank" style="font-size:11px; font-weight:700; color:#0369a1; text-decoration:none; background:#e0f2fe; padding:3px 8px; border-radius:6px;">📖 Tertera di Slide 2 &amp; 6 ↗</a>
+              <span style="font-size:11.5px; font-weight:800; color:#d97706; text-transform:uppercase;">Pertanyaan untuk
+                Teman (Kasus 1)</span>
+              <a href="presentasi.html" target="_blank"
+                style="font-size:11px; font-weight:700; color:#0369a1; text-decoration:none; background:#e0f2fe; padding:3px 8px; border-radius:6px;">📖
+                Tertera di Slide 2 &amp; 6 ↗</a>
             </div>
-            <div class="drill-q-text" style="font-size:16px; font-weight:800; color:#0f172a; line-height:1.45; margin-bottom:12px;">
+            <div class="drill-q-text"
+              style="font-size:16px; font-weight:800; color:#0f172a; line-height:1.45; margin-bottom:12px;">
               "Coba jelaskan lagi pengertian Makespan dan kenapa pulau yang tinggi menjadi masalah?"
             </div>
             <div class="drill-actions">
@@ -2051,7 +2446,8 @@
             </div>
           </div>
 
-          <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+          <div
+            style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
             <span>💡</span> Panduan Bedah Bersama (Jika Teman Masih Bingung):
           </div>
 
@@ -2062,7 +2458,9 @@
                 <span>Analogi Pelabuhan Peti Kemas</span>
               </div>
               <div class="drill-level-body">
-                Pulau itu seperti dermaga pelabuhan peti kemas. Kalau semua barang ditumpuk di satu dermaga, dermaga itu akan macet total (bottleneck) sementara dermaga lain kosong menganggur. Waktu selesainya kapal terakhir itulah yang disebut <strong>Makespan</strong>.
+                Pulau itu seperti dermaga pelabuhan peti kemas. Kalau semua barang ditumpuk di satu dermaga, dermaga itu
+                akan macet total (bottleneck) sementara dermaga lain kosong menganggur. Waktu selesainya kapal terakhir
+                itulah yang disebut <strong>Makespan</strong>.
               </div>
             </div>
 
@@ -2072,7 +2470,9 @@
                 <span>Tinggi Pulau &amp; Beban Tugas</span>
               </div>
               <div class="drill-level-body">
-                Tinggi pulau awan menunjukkan total akumulasi waktu tugas yang diberikan ke mesin tersebut. Semakin tinggi pulau, semakin lama mesin itu bekerja. Bendera merah menandakan pulau yang bebannya paling kritis dan menentukan Makespan keseluruhan!
+                Tinggi pulau awan menunjukkan total akumulasi waktu tugas yang diberikan ke mesin tersebut. Semakin
+                tinggi pulau, semakin lama mesin itu bekerja. Bendera merah menandakan pulau yang bebannya paling kritis
+                dan menentukan Makespan keseluruhan!
               </div>
             </div>
 
@@ -2084,7 +2484,8 @@
               <div class="drill-level-body">
                 • <strong>Waktu Eksekusi:</strong> ETC(i, j) = Panjang Instruksi Tugas (MI) / Kecepatan Mesin (MIPS)<br>
                 • <strong>Beban Total Mesin L_i:</strong> Penjumlahan waktu seluruh tugas di pulau tersebut.<br>
-                • <strong>Makespan:</strong> f(x) = max(L_1, L_2, ..., L_m). Tujuan algoritma adalah memperkecil puncak tertinggi ini!
+                • <strong>Makespan:</strong> f(x) = max(L_1, L_2, ..., L_m). Tujuan algoritma adalah memperkecil puncak
+                tertinggi ini!
               </div>
             </div>
 
@@ -2095,7 +2496,8 @@
               </div>
               <div class="drill-level-body" style="background:#fffaf5;">
                 <strong>Kata Kunci:</strong> <em>Makespan, Bottleneck, Degree of Imbalance (DI)</em>.<br>
-                Sistem cloud dinilai dari tugas terakhir yang paling lambat selesai, bukan rata-rata beban. Kita ingin beban terbagi seimbang antar semua mesin.
+                Sistem cloud dinilai dari tugas terakhir yang paling lambat selesai, bukan rata-rata beban. Kita ingin
+                beban terbagi seimbang antar semua mesin.
               </div>
             </div>
           </div>
@@ -2103,12 +2505,17 @@
 
         <!-- KASUS 2: SHAKING KOCOROCK (VNS) -->
         <div class="drill-case" id="drillCase1">
-          <div class="drill-q-box" style="background:#fffbeb; border:1px solid #fef3c7; border-left:5px solid #f59e0b; border-radius:14px; padding:16px 20px; margin-bottom:18px;">
+          <div class="drill-q-box"
+            style="background:#fffbeb; border:1px solid #fef3c7; border-left:5px solid #f59e0b; border-radius:14px; padding:16px 20px; margin-bottom:18px;">
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
-              <span style="font-size:11.5px; font-weight:800; color:#d97706; text-transform:uppercase;">Pertanyaan untuk Teman (Kasus 2)</span>
-              <a href="presentasi.html" target="_blank" style="font-size:11px; font-weight:700; color:#0369a1; text-decoration:none; background:#e0f2fe; padding:3px 8px; border-radius:6px;">📖 Tertera di Slide 3 ↗</a>
+              <span style="font-size:11.5px; font-weight:800; color:#d97706; text-transform:uppercase;">Pertanyaan untuk
+                Teman (Kasus 2)</span>
+              <a href="presentasi.html" target="_blank"
+                style="font-size:11px; font-weight:700; color:#0369a1; text-decoration:none; background:#e0f2fe; padding:3px 8px; border-radius:6px;">📖
+                Tertera di Slide 3 ↗</a>
             </div>
-            <div class="drill-q-text" style="font-size:16px; font-weight:800; color:#0f172a; line-height:1.45; margin-bottom:12px;">
+            <div class="drill-q-text"
+              style="font-size:16px; font-weight:800; color:#0f172a; line-height:1.45; margin-bottom:12px;">
               "Coba jelaskan lagi pengertian Shaking pada Kocorock (VNS) saat mengentakkan tongkat!"
             </div>
             <div class="drill-actions">
@@ -2121,7 +2528,8 @@
             </div>
           </div>
 
-          <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+          <div
+            style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
             <span>💡</span> Panduan Bedah Bersama (Jika Teman Masih Bingung):
           </div>
 
@@ -2132,7 +2540,9 @@
                 <span>Analogi Mengocok Toples Permen</span>
               </div>
               <div class="drill-level-body">
-                Seperti mengocok toples permen yang macet. Kalau susunan permen tersangkut di sudut (optimum lokal), Kocorock mengguncang dengan kekuatan k=1. Kalau masih belum membaik, diguncang lebih keras (k=2). Begitu susunannya membaik, kekuatan guncangan langsung dikembalikan ke k=1!
+                Seperti mengocok toples permen yang macet. Kalau susunan permen tersangkut di sudut (optimum lokal),
+                Kocorock mengguncang dengan kekuatan k=1. Kalau masih belum membaik, diguncang lebih keras (k=2). Begitu
+                susunannya membaik, kekuatan guncangan langsung dikembalikan ke k=1!
               </div>
             </div>
 
@@ -2142,7 +2552,9 @@
                 <span>Perpindahan Kristal Tugas</span>
               </div>
               <div class="drill-level-body">
-                Saat tongkat dihentakkan, Kocorock memindahkan kristal tugas dari pulau yang penuh ke pulau yang lebih luang. Jika pulau tertinggi berhasil turun (Makespan membaik), aura emas menyala di tongkat Kocorock dan jadwal baru langsung dipakai.
+                Saat tongkat dihentakkan, Kocorock memindahkan kristal tugas dari pulau yang penuh ke pulau yang lebih
+                luang. Jika pulau tertinggi berhasil turun (Makespan membaik), aura emas menyala di tongkat Kocorock dan
+                jadwal baru langsung dipakai.
               </div>
             </div>
 
@@ -2152,8 +2564,10 @@
                 <span>Struktur Lingkungan &amp; First-Improvement</span>
               </div>
               <div class="drill-level-body">
-                • <strong>First-Improvement:</strong> Begitu menemukan susunan tugas yang Makespan-nya lebih cepat, langsung diterima tanpa menunggu.<br>
-                • <strong>Perubahan Radius (k=1, 2, 3):</strong> Jika hasil guncangan tidak membaik, perbesar k (diversifikasi) agar algoritma bisa melompat keluar dari jebakan optimum lokal!
+                • <strong>First-Improvement:</strong> Begitu menemukan susunan tugas yang Makespan-nya lebih cepat,
+                langsung diterima tanpa menunggu.<br>
+                • <strong>Perubahan Radius (k=1, 2, 3):</strong> Jika hasil guncangan tidak membaik, perbesar k
+                (diversifikasi) agar algoritma bisa melompat keluar dari jebakan optimum lokal!
               </div>
             </div>
 
@@ -2163,8 +2577,10 @@
                 <span>Kata Kunci Penilaian</span>
               </div>
               <div class="drill-level-body" style="background:#fffaf5;">
-                <strong>Kata Kunci:</strong> <em>Shaking, Neighborhood Change, First-Improvement, Diversifikasi vs Intensifikasi</em>.<br>
-                VNS adalah algoritma lintasan tunggal (Single Trajectory) yang efisien di ruang diskrit tanpa parameter rumit.
+                <strong>Kata Kunci:</strong> <em>Shaking, Neighborhood Change, First-Improvement, Diversifikasi vs
+                  Intensifikasi</em>.<br>
+                VNS adalah algoritma lintasan tunggal (Single Trajectory) yang efisien di ruang diskrit tanpa parameter
+                rumit.
               </div>
             </div>
           </div>
@@ -2172,12 +2588,17 @@
 
         <!-- KASUS 3: KEMOTAKSIS PIPIMON (BFO) -->
         <div class="drill-case" id="drillCase2">
-          <div class="drill-q-box" style="background:#fffbeb; border:1px solid #fef3c7; border-left:5px solid #f59e0b; border-radius:14px; padding:16px 20px; margin-bottom:18px;">
+          <div class="drill-q-box"
+            style="background:#fffbeb; border:1px solid #fef3c7; border-left:5px solid #f59e0b; border-radius:14px; padding:16px 20px; margin-bottom:18px;">
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
-              <span style="font-size:11.5px; font-weight:800; color:#d97706; text-transform:uppercase;">Pertanyaan untuk Teman (Kasus 3)</span>
-              <a href="presentasi.html" target="_blank" style="font-size:11px; font-weight:700; color:#0369a1; text-decoration:none; background:#e0f2fe; padding:3px 8px; border-radius:6px;">📖 Tertera di Slide 4 ↗</a>
+              <span style="font-size:11.5px; font-weight:800; color:#d97706; text-transform:uppercase;">Pertanyaan untuk
+                Teman (Kasus 3)</span>
+              <a href="presentasi.html" target="_blank"
+                style="font-size:11px; font-weight:700; color:#0369a1; text-decoration:none; background:#e0f2fe; padding:3px 8px; border-radius:6px;">📖
+                Tertera di Slide 4 ↗</a>
             </div>
-            <div class="drill-q-text" style="font-size:16px; font-weight:800; color:#0f172a; line-height:1.45; margin-bottom:12px;">
+            <div class="drill-q-text"
+              style="font-size:16px; font-weight:800; color:#0f172a; line-height:1.45; margin-bottom:12px;">
               "Coba jelaskan lagi pengertian Kemotaksis pada Pipimon (BFO) saat berenang mencari nutrisi!"
             </div>
             <div class="drill-actions">
@@ -2190,7 +2611,8 @@
             </div>
           </div>
 
-          <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+          <div
+            style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
             <span>💡</span> Panduan Bedah Bersama (Jika Teman Masih Bingung):
           </div>
 
@@ -2201,7 +2623,10 @@
                 <span>Analogi Kawanan Lebah Madu</span>
               </div>
               <div class="drill-level-body">
-                Seperti kawanan lebah mencari nektar bunga. Pipimon yang mencium aroma nektar manis (Makespan rendah) akan berenang lurus ke arah itu (swim/run). Kalau aromanya hilang, ia akan berguling acak mencari arah baru (tumble). Pada akhir hari, Pipimon paling sehat akan membelah diri melahirkan keturunan baru (reproduksi)!
+                Seperti kawanan lebah mencari nektar bunga. Pipimon yang mencium aroma nektar manis (Makespan rendah)
+                akan berenang lurus ke arah itu (swim/run). Kalau aromanya hilang, ia akan berguling acak mencari arah
+                baru (tumble). Pada akhir hari, Pipimon paling sehat akan membelah diri melahirkan keturunan baru
+                (reproduksi)!
               </div>
             </div>
 
@@ -2211,7 +2636,8 @@
                 <span>Koloni Slime &amp; Mahkota Emas</span>
               </div>
               <div class="drill-level-body">
-                Setiap slime Pipimon kecil di pulau kanan mewakili satu alternatif jadwal tugas. Pipimon yang memakai mahkota emas adalah bakteri dengan Makespan tercepat saat ini.
+                Setiap slime Pipimon kecil di pulau kanan mewakili satu alternatif jadwal tugas. Pipimon yang memakai
+                mahkota emas adalah bakteri dengan Makespan tercepat saat ini.
               </div>
             </div>
 
@@ -2221,9 +2647,12 @@
                 <span>Kemotaksis, Reproduksi, &amp; Diskritisasi SPV</span>
               </div>
               <div class="drill-level-body">
-                • <strong>Kemotaksis:</strong> Gabungan gerakan berenang terarah (swim) dan berguling acak (tumble) menuju gradien nutrisi.<br>
-                • <strong>Reproduksi:</strong> Separuh koloni dengan performa terburuk dieliminasi, separuh terbaik membelah diri.<br>
-                • <strong>SPV (Smallest Position Value):</strong> Metode pengurutan untuk memetakan koordinat renang kontinu ke penugasan tugas diskrit di VM.
+                • <strong>Kemotaksis:</strong> Gabungan gerakan berenang terarah (swim) dan berguling acak (tumble)
+                menuju gradien nutrisi.<br>
+                • <strong>Reproduksi:</strong> Separuh koloni dengan performa terburuk dieliminasi, separuh terbaik
+                membelah diri.<br>
+                • <strong>SPV (Smallest Position Value):</strong> Metode pengurutan untuk memetakan koordinat renang
+                kontinu ke penugasan tugas diskrit di VM.
               </div>
             </div>
 
@@ -2233,7 +2662,8 @@
                 <span>Kata Kunci Penilaian</span>
               </div>
               <div class="drill-level-body" style="background:#fffaf5;">
-                <strong>Kata Kunci:</strong> <em>Chemotaxis (Swim &amp; Tumble), Reproduction (Health Sort), Swarm Intelligence, SPV</em>.<br>
+                <strong>Kata Kunci:</strong> <em>Chemotaxis (Swim &amp; Tumble), Reproduction (Health Sort), Swarm
+                  Intelligence, SPV</em>.<br>
                 BFO adalah metode berbasis populasi yang mencari solusi bersama-sama secara gotong royong.
               </div>
             </div>
@@ -2242,12 +2672,17 @@
 
         <!-- KASUS 4: LOWER BOUND & GAP -->
         <div class="drill-case" id="drillCase3">
-          <div class="drill-q-box" style="background:#fffbeb; border:1px solid #fef3c7; border-left:5px solid #f59e0b; border-radius:14px; padding:16px 20px; margin-bottom:18px;">
+          <div class="drill-q-box"
+            style="background:#fffbeb; border:1px solid #fef3c7; border-left:5px solid #f59e0b; border-radius:14px; padding:16px 20px; margin-bottom:18px;">
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
-              <span style="font-size:11.5px; font-weight:800; color:#d97706; text-transform:uppercase;">Pertanyaan untuk Teman (Kasus 4)</span>
-              <a href="presentasi.html" target="_blank" style="font-size:11px; font-weight:700; color:#0369a1; text-decoration:none; background:#e0f2fe; padding:3px 8px; border-radius:6px;">📖 Tertera di Slide 2 &amp; 6 ↗</a>
+              <span style="font-size:11.5px; font-weight:800; color:#d97706; text-transform:uppercase;">Pertanyaan untuk
+                Teman (Kasus 4)</span>
+              <a href="presentasi.html" target="_blank"
+                style="font-size:11px; font-weight:700; color:#0369a1; text-decoration:none; background:#e0f2fe; padding:3px 8px; border-radius:6px;">📖
+                Tertera di Slide 2 &amp; 6 ↗</a>
             </div>
-            <div class="drill-q-text" style="font-size:16px; font-weight:800; color:#0f172a; line-height:1.45; margin-bottom:12px;">
+            <div class="drill-q-text"
+              style="font-size:16px; font-weight:800; color:#0f172a; line-height:1.45; margin-bottom:12px;">
               "Coba jelaskan lagi apa arti garis laser biru (Theoretical Lower Bound) di atas pulau!"
             </div>
             <div class="drill-actions">
@@ -2260,7 +2695,8 @@
             </div>
           </div>
 
-          <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+          <div
+            style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
             <span>💡</span> Panduan Bedah Bersama (Jika Teman Masih Bingung):
           </div>
 
@@ -2271,7 +2707,9 @@
                 <span>Analogi Rekor Dunia Fisika</span>
               </div>
               <div class="drill-level-body">
-                Seperti rekor dunia lari manusia yang dibatasi oleh hukum fisika. Garis laser biru adalah batas waktu tercepat yang mustahil ditembus, yaitu waktu jika semua mesin bekerja bersamaan nonstop tanpa ada sedetik pun waktu menganggur. Tidak ada algoritma di dunia yang bisa menembus ke bawah garis itu!
+                Seperti rekor dunia lari manusia yang dibatasi oleh hukum fisika. Garis laser biru adalah batas waktu
+                tercepat yang mustahil ditembus, yaitu waktu jika semua mesin bekerja bersamaan nonstop tanpa ada
+                sedetik pun waktu menganggur. Tidak ada algoritma di dunia yang bisa menembus ke bawah garis itu!
               </div>
             </div>
 
@@ -2281,7 +2719,9 @@
                 <span>Visual Optimality Gap</span>
               </div>
               <div class="drill-level-body">
-                Laser biru membentang melintang di atas seluruh pulau VM. Jarak vertikal antara puncak pulau tertinggi dengan garis laser ini disebut <strong>Optimality Gap</strong>. Semakin dekat pulau ke garis, semakin sempurna penjadwalannya!
+                Laser biru membentang melintang di atas seluruh pulau VM. Jarak vertikal antara puncak pulau tertinggi
+                dengan garis laser ini disebut <strong>Optimality Gap</strong>. Semakin dekat pulau ke garis, semakin
+                sempurna penjadwalannya!
               </div>
             </div>
 
@@ -2291,7 +2731,8 @@
                 <span>Formulasi Batas Bawah Teoretis Ideal</span>
               </div>
               <div class="drill-level-body">
-                L_ideal >= max( Tugas Terpanjang / Kecepatan Mesin Tercepat, Total Panjang Semua Tugas / Total Kecepatan Semua Mesin ).<br>
+                L_ideal >= max( Tugas Terpanjang / Kecepatan Mesin Tercepat, Total Panjang Semua Tugas / Total Kecepatan
+                Semua Mesin ).<br>
                 Batas bawah ini membuktikan secara matematis performa absolut klaster cloud.
               </div>
             </div>
@@ -2302,8 +2743,10 @@
                 <span>Kata Kunci Penilaian</span>
               </div>
               <div class="drill-level-body" style="background:#fffaf5;">
-                <strong>Kata Kunci:</strong> <em>Theoretical Lower Bound, Optimality Gap, Ground Truth, Dual Bound</em>.<br>
-                Garis laser berfungsi sebagai standar pembanding objektif untuk mengukur seberapa dekat hasil algoritma metaheuristik dengan kondisi sempurna.
+                <strong>Kata Kunci:</strong> <em>Theoretical Lower Bound, Optimality Gap, Ground Truth, Dual
+                  Bound</em>.<br>
+                Garis laser berfungsi sebagai standar pembanding objektif untuk mengukur seberapa dekat hasil algoritma
+                metaheuristik dengan kondisi sempurna.
               </div>
             </div>
           </div>
@@ -2312,7 +2755,7 @@
     </div>
   </div>
 
-  
+
   <!-- MODAL 1: STUDI ABLASI ILMIAH (30 RUNS PARITAS 600 NFE) -->
   <div id="ablation-overlay">
     <div class="hybrid-modal-card">
@@ -2321,24 +2764,31 @@
           <span>📊</span>
           <span>Laboratorium Riset: Studi Ablasi 30x Run (Paritas Anggaran 600 NFE)</span>
         </div>
-        <button id="btnCloseAblation" style="color:#ffffff; font-size:18px; font-weight:700; background:rgba(255,255,255,0.15); border-radius:8px; width:32px; height:32px; display:grid; place-items:center; cursor:pointer;">&times;</button>
+        <button id="btnCloseAblation"
+          style="color:#ffffff; font-size:18px; font-weight:700; background:rgba(255,255,255,0.15); border-radius:8px; width:32px; height:32px; display:grid; place-items:center; cursor:pointer;">&times;</button>
       </div>
 
-      <div style="background:#f8fafc; padding:12px 24px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+      <div
+        style="background:#f8fafc; padding:12px 24px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
         <div>
           <span style="font-size:13px; font-weight:700; color:#0f172a;">Protokol Eksperimen:</span>
-          <span style="font-size:12px; color:#64748b; margin-left:6px;">Dataset Minggu 3 (12 Tasks × 3 VMs) • 30 Run Independen • Paritas 600 Evaluasi Fungsi (NFE)</span>
+          <span style="font-size:12px; color:#64748b; margin-left:6px;">Dataset Minggu 3 (12 Tasks × 3 VMs) • 30 Run
+            Independen • Paritas 600 Evaluasi Fungsi (NFE)</span>
         </div>
-        <button id="btnRunLiveAblation" style="padding:8px 18px; border-radius:10px; background:#0284c7; color:#ffffff; font-weight:700; font-size:12px; display:inline-flex; align-items:center; gap:6px; cursor:pointer; box-shadow:0 2px 8px rgba(2,132,199,0.3);">
+        <button id="btnRunLiveAblation"
+          style="padding:8px 18px; border-radius:10px; background:#0284c7; color:#ffffff; font-weight:700; font-size:12px; display:inline-flex; align-items:center; gap:6px; cursor:pointer; box-shadow:0 2px 8px rgba(2,132,199,0.3);">
           <span>▶</span>
           <span>Jalankan Uji 30x Run Sekarang</span>
         </button>
       </div>
 
       <div class="hybrid-modal-body">
-        <div id="ablation-loading" style="display:none; text-align:center; padding:20px; background:#f0f9ff; border-radius:12px; border:1px solid #bae6fd;">
-          <div style="font-weight:700; color:#0369a1; font-size:14px; margin-bottom:6px;">⚙️ Menjalankan Simulasi 30x Run Monte Carlo di Web Worker...</div>
-          <div style="font-size:12px; color:#0284c7;">Menguji Heuristik Min-Min, VNS, BFO, Seeded-BFO, dan Memetic BFO-VNS secara paralel.</div>
+        <div id="ablation-loading"
+          style="display:none; text-align:center; padding:20px; background:#f0f9ff; border-radius:12px; border:1px solid #bae6fd;">
+          <div style="font-weight:700; color:#0369a1; font-size:14px; margin-bottom:6px;">⚙️ Menjalankan Simulasi 30x
+            Run Monte Carlo di Web Worker...</div>
+          <div style="font-size:12px; color:#0284c7;">Menguji Heuristik Min-Min, VNS, BFO, Seeded-BFO, dan Memetic
+            BFO-VNS secara paralel.</div>
         </div>
 
         <div id="ablation-results-container">
@@ -2411,16 +2861,23 @@
 
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px;">
             <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:12px 16px;">
-              <div style="font-weight:700; color:#166534; font-size:12.5px; margin-bottom:4px;">🎯 Analisis Keunggulan Sinergi (Sains Hibrida)</div>
+              <div style="font-weight:700; color:#166534; font-size:12.5px; margin-bottom:4px;">🎯 Analisis Keunggulan
+                Sinergi (Sains Hibrida)</div>
               <p style="font-size:11.5px; color:#15803d; line-height:1.5;">
-                Hybrid 1 (Memetic BFO-VNS) membuktikan prinsip <strong>1 + 1 &gt; 2</strong>: Swarm Pipimon menyediakan eksplorasi global luas untuk mencari cekungan minimum, sementara Shaking Kocorock (k=1..3) secara intensif meratakan beban pada pulau terberat (bottleneck VM). Standar deviasi turun drastis ke <strong>&plusmn;1.12s</strong>, menjamin hasil yang sangat konsisten di setiap run!
+                Hybrid 1 (Memetic BFO-VNS) membuktikan prinsip <strong>1 + 1 &gt; 2</strong>: Swarm Pipimon menyediakan
+                eksplorasi global luas untuk mencari cekungan minimum, sementara Shaking Kocorock (k=1..3) secara
+                intensif meratakan beban pada pulau terberat (bottleneck VM). Standar deviasi turun drastis ke
+                <strong>&plusmn;1.12s</strong>, menjamin hasil yang sangat konsisten di setiap run!
               </p>
             </div>
 
             <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px 16px;">
-              <div style="font-weight:700; color:#334155; font-size:12.5px; margin-bottom:4px;">📜 Formulasi Ilmiah Welch's t-test</div>
+              <div style="font-weight:700; color:#334155; font-size:12.5px; margin-bottom:4px;">📜 Formulasi Ilmiah
+                Welch's t-test</div>
               <p style="font-size:11.5px; color:#475569; line-height:1.5;">
-                Nilai <em>p-value</em> &lt; 0.001 membuktikan secara statistik bahwa penurunan Makespan dan Degree of Imbalance (DI) bukan merupakan kebetulan acak (fluke), melainkan dampak signifikan dari intervensi operator local search bertingkat.
+                Nilai <em>p-value</em> &lt; 0.001 membuktikan secara statistik bahwa penurunan Makespan dan Degree of
+                Imbalance (DI) bukan merupakan kebetulan acak (fluke), melainkan dampak signifikan dari intervensi
+                operator local search bertingkat.
               </p>
             </div>
           </div>
@@ -2437,7 +2894,8 @@
           <span>🎓</span>
           <span>Pusat Belajar Edukatif: Taksonomi El-Ghazali Talbi &amp; 5 Pola Hibrida Metaheuristik</span>
         </div>
-        <button id="btnCloseEduHub" style="color:#ffffff; font-size:18px; font-weight:700; background:rgba(255,255,255,0.15); border-radius:8px; width:32px; height:32px; display:grid; place-items:center; cursor:pointer;">&times;</button>
+        <button id="btnCloseEduHub"
+          style="color:#ffffff; font-size:18px; font-weight:700; background:rgba(255,255,255,0.15); border-radius:8px; width:32px; height:32px; display:grid; place-items:center; cursor:pointer;">&times;</button>
       </div>
 
       <!-- Navigation Tabs -->
@@ -2460,24 +2918,33 @@
         <!-- PANE 0: TAKSONOMI TALBI -->
         <div class="eduhub-pane active" id="eduhub-pane-0">
           <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:14px; padding:16px;">
-            <h4 style="color:#0369a1; font-size:14px; margin-bottom:6px;">Klasifikasi Hibridisasi El-Ghazali Talbi (2002 / 2009)</h4>
+            <h4 style="color:#0369a1; font-size:14px; margin-bottom:6px;">Klasifikasi Hibridisasi El-Ghazali Talbi (2002
+              / 2009)</h4>
             <p style="font-size:12px; color:#0284c7; line-height:1.6;">
-              Talbi membagi hibridisasi metaheuristik berdasarkan 3 dimensi ortogonal: <strong>Level of Hybridization</strong> (High-Level vs Low-Level), <strong>Execution Order</strong> (Relay vs Co-evolutionary), dan <strong>Architecture</strong> (Heterogeneous vs Homogeneous).
+              Talbi membagi hibridisasi metaheuristik berdasarkan 3 dimensi ortogonal: <strong>Level of
+                Hybridization</strong> (High-Level vs Low-Level), <strong>Execution Order</strong> (Relay vs
+              Co-evolutionary), dan <strong>Architecture</strong> (Heterogeneous vs Homogeneous).
             </p>
           </div>
 
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
             <div style="border:1px solid #e2e8f0; border-radius:12px; padding:14px;">
-              <h5 style="color:#0f766e; font-size:13px; font-weight:700; margin-bottom:6px;">🟢 Low-Level Relay Hybrid (LRH) — Hybrid 1 (Memetic BFO-VNS)</h5>
+              <h5 style="color:#0f766e; font-size:13px; font-weight:700; margin-bottom:6px;">🟢 Low-Level Relay Hybrid
+                (LRH) — Hybrid 1 (Memetic BFO-VNS)</h5>
               <p style="font-size:11.5px; color:#334155; line-height:1.5;">
-                Satu metaheuristik tertanam di dalam siklus internal metaheuristik lainnya. Pada Memetic BFO-VNS, mekanisme Shaking &amp; First-Improvement Descent VNS diinjeksikan langsung ke dalam fase kemotaksis bakteri elit BFO.
+                Satu metaheuristik tertanam di dalam siklus internal metaheuristik lainnya. Pada Memetic BFO-VNS,
+                mekanisme Shaking &amp; First-Improvement Descent VNS diinjeksikan langsung ke dalam fase kemotaksis
+                bakteri elit BFO.
               </p>
             </div>
 
             <div style="border:1px solid #e2e8f0; border-radius:12px; padding:14px;">
-              <h5 style="color:#b45309; font-size:13px; font-weight:700; margin-bottom:6px;">🟡 High-Level Relay Hybrid (HRH) — Hybrid 2 (Seeded BFO)</h5>
+              <h5 style="color:#b45309; font-size:13px; font-weight:700; margin-bottom:6px;">🟡 High-Level Relay Hybrid
+                (HRH) — Hybrid 2 (Seeded BFO)</h5>
               <p style="font-size:11.5px; color:#334155; line-height:1.5;">
-                Dua algoritma berjalan mandiri secara sekuensial (estafet). Algoritma heuristik deterministik (Min-Min / Max-Min) dieksekusi terlebih dahulu untuk menghasilkan solusi awal, lalu diinjeksikan sebagai seed koloni BFO.
+                Dua algoritma berjalan mandiri secara sekuensial (estafet). Algoritma heuristik deterministik (Min-Min /
+                Max-Min) dieksekusi terlebih dahulu untuk menghasilkan solusi awal, lalu diinjeksikan sebagai seed
+                koloni BFO.
               </p>
             </div>
           </div>
@@ -2493,41 +2960,60 @@
             <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:10px 14px;">
               <div style="display:flex; justify-content:space-between; align-items:center;">
                 <strong style="color:#991b1b; font-size:12px;">Pola A: Heuristik + Heuristik (DILARANG ❌)</strong>
-                <span style="font-size:10px; background:#fee2e2; color:#991b1b; font-weight:700; padding:2px 6px; border-radius:4px;">Tidak Memenuhi Syarat</span>
+                <span
+                  style="font-size:10px; background:#fee2e2; color:#991b1b; font-weight:700; padding:2px 6px; border-radius:4px;">Tidak
+                  Memenuhi Syarat</span>
               </div>
-              <p style="font-size:11px; color:#7f1d1d; margin-top:4px;">Hanya menggabungkan dua algoritma heuristik murni (misal Min-Min + Max-Min) tanpa komponen metaheuristik probabilistik.</p>
+              <p style="font-size:11px; color:#7f1d1d; margin-top:4px;">Hanya menggabungkan dua algoritma heuristik
+                murni (misal Min-Min + Max-Min) tanpa komponen metaheuristik probabilistik.</p>
             </div>
 
             <div style="background:#fffbeb; border:1px solid #fef3c7; border-radius:10px; padding:10px 14px;">
               <div style="display:flex; justify-content:space-between; align-items:center;">
-                <strong style="color:#b45309; font-size:12px;">Pola B: Heuristik &rarr; Metaheuristik (Hybrid 2 Kita: Seeded BFO ✅)</strong>
-                <span style="font-size:10px; background:#fde68a; color:#b45309; font-weight:700; padding:2px 6px; border-radius:4px;">HRH Sequential</span>
+                <strong style="color:#b45309; font-size:12px;">Pola B: Heuristik &rarr; Metaheuristik (Hybrid 2 Kita:
+                  Seeded BFO ✅)</strong>
+                <span
+                  style="font-size:10px; background:#fde68a; color:#b45309; font-weight:700; padding:2px 6px; border-radius:4px;">HRH
+                  Sequential</span>
               </div>
-              <p style="font-size:11px; color:#78350f; margin-top:4px;">Heuristik Min-Min menginjeksi titik awal berpotensi tinggi ke populasi bakteri Pipimon, menghindari proses cold-start acak.</p>
+              <p style="font-size:11px; color:#78350f; margin-top:4px;">Heuristik Min-Min menginjeksi titik awal
+                berpotensi tinggi ke populasi bakteri Pipimon, menghindari proses cold-start acak.</p>
             </div>
 
             <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:10px 14px;">
               <div style="display:flex; justify-content:space-between; align-items:center;">
                 <strong style="color:#166534; font-size:12px;">Pola C: Metaheuristik + Metaheuristik</strong>
-                <span style="font-size:10px; background:#dcfce7; color:#166534; font-weight:700; padding:2px 6px; border-radius:4px;">Co-evolutionary / Master-Slave</span>
+                <span
+                  style="font-size:10px; background:#dcfce7; color:#166534; font-weight:700; padding:2px 6px; border-radius:4px;">Co-evolutionary
+                  / Master-Slave</span>
               </div>
-              <p style="font-size:11px; color:#14532d; margin-top:4px;">Dua metaheuristik saling bertukar solusi terbaik pada sub-populasi (misal GA + PSO).</p>
+              <p style="font-size:11px; color:#14532d; margin-top:4px;">Dua metaheuristik saling bertukar solusi terbaik
+                pada sub-populasi (misal GA + PSO).</p>
             </div>
 
             <div style="background:#f0fdfa; border:1px solid #99f6e4; border-radius:10px; padding:10px 14px;">
               <div style="display:flex; justify-content:space-between; align-items:center;">
-                <strong style="color:#0f766e; font-size:12px;">Pola D: Metaheuristik + Local Search (Hybrid 1 Kita: Memetic BFO-VNS 🏆)</strong>
-                <span style="font-size:10px; background:#ccfbf1; color:#0f766e; font-weight:700; padding:2px 6px; border-radius:4px;">LRH Memetic</span>
+                <strong style="color:#0f766e; font-size:12px;">Pola D: Metaheuristik + Local Search (Hybrid 1 Kita:
+                  Memetic BFO-VNS 🏆)</strong>
+                <span
+                  style="font-size:10px; background:#ccfbf1; color:#0f766e; font-weight:700; padding:2px 6px; border-radius:4px;">LRH
+                  Memetic</span>
               </div>
-              <p style="font-size:11px; color:#134e4a; margin-top:4px;">Algoritma populasi global (BFO) dikombinasikan dengan pencari lokal bertingkat (VNS Shaking) untuk menyeimbangkan diversifikasi dan intensifikasi secara optimal.</p>
+              <p style="font-size:11px; color:#134e4a; margin-top:4px;">Algoritma populasi global (BFO) dikombinasikan
+                dengan pencari lokal bertingkat (VNS Shaking) untuk menyeimbangkan diversifikasi dan intensifikasi
+                secara optimal.</p>
             </div>
 
             <div style="background:#faf5ff; border:1px solid #e9d5ff; border-radius:10px; padding:10px 14px;">
               <div style="display:flex; justify-content:space-between; align-items:center;">
-                <strong style="color:#6b21a8; font-size:12px;">Pola E: Hyper-Heuristik (Heuristics to Choose Heuristics)</strong>
-                <span style="font-size:10px; background:#f3e8ff; color:#6b21a8; font-weight:700; padding:2px 6px; border-radius:4px;">Reinforcement Learning / Q-Learning</span>
+                <strong style="color:#6b21a8; font-size:12px;">Pola E: Hyper-Heuristik (Heuristics to Choose
+                  Heuristics)</strong>
+                <span
+                  style="font-size:10px; background:#f3e8ff; color:#6b21a8; font-weight:700; padding:2px 6px; border-radius:4px;">Reinforcement
+                  Learning / Q-Learning</span>
               </div>
-              <p style="font-size:11px; color:#581c87; margin-top:4px;">Tingkat atas menggunakan agen pembelajaran (Q-learning) untuk memilih operator heuristik tingkat rendah terbaik di setiap iterasi.</p>
+              <p style="font-size:11px; color:#581c87; margin-top:4px;">Tingkat atas menggunakan agen pembelajaran
+                (Q-learning) untuk memilih operator heuristik tingkat rendah terbaik di setiap iterasi.</p>
             </div>
           </div>
         </div>
@@ -2535,13 +3021,19 @@
         <!-- PANE 2: ARSITEKTUR MEMETIC BFO-VNS -->
         <div class="eduhub-pane" id="eduhub-pane-2">
           <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:12px; padding:14px;">
-            <h4 style="color:#0f172a; font-size:13px; font-weight:700; margin-bottom:8px;">Alur Kerja Sinergis Memetic BFO-VNS</h4>
+            <h4 style="color:#0f172a; font-size:13px; font-weight:700; margin-bottom:8px;">Alur Kerja Sinergis Memetic
+              BFO-VNS</h4>
             <div style="display:flex; flex-direction:column; gap:8px; font-size:12px; color:#334155; line-height:1.5;">
-              <div><strong>Tahap 1 (Eksplorasi Global):</strong> Koloni Pipimon mengeksekusi kemotaksis (Swim &amp; Tumble) untuk memindai seluruh topologi tugas dan mesin virtual.</div>
-              <div><strong>Tahap 2 (Ekstraksi Elit &amp; Deteksi Bottleneck):</strong> Bakteri dengan makespan terbaik diidentifikasi, lalu dicari pulau VM yang memegang beban komputasi terberat ($VM_{\max}$).</div>
-              <div><strong>Tahap 3 (Intensifikasi Lokal VNS):</strong> Kocorock mengeksekusi goncangan $k$-neighborhood ($k=1..3$) khusus memindahkan tugas dari pulau bottleneck ke pulau yang lebih lengang.</div>
-              <div><strong>Tahap 4 (Aturan Penerimaan):</strong> Jika makespan turun, solusi diperbarui dan radius $k \leftarrow 1$; jika stagnan, radius dinaikkan $k \leftarrow k+1$.</div>
-              <div><strong>Tahap 5 (Kelestarian Populasi):</strong> Siklus reproduksi menggandakan 50% koloni terbaik dan eliminasi-dispersi mencegah keterjebakan lokal.</div>
+              <div><strong>Tahap 1 (Eksplorasi Global):</strong> Koloni Pipimon mengeksekusi kemotaksis (Swim &amp;
+                Tumble) untuk memindai seluruh topologi tugas dan mesin virtual.</div>
+              <div><strong>Tahap 2 (Ekstraksi Elit &amp; Deteksi Bottleneck):</strong> Bakteri dengan makespan terbaik
+                diidentifikasi, lalu dicari pulau VM yang memegang beban komputasi terberat ($VM_{\max}$).</div>
+              <div><strong>Tahap 3 (Intensifikasi Lokal VNS):</strong> Kocorock mengeksekusi goncangan $k$-neighborhood
+                ($k=1..3$) khusus memindahkan tugas dari pulau bottleneck ke pulau yang lebih lengang.</div>
+              <div><strong>Tahap 4 (Aturan Penerimaan):</strong> Jika makespan turun, solusi diperbarui dan radius $k
+                \leftarrow 1$; jika stagnan, radius dinaikkan $k \leftarrow k+1$.</div>
+              <div><strong>Tahap 5 (Kelestarian Populasi):</strong> Siklus reproduksi menggandakan 50% koloni terbaik
+                dan eliminasi-dispersi mencegah keterjebakan lokal.</div>
             </div>
           </div>
         </div>
@@ -2549,11 +3041,19 @@
         <!-- PANE 3: RUBRIK SIDANG -->
         <div class="eduhub-pane" id="eduhub-pane-3">
           <div style="background:#fdf4ff; border:1px solid #f5d0fe; border-radius:12px; padding:14px;">
-            <h4 style="color:#86198f; font-size:13px; font-weight:700; margin-bottom:6px;">🎯 Rubrik Evaluasi &amp; Kunci Jawaban Sidang Dosen</h4>
-            <div style="display:flex; flex-direction:column; gap:8px; font-size:11.5px; color:#701a75; line-height:1.5;">
-              <div>• <strong>Mengapa Harus Hibridisasi?</strong> Karena <em>No Free Lunch Theorem</em>. Algoritma murni memiliki kompromi: BFO lambat pada konvergensi lokal, sedangkan VNS rentan terjebak pada cekungan optimum lokal yang sempit. Penggabungan keduanya saling melengkapi secara sinergis.</div>
-              <div>• <strong>Prinsip Fair Benchmark:</strong> Evaluasi wajib dihentikan pada anggaran evaluasi yang sama persis (NFE = 600), bukan sekadar jumlah generasi luar, karena satu generasi BFO mengevaluasi $P \times S$ kali lebih banyak daripada satu langkah VNS.</div>
-              <div>• <strong>Uji Ablasi Wajib:</strong> Menunjukkan komparasi lengkap antara Hybrid vs Komponen Tunggalnya (Hybrid BFO-VNS vs BFO murni vs VNS murni vs Heuristik Min-Min) dengan minimal 10 kali run (kita sediakan 30 run) disertai Mean &plusmn; Std Dev.</div>
+            <h4 style="color:#86198f; font-size:13px; font-weight:700; margin-bottom:6px;">🎯 Rubrik Evaluasi &amp;
+              Kunci Jawaban Sidang Dosen</h4>
+            <div
+              style="display:flex; flex-direction:column; gap:8px; font-size:11.5px; color:#701a75; line-height:1.5;">
+              <div>• <strong>Mengapa Harus Hibridisasi?</strong> Karena <em>No Free Lunch Theorem</em>. Algoritma murni
+                memiliki kompromi: BFO lambat pada konvergensi lokal, sedangkan VNS rentan terjebak pada cekungan
+                optimum lokal yang sempit. Penggabungan keduanya saling melengkapi secara sinergis.</div>
+              <div>• <strong>Prinsip Fair Benchmark:</strong> Evaluasi wajib dihentikan pada anggaran evaluasi yang sama
+                persis (NFE = 600), bukan sekadar jumlah generasi luar, karena satu generasi BFO mengevaluasi $P \times
+                S$ kali lebih banyak daripada satu langkah VNS.</div>
+              <div>• <strong>Uji Ablasi Wajib:</strong> Menunjukkan komparasi lengkap antara Hybrid vs Komponen
+                Tunggalnya (Hybrid BFO-VNS vs BFO murni vs VNS murni vs Heuristik Min-Min) dengan minimal 10 kali run
+                (kita sediakan 30 run) disertai Mean &plusmn; Std Dev.</div>
             </div>
           </div>
         </div>
@@ -2562,7 +3062,7 @@
   </div>
 
   <!-- BUNDLE SCRIPT (Mendukung offline file:/// maupun http server) -->
-  
+
   <!-- ==========================================
        MODAL GAME EDUKATIF: CLOUD DISPATCHER CHALLENGE
        ========================================== -->
@@ -2573,10 +3073,13 @@
           <span style="font-size:24px;">🎮</span>
           <div>
             <div>Tantangan Cloud Dispatcher: Taklukkan Bottleneck!</div>
-            <div style="font-size:12px; font-weight:500; opacity:0.85;">Alokasikan 10 tugas ke 3 VM Heterogen & Buktikan Solusi Anda vs 5 Algoritma Cerdas!</div>
+            <div style="font-size:12px; font-weight:500; opacity:0.85;">Alokasikan 10 tugas ke 3 VM Heterogen & Buktikan
+              Solusi Anda vs 5 Algoritma Cerdas!</div>
           </div>
         </div>
-        <button id="btnCloseGame" style="background:rgba(255,255,255,0.2); border:none; color:#ffffff; font-size:16px; font-weight:700; width:34px; height:34px; border-radius:10px; cursor:pointer;" title="Tutup Game [G]">✕</button>
+        <button id="btnCloseGame"
+          style="background:rgba(255,255,255,0.2); border:none; color:#ffffff; font-size:16px; font-weight:700; width:34px; height:34px; border-radius:10px; cursor:pointer;"
+          title="Tutup Game [G]">✕</button>
       </div>
 
       <!-- Live Metric HUD -->
@@ -2617,7 +3120,8 @@
 
       <!-- Action Toolbar -->
       <div class="game-toolbar">
-        <button id="btnGameTestAI" class="game-btn-primary" title="Uji solusi Anda melawan Min-Min, VNS, BFO, PSO-MinMin, dan BFO-VNS!">
+        <button id="btnGameTestAI" class="game-btn-primary"
+          title="Uji solusi Anda melawan Min-Min, VNS, BFO, PSO-MinMin, dan BFO-VNS!">
           <span>⚔️</span>
           <span>Uji vs 5 Algoritma AI</span>
         </button>
@@ -2648,31 +3152,42 @@
     </div>
   </div>
 
-  
+  <script src="./src/bundle.js"></script>
 
 
   <!-- FIRST-PERSON POV HUD OVERLAY -->
-  <div id="pov-hud" style="display:none; position:fixed; inset:0; pointer-events:none; z-index:45;">
+  <div id="pov-hud" style="display:block; position:fixed; inset:0; pointer-events:none; z-index:45;">
     <!-- Crosshair Reticle -->
-    <div id="pov-crosshair" style="position:absolute; top:50%; left:50%; width:18px; height:18px; transform:translate(-50%, -50%); border:1.5px solid rgba(255,255,255,0.7); border-radius:50%; box-shadow:0 0 8px rgba(0,0,0,0.6);">
-      <div style="position:absolute; top:50%; left:50%; width:4px; height:4px; transform:translate(-50%, -50%); background:#f59e0b; border-radius:50%;"></div>
+    <div id="pov-crosshair"
+      style="position:absolute; top:50%; left:50%; width:18px; height:18px; transform:translate(-50%, -50%); border:1.5px solid rgba(255,255,255,0.7); border-radius:50%; box-shadow:0 0 8px rgba(0,0,0,0.6);">
+      <div
+        style="position:absolute; top:50%; left:50%; width:4px; height:4px; transform:translate(-50%, -50%); background:#f59e0b; border-radius:50%;">
+      </div>
     </div>
 
     <!-- Proximity Inspection Card -->
-    <div id="pov-proximity-box" style="display:none; position:absolute; top:88px; left:50%; transform:translateX(-50%); background:rgba(15, 23, 42, 0.94); backdrop-filter:blur(12px); padding:12px 22px; border-radius:16px; border:1.5px solid #f59e0b; box-shadow:0 12px 36px rgba(0,0,0,0.65); max-width:520px; text-align:center; pointer-events:auto; color:#ffffff;">
+    <div id="pov-proximity-box"
+      style="display:none; position:absolute; top:88px; left:50%; transform:translateX(-50%); background:rgba(15, 23, 42, 0.94); backdrop-filter:blur(12px); padding:12px 22px; border-radius:16px; border:1.5px solid #f59e0b; box-shadow:0 12px 36px rgba(0,0,0,0.65); max-width:520px; text-align:center; pointer-events:auto; color:#ffffff;">
     </div>
 
     <!-- Bottom Instructions Pill -->
-    <div style="position:absolute; bottom:28px; left:50%; transform:translateX(-50%); background:rgba(15, 23, 42, 0.92); backdrop-filter:blur(10px); padding:8px 18px; border-radius:24px; border:1px solid rgba(245, 158, 11, 0.5); box-shadow:0 8px 30px rgba(0,0,0,0.55); display:flex; align-items:center; gap:14px; font-size:12px; color:#e2e8f0; pointer-events:auto;">
-      <span style="display:inline-flex; align-items:center; gap:5px;"><b style="color:#f59e0b; font-size:13px;">W A S D</b> Berjalan</span>
+    <div
+      style="position:absolute; bottom:28px; left:50%; transform:translateX(-50%); background:rgba(15, 23, 42, 0.92); backdrop-filter:blur(10px); padding:8px 18px; border-radius:24px; border:1px solid rgba(245, 158, 11, 0.5); box-shadow:0 8px 30px rgba(0,0,0,0.55); display:flex; align-items:center; gap:14px; font-size:12px; color:#e2e8f0; pointer-events:auto;">
+      <span style="display:inline-flex; align-items:center; gap:5px;"><b style="color:#f59e0b; font-size:13px;">W A S
+          D</b> Berjalan</span>
       <span style="color:#64748b;">•</span>
-      <span style="display:inline-flex; align-items:center; gap:5px;"><b style="color:#f59e0b; font-size:13px;">Mouse</b> Melihat (Klik untuk Kunci Kursor)</span>
+      <span style="display:inline-flex; align-items:center; gap:5px;"><b
+          style="color:#f59e0b; font-size:13px;">Mouse</b> Melihat (Klik untuk Kunci Kursor)</span>
       <span style="color:#64748b;">•</span>
-      <span style="display:inline-flex; align-items:center; gap:5px;"><b style="color:#f59e0b; font-size:13px;">Shift</b> Lari</span>
+      <span style="display:inline-flex; align-items:center; gap:5px;"><b
+          style="color:#f59e0b; font-size:13px;">Shift</b> Lari</span>
       <span style="color:#64748b;">•</span>
-      <span style="display:inline-flex; align-items:center; gap:5px;"><b style="color:#f59e0b; font-size:13px;">Spasi</b> Lompat</span>
+      <span style="display:inline-flex; align-items:center; gap:5px;"><b
+          style="color:#f59e0b; font-size:13px;">Spasi</b> Lompat</span>
       <span style="color:#64748b;">•</span>
-      <button id="btnClosePOV" style="background:#ef4444; color:#ffffff; border:none; padding:4px 12px; border-radius:14px; font-weight:700; font-size:11px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; box-shadow:0 2px 8px rgba(239,68,68,0.4);" title="Keluar dari POV [V / Esc]">
+      <button id="btnClosePOV"
+        style="background:#ef4444; color:#ffffff; border:none; padding:4px 12px; border-radius:14px; font-weight:700; font-size:11px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; box-shadow:0 2px 8px rgba(239,68,68,0.4);"
+        title="Keluar dari POV [V / Esc]">
         <span>✕ Keluar POV [V]</span>
       </button>
     </div>
@@ -2682,22 +3197,32 @@
   <!-- ============================================================== -->
   <!-- 1. ABYSSAL WELCOME GATE (ENTRY WITH LAVA THEME & ELEVENLABS SCRIPT) -->
   <!-- ============================================================== -->
-  <div id="abyssal-welcome-gate" onclick="if(event.target.id==='abyssal-welcome-gate') window.enterAbyssalDirectly ? window.enterAbyssalDirectly() : null" style="position:fixed; inset:0; z-index:120; background:radial-gradient(circle at 50% 40%, #1f0f08 0%, #0a0503 100%); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:24px; color:#ffffff; transition:opacity 0.6s ease; pointer-events:auto;">
-    <div style="font-size:12px; font-weight:800; letter-spacing:4px; color:#f59e0b; text-transform:uppercase; margin-bottom:10px; display:flex; align-items:center; gap:8px;">
-      <span style="font-size:16px;">🌊</span> KEDALAMAN 11.000 METER DI BAWAH LAUT <span style="font-size:16px;">🌋</span>
+  <div id="abyssal-welcome-gate"
+    style="position:fixed; inset:0; z-index:120; background:radial-gradient(circle at 50% 40%, rgba(35,16,10,0.88) 0%, rgba(10,5,3,0.98) 100%); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:24px; color:#ffffff; transition:opacity 0.8s ease, transform 0.8s ease;">
+    <div
+      style="font-size:12px; font-weight:800; letter-spacing:4px; color:#f59e0b; text-transform:uppercase; margin-bottom:10px; display:flex; align-items:center; gap:8px;">
+      <span style="font-size:16px;">🌊</span> KEDALAMAN 11.000 METER DI BAWAH LAUT <span
+        style="font-size:16px;">🌋</span>
     </div>
-    <h1 style="font-size:clamp(26px, 5vw, 46px); font-weight:900; color:#fb923c; margin:0 0 14px; text-shadow:0 4px 18px rgba(0,0,0,0.9);">
+    <h1
+      style="font-size:clamp(26px, 5vw, 46px); font-weight:900; background:linear-gradient(135deg, #fef08a 0%, #f97316 45%, #38bdf8 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin:0 0 14px; text-shadow:0 0 40px rgba(249,115,22,0.5);">
       ABYSSAL GRID 3D: SINTESIS HIBRIDA
     </h1>
-    <div style="background:#18181b; border:2px solid #57534e; border-radius:12px; padding:14px 22px; max-width:620px; margin-bottom:28px; box-shadow:0 8px 32px rgba(0,0,0,0.7);">
-      <p style="font-size:13.5px; color:#e2e8f0; line-height:1.6; margin:0; font-style:italic;">
-        <span style="color:#f59e0b; font-weight:700;">[whispering]</span> Kedalaman sebelas ribu meter di bawah laut. <span style="color:#38bdf8; font-weight:700;">[mysterious]</span> Selamat datang di markas Abyssal Grid Three-D!<br>
-        <span style="color:#a1a1aa; font-size:12px; font-style:normal;">Dua penguasa palung—<b>Magma-Kocorock (VNS)</b> dan <b>Aqua-Pipimon (BFO)</b>—menunggumu di dalam kastil.</span>
+    <div
+      style="background:rgba(15, 23, 42, 0.7); border:1px solid rgba(245, 158, 11, 0.35); border-radius:16px; padding:12px 20px; max-width:620px; margin-bottom:24px; box-shadow:0 8px 30px rgba(0,0,0,0.4);">
+      <p style="font-size:13.5px; color:#cbd5e1; line-height:1.6; margin:0; font-style:italic;">
+        <span style="color:#f59e0b; font-weight:700;">[whispering]</span> Kedalaman sebelas ribu meter di bawah laut.
+        <span style="color:#38bdf8; font-weight:700;">[mysterious]</span> Selamat datang di markas Abyssal Grid
+        Three-D!<br>
+        <span style="color:#94a3b8; font-size:12px; font-style:normal;">Dua penguasa palung—<b>Magma-Kocorock (VNS)</b>
+          dan <b>Aqua-Pipimon (BFO)</b>—menunggumu di dalam kastil.</span>
       </p>
     </div>
-    <button id="btnEnterAbyssal" class="stone-magma" onclick="window.enterAbyssalDirectly ? window.enterAbyssalDirectly() : null" style="position:relative; z-index:130; pointer-events:auto; padding:18px 48px; font-size:16px; border-radius:12px; box-shadow:0 6px 0 #431407, 0 12px 30px rgba(0,0,0,0.85); display:inline-flex; align-items:center; gap:12px; cursor:pointer;" title="Klik atau tekan [Enter / Spasi] untuk Masuk">
+    <button id="btnEnterAbyssal" class="stone-magma"
+      onclick="window.enterAbyssalDirectly ? window.enterAbyssalDirectly() : (document.getElementById('abyssal-welcome-gate').style.display='none')"
+      style="padding:16px 40px; font-size:15.5px; border-radius:14px; cursor:pointer; display:flex; align-items:center; gap:12px;">
       <span style="font-size:22px;">🌋</span>
-      <span>Masuk ke Markas Abyssal (Putar Musik Lava)</span>
+      <span style="letter-spacing:0.5px;">Masuk ke Markas Abyssal (Putar Musik Lava)</span>
       <span style="font-size:22px;">🔊</span>
     </button>
   </div>
@@ -2705,10 +3230,12 @@
   <!-- ============================================================== -->
   <!-- 1.5 CINEMATIC PROLOGUE DIALOGUE BANNER (ELEVENLABS AUDIO SYNC) -->
   <!-- ============================================================== -->
-  <div id="prologue-dialog-box" style="display:none; position:fixed; bottom:32px; left:50%; transform:translateX(-50%); z-index:115; width:min(720px, 94vw); background:rgba(15, 23, 42, 0.95); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border:1.5px solid rgba(56, 189, 248, 0.5); border-radius:20px; box-shadow:0 20px 50px rgba(0,0,0,0.85), 0 0 30px rgba(56,189,248,0.25); padding:16px 22px; color:#ffffff; transition:opacity 0.4s ease, transform 0.4s ease;">
+  <div id="prologue-dialog-box"
+    style="display:none; position:fixed; bottom:32px; left:50%; transform:translateX(-50%); z-index:115; width:min(720px, 94vw); background:rgba(15, 23, 42, 0.95); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border:1.5px solid rgba(56, 189, 248, 0.5); border-radius:20px; box-shadow:0 20px 50px rgba(0,0,0,0.85), 0 0 30px rgba(56,189,248,0.25); padding:16px 22px; color:#ffffff; transition:opacity 0.4s ease, transform 0.4s ease;">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
       <div style="display:flex; align-items:center; gap:10px;">
-        <div id="prologue-avatar" style="width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg, #0284c7 0%, #38bdf8 100%); display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 0 12px rgba(56,189,248,0.5); flex-shrink:0;">
+        <div id="prologue-avatar"
+          style="width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg, #0284c7 0%, #38bdf8 100%); display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 0 12px rgba(56,189,248,0.5); flex-shrink:0;">
           🎙️
         </div>
         <div>
@@ -2721,40 +3248,57 @@
           </div>
         </div>
       </div>
-      <button id="btnSkipPrologue" style="padding:5px 14px; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.22); border-radius:10px; color:#cbd5e1; font-size:11.5px; font-weight:700; cursor:pointer;" title="Lewati dialog langsung ke tawaran tur">
+      <button id="btnSkipPrologue"
+        style="padding:5px 14px; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.22); border-radius:10px; color:#cbd5e1; font-size:11.5px; font-weight:700; cursor:pointer;"
+        title="Lewati dialog langsung ke tawaran tur">
         Lewati Prolog ❯❯
       </button>
     </div>
-    <div id="prologue-text" style="font-size:13.5px; line-height:1.6; color:#f1f5f9; font-style:italic; padding:6px 0; min-height:44px;">
-      "Kedalaman sebelas ribu meter di bawah laut. Di antara rekahan palung magma dan samudera abadi. Selamat datang di markas Abyssal Grid Three-D!"
+    <div id="prologue-text"
+      style="font-size:13.5px; line-height:1.6; color:#f1f5f9; font-style:italic; padding:6px 0; min-height:44px;">
+      "Kedalaman sebelas ribu meter di bawah laut. Di antara rekahan palung magma dan samudera abadi. Selamat datang di
+      markas Abyssal Grid Three-D!"
     </div>
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; border-top:1px solid rgba(255,255,255,0.08); padding-top:6px; font-size:11px; color:#64748b;">
+    <div
+      style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; border-top:1px solid rgba(255,255,255,0.08); padding-top:6px; font-size:11px; color:#64748b;">
       <span id="prologue-step-indicator" style="color:#f59e0b; font-weight:700;">Bagian 1 dari 3</span>
-      <span style="color:#38bdf8; display:flex; align-items:center; gap:5px;"><span>🔊</span> Suara Asli ElevenLabs Aktif</span>
+      <span style="color:#38bdf8; display:flex; align-items:center; gap:5px;"><span>🔊</span> Suara Asli ElevenLabs
+        Aktif</span>
     </div>
   </div>
 
   <!-- ============================================================== -->
   <!-- 2. TOUR INVITATION MODAL (APPROACHING NPC DIALOGUE) -->
   <!-- ============================================================== -->
-  <div id="tour-invitation-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:110; width:min(560px, 92vw); background:rgba(15, 23, 42, 0.96); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border:2px solid #38bdf8; border-radius:24px; box-shadow:0 24px 64px rgba(0,0,0,0.85), 0 0 35px rgba(56,189,248,0.35); padding:24px; color:#ffffff; text-align:center;">
+  <div id="tour-invitation-modal"
+    style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:110; width:min(560px, 92vw); background:rgba(15, 23, 42, 0.96); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border:2px solid #38bdf8; border-radius:24px; box-shadow:0 24px 64px rgba(0,0,0,0.85), 0 0 35px rgba(56,189,248,0.35); padding:24px; color:#ffffff; text-align:center;">
     <div style="display:flex; justify-content:center; align-items:center; gap:14px; margin-bottom:12px;">
-      <div style="width:50px; height:50px; border-radius:50%; background:radial-gradient(circle, #38bdf8 0%, #0284c7 100%); display:flex; align-items:center; justify-content:center; font-size:26px; box-shadow:0 0 16px rgba(56,189,248,0.6);">💧</div>
-      <div style="width:50px; height:50px; border-radius:50%; background:radial-gradient(circle, #f59e0b 0%, #ea580c 100%); display:flex; align-items:center; justify-content:center; font-size:26px; box-shadow:0 0 16px rgba(245,158,11,0.6);">🌋</div>
+      <div
+        style="width:50px; height:50px; border-radius:50%; background:radial-gradient(circle, #38bdf8 0%, #0284c7 100%); display:flex; align-items:center; justify-content:center; font-size:26px; box-shadow:0 0 16px rgba(56,189,248,0.6);">
+        💧</div>
+      <div
+        style="width:50px; height:50px; border-radius:50%; background:radial-gradient(circle, #f59e0b 0%, #ea580c 100%); display:flex; align-items:center; justify-content:center; font-size:26px; box-shadow:0 0 16px rgba(245,158,11,0.6);">
+        🌋</div>
     </div>
-    <div style="font-size:11px; font-weight:800; color:#38bdf8; letter-spacing:2px; text-transform:uppercase;">PANGGILAN DARI PENGUASA PALUNG</div>
+    <div style="font-size:11px; font-weight:800; color:#38bdf8; letter-spacing:2px; text-transform:uppercase;">PANGGILAN
+      DARI PENGUASA PALUNG</div>
     <h3 style="font-size:18px; font-weight:800; color:#ffffff; margin:4px 0 10px;">
       Tawaran Tur Eksplorasi Abyssal Grid
     </h3>
-    <div style="background:rgba(2, 132, 199, 0.12); border:1px solid rgba(56, 189, 248, 0.3); border-radius:14px; padding:12px 16px; margin-bottom:18px; text-align:left; font-size:12.5px; line-height:1.55; color:#e2e8f0;">
-      <p style="margin:0 0 6px;"><b style="color:#38bdf8;">💧 Aqua-Pipimon:</b> <i>"Maukah kamu ikut tur pembelajaran eksklusif bersama kami? Kami punya ruang teater holografik raksasa di dalam!"</i></p>
-      <p style="margin:0;"><b style="color:#f59e0b;">🌋 Magma-Kocorock:</b> <i>"Di sana, kami berdua akan menjadi gurumu, lengkap dengan layar bioskop interaktif dan mini-game seru! Ayo, tekan tombol Ikuti Tur sekarang!"</i></p>
+    <div
+      style="background:rgba(2, 132, 199, 0.12); border:1px solid rgba(56, 189, 248, 0.3); border-radius:14px; padding:12px 16px; margin-bottom:18px; text-align:left; font-size:12.5px; line-height:1.55; color:#e2e8f0;">
+      <p style="margin:0 0 6px;"><b style="color:#38bdf8;">💧 Aqua-Pipimon:</b> <i>"Maukah kamu ikut tur pembelajaran
+          eksklusif bersama kami? Kami punya ruang teater holografik raksasa di dalam!"</i></p>
+      <p style="margin:0;"><b style="color:#f59e0b;">🌋 Magma-Kocorock:</b> <i>"Di sana, kami berdua akan menjadi
+          gurumu, lengkap dengan layar bioskop interaktif dan mini-game seru! Ayo, tekan tombol Ikuti Tur sekarang!"</i>
+      </p>
     </div>
     <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-      <button id="btnAcceptTour" class="stone-ocean" style="padding:14px 28px; font-size:13.5px; border-radius:10px;">
+      <button id="btnAcceptTour" class="stone-ocean" style="padding:12px 26px; font-size:13.5px; border-radius:12px; display:inline-flex; align-items:center; gap:8px;">
         <span>🚀 Ikuti Tur Teater Bersama Kami</span>
       </button>
-      <button id="btnDeclineTour" class="btn-stone" style="padding:14px 24px; font-size:13.5px; border-radius:10px;">
+      <button id="btnDeclineTour"
+        style="padding:12px 20px; background:rgba(255,255,255,0.1); color:#cbd5e1; font-weight:700; font-size:13px; border:1px solid rgba(255,255,255,0.22); border-radius:14px; cursor:pointer;">
         <span>🚶 Jelajah Bebas di Kastil</span>
       </button>
     </div>
@@ -2763,13 +3307,20 @@
   <!-- ============================================================== -->
   <!-- 3. CUTSCENE WARP TRANSITION OVERLAY (SCENE 2 TELEPORTATION) -->
   <!-- ============================================================== -->
-  <div id="cutscene-overlay" style="position:fixed; inset:0; z-index:115; background:radial-gradient(circle at 50% 50%, rgba(10,5,20,0.95) 0%, rgba(2,1,5,0.98) 100%); opacity:0; pointer-events:none; transition:opacity 0.6s ease; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:#ffffff; padding:24px;">
-    <div style="width:90px; height:90px; border:4px solid transparent; border-top-color:#38bdf8; border-bottom-color:#f59e0b; border-left-color:#a855f7; border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:20px; box-shadow:0 0 45px rgba(56,189,248,0.7);"></div>
-    <div style="font-size:11px; font-weight:800; letter-spacing:3px; color:#f59e0b; text-transform:uppercase; margin-bottom:6px;">PROTOKOL WARP PORTAL AKTIF</div>
-    <div style="font-size:clamp(18px, 4vw, 24px); font-weight:900; background:linear-gradient(135deg, #38bdf8 0%, #fef08a 50%, #f97316 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:14px;">
+  <div id="cutscene-overlay"
+    style="position:fixed; inset:0; z-index:115; background:radial-gradient(circle at 50% 50%, rgba(10,5,20,0.95) 0%, rgba(2,1,5,0.98) 100%); opacity:0; pointer-events:none; transition:opacity 0.6s ease; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:#ffffff; padding:24px;">
+    <div
+      style="width:90px; height:90px; border:4px solid transparent; border-top-color:#38bdf8; border-bottom-color:#f59e0b; border-left-color:#a855f7; border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:20px; box-shadow:0 0 45px rgba(56,189,248,0.7);">
+    </div>
+    <div
+      style="font-size:11px; font-weight:800; letter-spacing:3px; color:#f59e0b; text-transform:uppercase; margin-bottom:6px;">
+      PROTOKOL WARP PORTAL AKTIF</div>
+    <div
+      style="font-size:clamp(18px, 4vw, 24px); font-weight:900; background:linear-gradient(135deg, #38bdf8 0%, #fef08a 50%, #f97316 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:14px;">
       MEMASUKI AUDITORIUM TEATER HOLOGRAFIK
     </div>
-    <div style="background:rgba(15,23,42,0.8); border:1px solid rgba(56,189,248,0.4); border-radius:14px; padding:10px 18px; max-width:580px; margin-bottom:18px; box-shadow:0 10px 30px rgba(0,0,0,0.6);">
+    <div
+      style="background:rgba(15,23,42,0.8); border:1px solid rgba(56,189,248,0.4); border-radius:14px; padding:10px 18px; max-width:580px; margin-bottom:18px; box-shadow:0 10px 30px rgba(0,0,0,0.6);">
       <p id="cutscene-subtitle" style="font-size:13px; color:#e2e8f0; font-style:italic; margin:0; line-height:1.6;">
         "Menginisiasi protokol teleportasi... Memasuki Auditorium Holografik Abyssal."
       </p>
@@ -2779,7 +3330,8 @@
         <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#10b981;"></span>
         <span>Suara Narator ElevenLabs Aktif</span>
       </span>
-      <button id="btnSkipCutscene" style="padding:5px 14px; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); border-radius:10px; color:#cbd5e1; font-size:11.5px; font-weight:700; cursor:pointer;">
+      <button id="btnSkipCutscene"
+        style="padding:5px 14px; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); border-radius:10px; color:#cbd5e1; font-size:11.5px; font-weight:700; cursor:pointer;">
         Lewati Cutscene ❯❯
       </button>
     </div>
@@ -2788,17 +3340,21 @@
   <!-- ============================================================== -->
   <!-- 4. HOLOGRAPHIC CLASSROOM CINEMA THEATER (BIG SCREEN & TEACHERS) -->
   <!-- ============================================================== -->
-  <div id="theater-overlay" style="position:fixed; inset:0; z-index:90; background:rgba(8, 4, 12, 0.95); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); display:none; flex-direction:column; overflow-y:auto; padding:16px 20px; color:#ffffff;">
-    
+  <div id="theater-overlay"
+    style="position:fixed; inset:0; z-index:90; background:rgba(8, 4, 12, 0.95); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); display:none; flex-direction:column; overflow-y:auto; padding:16px 20px; color:#ffffff;">
+
     <!-- Theater Top Header -->
-    <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.12); padding-bottom:12px; margin-bottom:14px;">
+    <div
+      style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.12); padding-bottom:12px; margin-bottom:14px;">
       <div style="display:flex; align-items:center; gap:12px;">
         <span style="font-size:24px;">🏛️</span>
         <div>
-          <div style="font-size:16px; font-weight:800; background:linear-gradient(135deg, #fef08a 0%, #f97316 50%, #38bdf8 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
+          <div
+            style="font-size:16px; font-weight:800; background:linear-gradient(135deg, #fef08a 0%, #f97316 50%, #38bdf8 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
             TEATER HOLOGRAFIK ABYSSAL GRID 3D
           </div>
-          <div style="font-size:11.5px; color:#94a3b8;">Ruang Kuliah Komputasi Heterogen • Dosen Pembimbing: Magma-Kocorock &amp; Aqua-Pipimon</div>
+          <div style="font-size:11.5px; color:#94a3b8;">Ruang Kuliah Komputasi Heterogen • Dosen Pembimbing:
+            Magma-Kocorock &amp; Aqua-Pipimon</div>
         </div>
       </div>
       <div style="display:flex; align-items:center; gap:10px;">
@@ -2973,50 +3529,11 @@
 
         <!-- Mascot Avatar Figure (SVG with mouth flap & blinking eyes) -->
         <div class="mascot-figure-wrapper" style="width:130px; height:130px; margin:0 auto 10px; position:relative; display:flex; align-items:center; justify-content:center;">
-          <svg class="mascot-svg golem-svg" viewBox="0 0 120 120" width="120" height="120">
-            <defs>
-              <radialGradient id="kocoCoreGlow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="#fdba74"/>
-                <stop offset="60%" stop-color="#ea580c"/>
-                <stop offset="100%" stop-color="#7c2d12"/>
-              </radialGradient>
-              <filter id="kocoGlow">
-                <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
-                <feMerge>
-                  <feMergeNode in="coloredBlur"/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            </defs>
-            <!-- Aura/Ring -->
-            <circle cx="60" cy="60" r="54" fill="none" stroke="#ea580c" stroke-width="2" opacity="0.3" class="mascot-pulse-ring"/>
-            <!-- Rock Golem Body Base -->
-            <polygon points="30,45 60,25 90,45 98,85 60,105 22,85" fill="#292524" stroke="#44403c" stroke-width="3"/>
-            <!-- Molten Magma Core Veins -->
-            <path d="M40,55 Q60,75 80,55 Q60,95 40,55" fill="url(#kocoCoreGlow)" filter="url(#kocoGlow)" opacity="0.85"/>
-            <!-- Stone Shoulder Plates -->
-            <polygon points="12,50 30,42 26,75 10,70" fill="#1c1917" stroke="#ea580c" stroke-width="1.5"/>
-            <polygon points="108,50 90,42 94,75 110,70" fill="#1c1917" stroke="#ea580c" stroke-width="1.5"/>
-            <!-- Obsidian Brow -->
-            <polygon points="35,42 60,35 85,42 78,50 60,46 42,50" fill="#0c0a09" stroke="#78716c" stroke-width="1.5"/>
-            <!-- Blinking Glowing Eyes -->
-            <g class="mascot-eyes">
-              <ellipse cx="46" cy="52" rx="6" ry="7" fill="#fef08a" filter="url(#kocoGlow)"/>
-              <ellipse cx="74" cy="52" rx="6" ry="7" fill="#fef08a" filter="url(#kocoGlow)"/>
-              <ellipse cx="46" cy="52" rx="2" ry="4" fill="#ea580c"/>
-              <ellipse cx="74" cy="52" rx="2" ry="4" fill="#ea580c"/>
-            </g>
-            <!-- Mouth / Jaw that flaps when speaking -->
-            <g class="mascot-mouth">
-              <polygon points="46,74 60,78 74,74 60,86" fill="#0c0a09" stroke="#ea580c" stroke-width="1.5"/>
-              <line x1="50" y1="78" x2="70" y2="78" stroke="#fef08a" stroke-width="1.5"/>
-            </g>
-            <!-- Obsidian Staff in hand -->
-            <g transform="translate(86, 20)">
-              <line x1="8" y1="0" x2="8" y2="85" stroke="#44403c" stroke-width="4"/>
-              <polygon points="8,-4 -4,12 8,24 20,12" fill="#ea580c" filter="url(#kocoGlow)"/>
-            </g>
-          </svg>
+          
+          <div class="chibi-avatar-frame" style="width:115px; height:115px; margin:0 auto; border-radius:50%; overflow:hidden; border:3px solid #ea580c; box-shadow:0 0 24px rgba(234,88,12,0.7), 0 8px 20px rgba(0,0,0,0.8); background:#180c06; position:relative;">
+            <img src="assets/images/kocorock-magma-concept.jpg" alt="Chibi Magma-Kocorock" class="mascot-chibi-art golem-img" style="width:100%; height:100%; object-fit:cover; display:block;">
+            <div style="position:absolute; bottom:0; left:0; right:0; background:rgba(234,88,12,0.92); color:#ffffff; font-size:9px; font-weight:900; letter-spacing:1px; padding:2px 0;">VNS MASTER</div>
+          </div>
         </div>
 
         <div style="font-size:13.5px; font-weight:800; color:#fb923c; margin-bottom:2px;">DOSEN MAGMA-KOCOROCK</div>
@@ -3037,7 +3554,9 @@
             <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#ef4444;"></span>
             <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#f59e0b;"></span>
             <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#10b981;"></span>
-            <span id="theater-slide-title" style="font-size:13.5px; font-weight:800; color:#ffffff; margin-left:8px;">Bab 1: Konsep Cloud Task Scheduling di Abyssal Grid</span>
+            <span id="theater-slide-title"
+              style="font-size:13.5px; font-weight:800; color:#ffffff; margin-left:8px;">Bab 1: Konsep Cloud Task
+              Scheduling di Abyssal Grid</span>
           </div>
           <div style="display:flex; align-items:center; gap:8px;">
             <button id="btnTheaterPrev" class="stone-charcoal" style="padding:4px 14px; font-size:11.5px; font-weight:700;">❮ Bab Lalu</button>
@@ -3047,7 +3566,8 @@
         </div>
 
         <!-- Cinema Screen Canvas / Content Area -->
-        <div id="theater-screen-content" style="padding:20px; min-height:360px; max-height:55vh; overflow-y:auto; font-size:13px; line-height:1.6; color:#e2e8f0;">
+        <div id="theater-screen-content"
+          style="padding:20px; min-height:360px; max-height:55vh; overflow-y:auto; font-size:13px; line-height:1.6; color:#e2e8f0;">
           <!-- Dynamically filled by showTheaterSlide(idx) -->
         </div>
 
@@ -3072,49 +3592,11 @@
 
         <!-- Mascot Avatar Figure (SVG with mouth flap & blinking anime eyes) -->
         <div class="mascot-figure-wrapper" style="width:130px; height:130px; margin:0 auto 10px; position:relative; display:flex; align-items:center; justify-content:center;">
-          <svg class="mascot-svg droplet-svg" viewBox="0 0 120 120" width="120" height="120">
-            <defs>
-              <linearGradient id="pipGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stop-color="#7dd3fc"/>
-                <stop offset="60%" stop-color="#0284c7"/>
-                <stop offset="100%" stop-color="#0369a1"/>
-              </linearGradient>
-              <filter id="pipGlow">
-                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-                <feMerge>
-                  <feMergeNode in="coloredBlur"/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            </defs>
-            <!-- Aura/Ring -->
-            <circle cx="60" cy="65" r="50" fill="none" stroke="#38bdf8" stroke-width="2" opacity="0.3" class="mascot-pulse-ring"/>
-            <!-- Teardrop Water Droplet Body -->
-            <path d="M60,18 C60,18 25,60 25,82 C25,102 40,112 60,112 C80,112 95,102 95,82 C95,60 60,18 60,18 Z" fill="url(#pipGrad)" stroke="#38bdf8" stroke-width="2.5" filter="url(#pipGlow)"/>
-            <!-- Soft White Specular Highlight on forehead -->
-            <ellipse cx="48" cy="42" rx="8" ry="14" fill="#ffffff" opacity="0.6" transform="rotate(-25 48 42)"/>
-            <!-- Kawaii Pink Blush Cheeks -->
-            <ellipse cx="38" cy="85" rx="7" ry="4" fill="#fb7185" opacity="0.75"/>
-            <ellipse cx="82" cy="85" rx="7" ry="4" fill="#fb7185" opacity="0.75"/>
-            <!-- Sparkling Anime Eyes -->
-            <g class="mascot-eyes">
-              <ellipse cx="46" cy="74" rx="6" ry="8" fill="#0f172a"/>
-              <circle cx="44" cy="70" r="3" fill="#ffffff"/>
-              <circle cx="48" cy="76" r="1.5" fill="#ffffff"/>
-              <ellipse cx="74" cy="74" rx="6" ry="8" fill="#0f172a"/>
-              <circle cx="72" cy="70" r="3" fill="#ffffff"/>
-              <circle cx="76" cy="76" r="1.5" fill="#ffffff"/>
-            </g>
-            <!-- Mouth that flaps when speaking -->
-            <g class="mascot-mouth">
-              <path d="M52,86 Q60,94 68,86" fill="none" stroke="#0f172a" stroke-width="2.2" stroke-linecap="round"/>
-              <ellipse cx="60" cy="88" rx="4" ry="3" fill="#fb7185" opacity="0.8"/>
-            </g>
-            <!-- Cute Little Antenna Droplet Crown -->
-            <circle cx="60" cy="14" r="5" fill="#bae6fd" filter="url(#pipGlow)"/>
-            <circle cx="20" cy="45" r="4" fill="#38bdf8" opacity="0.6"/>
-            <circle cx="100" cy="50" r="3" fill="#38bdf8" opacity="0.5"/>
-          </svg>
+          
+          <div class="chibi-avatar-frame" style="width:115px; height:115px; margin:0 auto; border-radius:50%; overflow:hidden; border:3px solid #0284c7; box-shadow:0 0 24px rgba(56,189,248,0.7), 0 8px 20px rgba(0,0,0,0.8); background:#041f1e; position:relative;">
+            <img src="assets/images/pipimon-water-concept.png" alt="Chibi Aqua-Pipimon" class="mascot-chibi-art droplet-img" style="width:100%; height:100%; object-fit:cover; display:block;">
+            <div style="position:absolute; bottom:0; left:0; right:0; background:rgba(2,132,199,0.92); color:#ffffff; font-size:9px; font-weight:900; letter-spacing:1px; padding:2px 0;">BFO QUEEN</div>
+          </div>
         </div>
 
         <div style="font-size:13.5px; font-weight:800; color:#38bdf8; margin-bottom:2px;">DOSEN AQUA-PIPIMON</div>
@@ -3128,17 +3610,41 @@
 
     </div>
 
-    <!-- Bottom Cinema Subtitle & Audio Track Bar -->
-    <div style="margin-top:14px; background:rgba(15, 23, 42, 0.92); border:1px solid rgba(255,255,255,0.15); border-radius:16px; padding:12px 18px; display:flex; align-items:center; gap:16px;">
-      <div id="theater-speaker-pill" style="padding:4px 12px; border-radius:12px; font-size:11.5px; font-weight:800; background:#f59e0b; color:#ffffff; white-space:nowrap;">
-        🎙️ Narasi ElevenLabs
+    <!-- Bottom Cinema RPG Dialogue Box & Audio Track Bar with Corner Animated Chibi Mascots -->
+    <div id="theater-rpg-bar"
+      style="margin-top:14px; background:#18181b; border:2px solid #3f3f46; border-bottom:4px solid #09090b; border-radius:18px; padding:12px 18px; display:flex; align-items:center; gap:16px; box-shadow:0 8px 24px rgba(0,0,0,0.6);">
+      
+      <!-- Left Corner: Animated Chibi Magma-Kocorock Mascot (Game RPG style) -->
+      <div id="corner-chibi-kocorock" style="position:relative; width:54px; height:54px; flex-shrink:0; border-radius:50%; border:2.5px solid #ea580c; box-shadow:0 0 12px rgba(234,88,12,0.5); overflow:hidden; background:#292524; transition:all 0.25s ease;">
+        <img src="assets/images/kocorock-magma-concept.jpg" alt="Mini Magma-Kocorock" style="width:100%; height:100%; object-fit:cover; display:block;">
+        <span style="position:absolute; bottom:0; left:0; right:0; background:rgba(234,88,12,0.92); color:#fff; font-size:8px; font-weight:900; text-align:center; padding:1px 0;">VNS</span>
       </div>
-      <div id="theater-subtitle-box" style="flex:1; font-size:12.5px; color:#f8fafc; font-style:italic; line-height:1.5;">
-        [whispering] Kedalaman sebelas ribu meter di bawah laut. [mysterious] Selamat datang di markas Abyssal Grid Three-D!
+
+      <!-- Center: Dialogue Transcript & Speaker Pill -->
+      <div style="flex:1; display:flex; flex-direction:column; gap:4px; min-width:0;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div id="theater-speaker-pill" class="stone-amber" style="padding:3px 12px; font-size:11px; font-weight:800; border-radius:6px; white-space:nowrap;">
+            🎙️ Narasi ElevenLabs
+          </div>
+          <div class="audio-equalizer" style="display:inline-flex; gap:2px; height:10px; align-items:flex-end;">
+            <span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span>
+          </div>
+        </div>
+        <div id="theater-subtitle-box" style="font-size:12.5px; color:#f8fafc; font-style:italic; line-height:1.5;">
+          [whispering] Kedalaman sebelas ribu meter di bawah laut. [mysterious] Selamat datang di markas Abyssal Grid Three-D!
+        </div>
       </div>
+
+      <!-- Right Corner: Animated Chibi Aqua-Pipimon Mascot (Game RPG style) -->
+      <div id="corner-chibi-pipimon" style="position:relative; width:54px; height:54px; flex-shrink:0; border-radius:50%; border:2.5px solid #0284c7; box-shadow:0 0 12px rgba(56,189,248,0.5); overflow:hidden; background:#0f172a; transition:all 0.25s ease;">
+        <img src="assets/images/pipimon-water-concept.png" alt="Mini Aqua-Pipimon" style="width:100%; height:100%; object-fit:cover; display:block;">
+        <span style="position:absolute; bottom:0; left:0; right:0; background:rgba(2,132,199,0.92); color:#fff; font-size:8px; font-weight:900; text-align:center; padding:1px 0;">BFO</span>
+      </div>
+
     </div>
 
   </div>
   <script src="./src/bundle.js"></script>
 </body>
+
 </html>
