@@ -4527,26 +4527,13 @@
 
     say(text) {
       if (this.narrTextEl) this.narrTextEl.innerHTML = text;
-      // Automatically speak when user has entered or voice is enabled
-      if (this.voiceEnabled || this.hasEnteredAbyssal) {
-        this.speak(text.replace(/<[^>]*>?/gm, ''));
-      }
+      // Google SpeechSynthesis removed to prevent audio collision with real ElevenLabs recordings
     }
 
     speak(text) {
-      if (!('speechSynthesis' in window)) return;
-      try {
+      // Disabled to ensure only pristine ElevenLabs audio plays without collision
+      if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = 'id-ID';
-        u.pitch = 1.15;
-        u.rate = 1.08;
-        const voices = window.speechSynthesis.getVoices();
-        const naturalVoice = voices.find(v => v.lang.startsWith('id') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Ardi') || v.name.includes('Indonesian') || v.name.includes('Gadis')));
-        if (naturalVoice) u.voice = naturalVoice;
-        window.speechSynthesis.speak(u);
-      } catch (e) {
-        console.warn('SpeechSynthesis error:', e);
       }
     }
 
@@ -4748,48 +4735,11 @@
     }
 
     speakWithBestIndonesianVoice(text, onEnd = null, speakerType = 'both') {
-      if (!('speechSynthesis' in window)) {
-        if (onEnd) onEnd();
-        return;
-      }
-      try {
+      // Disabled Google SpeechSynthesis: only play real ElevenLabs MP3 recordings
+      if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = 'id-ID';
-
-        // Fast, energetic pacing for both Kocorock and Pipimon
-        if (speakerType === 'kocorock') {
-          u.pitch = 0.82; // Suara golem batu berwibawa
-          u.rate = 1.18;  // Tempo cepat & tanggap
-        } else if (speakerType === 'pipimon') {
-          u.pitch = 1.45; // Suara slime ceria
-          u.rate = 1.22;  // Lincah & cepat
-        } else {
-          u.pitch = 1.05;
-          u.rate = 1.20;  // Narasi awal ceria & cepat
-        }
-
-        const voices = window.speechSynthesis.getVoices();
-        const naturalVoice = voices.find(v => v.lang.startsWith('id') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Ardi')));
-        if (naturalVoice) u.voice = naturalVoice;
-
-        let called = false;
-        const finish = () => {
-          if (!called) {
-            called = true;
-            if (onEnd) onEnd();
-          }
-        };
-
-        u.onend = finish;
-        u.onerror = finish;
-        window.speechSynthesis.speak(u);
-
-        // Safety fallback timer in case speech synthesis hangs on certain browsers
-        setTimeout(finish, 8000);
-      } catch (err) {
-        if (onEnd) onEnd();
       }
+      if (onEnd) onEnd();
     }
 
     render2D() {
@@ -5323,7 +5273,7 @@
     enterAbyssalFromGate() {
       if (this.hasEnteredAbyssal) return;
       this.hasEnteredAbyssal = true;
-      this.voiceEnabled = true;
+      this.voiceEnabled = false;
 
       // 1. Play Lava infernal Web Audio soundtrack (ducked for speech clarity)
       if (this.soundtrack) {
@@ -5603,21 +5553,19 @@
         };
 
         aud.onerror = (e) => {
-          console.warn("Could not load audio file:", part.audio, e, "using TTS fallback...");
-          if (this.speak) this.speak(part.text.replace(/\[.*?\]/g, ''));
+          console.warn("Could not load audio file:", part.audio, e);
           setTimeout(() => {
             if (!isFinished) playPart(idx + 1);
-          }, 6500);
+          }, 4000);
         };
 
         const playPromise = aud.play();
         if (playPromise !== undefined) {
           playPromise.catch(err => {
-            console.warn("Autoplay audio blocked or error:", err, "using TTS fallback...");
-            if (this.speak) this.speak(part.text.replace(/\[.*?\]/g, ''));
+            console.warn("Audio play blocked or error:", err);
             setTimeout(() => {
               if (!isFinished) playPart(idx + 1);
-            }, 6500);
+            }, 4000);
           });
         }
       };
@@ -5988,28 +5936,10 @@
     }
 
     speakElevenlabsText(textWithTags, speakerType = 'narrator') {
-      if (!('speechSynthesis' in window)) return;
-      window.speechSynthesis.cancel();
-
-      // Strip [tag] intonation markers for browser Web Speech API
-      const cleanText = textWithTags.replace(/\[[^\]]+\]/g, '').trim();
-      if (!cleanText) return;
-
-      const utter = new SpeechSynthesisUtterance(cleanText);
-      utter.lang = 'id-ID';
-
-      if (speakerType === 'kocorock') {
-        utter.pitch = 0.72; // Deep, booming
-        utter.rate = 0.95;
-      } else if (speakerType === 'pipimon') {
-        utter.pitch = 1.38; // Cheerful, high-pitched kawaii
-        utter.rate = 1.05;
-      } else {
-        utter.pitch = 0.92;
-        utter.rate = 0.98;
+      // Disabled: Only real ElevenLabs MP3 recordings should play
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
       }
-
-      window.speechSynthesis.speak(utter);
     }
 
     // ==============================================================
