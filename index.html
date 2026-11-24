@@ -2802,39 +2802,237 @@
         </div>
       </div>
       <div style="display:flex; align-items:center; gap:10px;">
-        <button id="btnTheaterVoice" style="padding:6px 14px; background:rgba(56,189,248,0.18); border:1px solid #38bdf8; border-radius:12px; color:#38bdf8; font-weight:700; font-size:12px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+        <button id="btnTheaterVoice" class="stone-ocean" style="padding:7px 16px; font-weight:700; font-size:12px; display:inline-flex; align-items:center; gap:6px;">
           <span>🔊 Putar Suara Karakter</span>
         </button>
-        <button id="btnCloseTheater" style="padding:6px 14px; background:rgba(239,68,68,0.2); border:1px solid #ef4444; border-radius:12px; color:#fca5a5; font-weight:700; font-size:12px; cursor:pointer;">
+        <button id="btnCloseTheater" class="stone-crimson" style="padding:7px 16px; font-weight:700; font-size:12px;">
           <span>✕ Kembali ke Kastil Magma</span>
         </button>
       </div>
     </div>
 
-    <!-- Main Theater Stage: Left Teacher, Center Big Screen, Right Teacher -->
-    <div class="theater-stage-grid" style="display:grid; grid-template-columns: 240px 1fr 240px; gap:18px; align-items:start; flex:1;">
+    <!-- Mascot Character & Slide Animations -->
+    <style>
+      .theater-mascot-card {
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+      }
+      .mascot-svg {
+        filter: drop-shadow(0 8px 16px rgba(0,0,0,0.5));
+      }
+      .golem-svg {
+        animation: golemIdle 3s ease-in-out infinite;
+      }
+      .droplet-svg {
+        animation: dropletIdle 2.5s ease-in-out infinite;
+      }
+      @keyframes golemIdle {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-4px) rotate(1deg); }
+      }
+      @keyframes dropletIdle {
+        0%, 100% { transform: translateY(0px) scale(1, 1); }
+        50% { transform: translateY(-6px) scale(0.97, 1.04); }
+      }
+      .mascot-eyes {
+        animation: mascotEyeBlink 4s infinite;
+        transform-origin: center;
+      }
+      @keyframes mascotEyeBlink {
+        0%, 94%, 98%, 100% { transform: scaleY(1); }
+        96% { transform: scaleY(0.1); }
+      }
+      .theater-mascot-card.is-speaking.mascot-kocorock {
+        border-color: #f97316 !important;
+        box-shadow: 0 0 25px rgba(249, 115, 22, 0.7), 0 12px 35px rgba(0,0,0,0.9) !important;
+        transform: translateY(-4px) scale(1.02);
+      }
+      .theater-mascot-card.is-speaking.mascot-pipimon {
+        border-color: #38bdf8 !important;
+        box-shadow: 0 0 25px rgba(56, 189, 248, 0.7), 0 12px 35px rgba(0,0,0,0.9) !important;
+        transform: translateY(-4px) scale(1.02);
+      }
+      .theater-mascot-card.is-speaking .mascot-pulse-ring {
+        opacity: 0.8 !important;
+        animation: pulseRing 1s ease-out infinite;
+      }
+      @keyframes pulseRing {
+        0% { r: 50; opacity: 0.8; }
+        100% { r: 62; opacity: 0; }
+      }
+      .theater-mascot-card.is-speaking .golem-svg {
+        animation: golemTalk 0.3s ease-in-out infinite alternate !important;
+      }
+      .theater-mascot-card.is-speaking .droplet-svg {
+        animation: dropletTalk 0.28s ease-in-out infinite alternate !important;
+      }
+      @keyframes golemTalk {
+        0% { transform: translateY(0px) rotate(0deg); }
+        100% { transform: translateY(-3px) rotate(-1deg); }
+      }
+      @keyframes dropletTalk {
+        0% { transform: translateY(0px) scale(1, 1); }
+        100% { transform: translateY(-4px) scale(1.03, 0.97); }
+      }
+      .theater-mascot-card.is-speaking .mascot-mouth {
+        animation: mouthFlapMotion 0.24s ease-in-out infinite alternate;
+        transform-origin: 60px 80px;
+      }
+      @keyframes mouthFlapMotion {
+        0% { transform: scaleY(0.7) translateY(0); }
+        100% { transform: scaleY(1.5) translateY(2px); }
+      }
+      .eq-bar {
+        width: 2.5px;
+        background: #a1a1aa;
+        border-radius: 1px;
+        height: 3px;
+        transition: height 0.15s ease;
+      }
+      .theater-mascot-card.is-speaking.mascot-kocorock .eq-bar {
+        background: #ea580c;
+        animation: eqBounce 0.35s infinite alternate;
+      }
+      .theater-mascot-card.is-speaking.mascot-pipimon .eq-bar {
+        background: #38bdf8;
+        animation: eqBounce 0.35s infinite alternate;
+      }
+      .eq-bar:nth-child(2) { animation-delay: 0.12s; }
+      .eq-bar:nth-child(3) { animation-delay: 0.24s; }
+      @keyframes eqBounce {
+        0% { height: 3px; }
+        100% { height: 10px; }
+      }
+
+      /* Slide Interactive Animations */
+      @keyframes taskStream {
+        0% { transform: translateX(0); opacity: 0.2; }
+        50% { opacity: 1; }
+        100% { transform: translateX(80px); opacity: 0.2; }
+      }
+      @keyframes sirenPulse {
+        0%, 100% { background: rgba(239, 68, 68, 0.2); box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
+        50% { background: rgba(239, 68, 68, 0.6); box-shadow: 0 0 25px rgba(239, 68, 68, 0.85); }
+      }
+      @keyframes laserBeamPulse {
+        0%, 100% { opacity: 0.7; box-shadow: 0 0 8px #38bdf8; }
+        50% { opacity: 1; box-shadow: 0 0 20px #38bdf8, 0 0 35px #0284c7; }
+      }
+      @keyframes hammerSlam {
+        0%, 100% { transform: rotate(0deg); }
+        30% { transform: rotate(-25deg); }
+        60% { transform: rotate(20deg); }
+      }
+      @keyframes shockwaveRing {
+        0% { transform: scale(0.2); opacity: 1; }
+        100% { transform: scale(2.2); opacity: 0; }
+      }
+      @keyframes bacteriaFloat {
+        0% { transform: translate(0, 0) rotate(0deg); }
+        25% { transform: translate(15px, -12px) rotate(20deg); }
+        50% { transform: translate(28px, 6px) rotate(-15deg); }
+        75% { transform: translate(12px, 18px) rotate(10deg); }
+        100% { transform: translate(0, 0) rotate(0deg); }
+      }
+      @keyframes reactorSpinCW {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      @keyframes reactorSpinCCW {
+        0% { transform: rotate(360deg); }
+        100% { transform: rotate(0deg); }
+      }
+      @keyframes fusionFlash {
+        0%, 100% { transform: scale(0.9); opacity: 0.7; }
+        50% { transform: scale(1.15); opacity: 1; box-shadow: 0 0 40px #fef08a, 0 0 70px #f97316; }
+      }
+      @keyframes barHeightGrow {
+        0% { transform: scaleY(0.2); }
+        100% { transform: scaleY(1); }
+      }
+    </style>
+
+    <!-- Main Theater Stage: Left Mascot, Center Big Screen, Right Mascot -->
+    <div class="theater-stage-grid" style="display:grid; grid-template-columns: 250px 1fr 250px; gap:16px; align-items:start; flex:1;">
       
-      <!-- LEFT TEACHER: Magma-Kocorock (VNS Master) -->
-      <div style="background:rgba(24, 24, 27, 0.85); border:1.5px solid rgba(245, 158, 11, 0.45); border-radius:18px; padding:16px; box-shadow:0 12px 32px rgba(0,0,0,0.5), 0 0 20px rgba(245,158,11,0.2); text-align:center;">
-        <div style="width:72px; height:72px; border-radius:50%; background:radial-gradient(circle, #f59e0b 0%, #b45309 60%, #18181b 100%); margin:0 auto 10px; display:flex; align-items:center; justify-content:center; font-size:36px; border:2px solid #f59e0b; box-shadow:0 0 16px rgba(245,158,11,0.6);">
-          🌋
+      <!-- LEFT TEACHER: Magma-Kocorock (VNS Master) Game Mascot -->
+      <div id="theater-mascot-kocorock" class="theater-mascot-card mascot-kocorock" style="background:#18181b; border:2px solid #ea580c; border-bottom:5px solid #431407; border-radius:18px; padding:14px; box-shadow:0 12px 30px rgba(0,0,0,0.8); text-align:center; position:relative;">
+        
+        <!-- Speech balloon -->
+        <div class="mascot-speech-bubble" style="position:relative; background:#292524; border:1.5px solid #ea580c; border-radius:12px; padding:10px 12px; margin-bottom:12px; font-size:11.5px; color:#fef08a; text-align:left; line-height:1.45; box-shadow:0 4px 14px rgba(0,0,0,0.6);">
+          <div style="font-size:10px; font-weight:800; color:#fb923c; text-transform:uppercase; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
+            <span>🌋 Dosen VNS (Lokal)</span>
+            <div class="audio-equalizer" style="display:inline-flex; gap:2px; height:10px; align-items:flex-end;">
+              <span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span>
+            </div>
+          </div>
+          <div id="mascot-kocorock-speech" style="font-style:italic;">
+            "Perhatikan struktur alokasi tugas! Shaking radius k bertingkat siap memotong antrean bottleneck."
+          </div>
+          <div style="position:absolute; bottom:-8px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:7px solid transparent; border-right:7px solid transparent; border-top:8px solid #ea580c;"></div>
         </div>
-        <div style="font-size:14px; font-weight:800; color:#f59e0b;">DOSEN MAGMA-KOCOROCK</div>
-        <div style="font-size:11px; font-weight:700; color:#cbd5e1; margin-bottom:8px;">Spesialis VNS • Eksploitasi Lokal</div>
-        <div style="background:rgba(245, 158, 11, 0.12); border:1px solid rgba(245, 158, 11, 0.3); border-radius:10px; padding:8px; font-size:11px; text-align:left; color:#fef08a; line-height:1.45; margin-bottom:10px;">
-          ⚔️ <b>Status Instruktur:</b> Kapak Obsidian Siap Guncang!<br>
-          🔨 <b>Manuver Utama:</b> Shaking radius k=1..3 memotong tumpukan antrean bottleneck seketika!
+
+        <!-- Mascot Avatar Figure (SVG with mouth flap & blinking eyes) -->
+        <div class="mascot-figure-wrapper" style="width:130px; height:130px; margin:0 auto 10px; position:relative; display:flex; align-items:center; justify-content:center;">
+          <svg class="mascot-svg golem-svg" viewBox="0 0 120 120" width="120" height="120">
+            <defs>
+              <radialGradient id="kocoCoreGlow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#fdba74"/>
+                <stop offset="60%" stop-color="#ea580c"/>
+                <stop offset="100%" stop-color="#7c2d12"/>
+              </radialGradient>
+              <filter id="kocoGlow">
+                <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+            <!-- Aura/Ring -->
+            <circle cx="60" cy="60" r="54" fill="none" stroke="#ea580c" stroke-width="2" opacity="0.3" class="mascot-pulse-ring"/>
+            <!-- Rock Golem Body Base -->
+            <polygon points="30,45 60,25 90,45 98,85 60,105 22,85" fill="#292524" stroke="#44403c" stroke-width="3"/>
+            <!-- Molten Magma Core Veins -->
+            <path d="M40,55 Q60,75 80,55 Q60,95 40,55" fill="url(#kocoCoreGlow)" filter="url(#kocoGlow)" opacity="0.85"/>
+            <!-- Stone Shoulder Plates -->
+            <polygon points="12,50 30,42 26,75 10,70" fill="#1c1917" stroke="#ea580c" stroke-width="1.5"/>
+            <polygon points="108,50 90,42 94,75 110,70" fill="#1c1917" stroke="#ea580c" stroke-width="1.5"/>
+            <!-- Obsidian Brow -->
+            <polygon points="35,42 60,35 85,42 78,50 60,46 42,50" fill="#0c0a09" stroke="#78716c" stroke-width="1.5"/>
+            <!-- Blinking Glowing Eyes -->
+            <g class="mascot-eyes">
+              <ellipse cx="46" cy="52" rx="6" ry="7" fill="#fef08a" filter="url(#kocoGlow)"/>
+              <ellipse cx="74" cy="52" rx="6" ry="7" fill="#fef08a" filter="url(#kocoGlow)"/>
+              <ellipse cx="46" cy="52" rx="2" ry="4" fill="#ea580c"/>
+              <ellipse cx="74" cy="52" rx="2" ry="4" fill="#ea580c"/>
+            </g>
+            <!-- Mouth / Jaw that flaps when speaking -->
+            <g class="mascot-mouth">
+              <polygon points="46,74 60,78 74,74 60,86" fill="#0c0a09" stroke="#ea580c" stroke-width="1.5"/>
+              <line x1="50" y1="78" x2="70" y2="78" stroke="#fef08a" stroke-width="1.5"/>
+            </g>
+            <!-- Obsidian Staff in hand -->
+            <g transform="translate(86, 20)">
+              <line x1="8" y1="0" x2="8" y2="85" stroke="#44403c" stroke-width="4"/>
+              <polygon points="8,-4 -4,12 8,24 20,12" fill="#ea580c" filter="url(#kocoGlow)"/>
+            </g>
+          </svg>
         </div>
-        <div style="font-size:10.5px; color:#94a3b8; text-align:left; line-height:1.4;">
-          <i>"Jangan biarkan ada VM yang kelebihan beban! First-Improvement Descent memindahkan tugas begitu Makespan turun."</i>
+
+        <div style="font-size:13.5px; font-weight:800; color:#fb923c; margin-bottom:2px;">DOSEN MAGMA-KOCOROCK</div>
+        <div style="font-size:11px; font-weight:700; color:#cbd5e1; margin-bottom:8px;">Pakar VNS • Eksploitasi Lokal</div>
+        
+        <div style="background:#262626; border:1px solid #44403c; border-radius:10px; padding:8px; font-size:11px; text-align:left; color:#f5f5f4; line-height:1.45;">
+          🔨 <b>Mekanisme Inti:</b> Shaking k=1..3 + First-Improvement Descent.<br>
+          ⚡ <b>Kekuatan:</b> Memangkas bottleneck lokal secara presisi!
         </div>
       </div>
 
       <!-- CENTER: GIANT HOLOGRAPHIC CINEMA SCREEN -->
-      <div style="background:rgba(15, 23, 42, 0.94); border:2px solid #f59e0b; border-radius:20px; box-shadow:0 16px 48px rgba(0,0,0,0.7), 0 0 35px rgba(245,158,11,0.25); display:flex; flex-direction:column; overflow:hidden;">
+      <div style="background:rgba(15, 23, 42, 0.94); border:2px solid #57534e; border-bottom:4px solid #1c1917; border-radius:20px; box-shadow:0 16px 48px rgba(0,0,0,0.7), 0 0 35px rgba(245,158,11,0.25); display:flex; flex-direction:column; overflow:hidden;">
         
         <!-- Screen Top Bar with Slide Title & Navigation -->
-        <div style="background:rgba(24, 24, 27, 0.9); padding:10px 18px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:space-between;">
+        <div style="background:#18181b; padding:10px 18px; border-bottom:2px solid #3f3f46; display:flex; align-items:center; justify-content:space-between;">
           <div style="display:flex; align-items:center; gap:8px;">
             <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#ef4444;"></span>
             <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#f59e0b;"></span>
@@ -2842,9 +3040,9 @@
             <span id="theater-slide-title" style="font-size:13.5px; font-weight:800; color:#ffffff; margin-left:8px;">Bab 1: Konsep Cloud Task Scheduling di Abyssal Grid</span>
           </div>
           <div style="display:flex; align-items:center; gap:8px;">
-            <button id="btnTheaterPrev" style="padding:4px 12px; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:#ffffff; font-size:11.5px; font-weight:700; cursor:pointer;">❮ Bab Lalu</button>
-            <span id="theater-slide-indicator" style="font-size:11px; font-weight:700; color:#f59e0b; background:rgba(245,158,11,0.15); padding:3px 8px; border-radius:6px;">1 / 7</span>
-            <button id="btnTheaterNext" style="padding:4px 12px; background:#f59e0b; border:none; border-radius:8px; color:#ffffff; font-size:11.5px; font-weight:700; cursor:pointer;">Bab Lanjut ❯</button>
+            <button id="btnTheaterPrev" class="stone-charcoal" style="padding:4px 14px; font-size:11.5px; font-weight:700;">❮ Bab Lalu</button>
+            <span id="theater-slide-indicator" style="font-size:11px; font-weight:700; color:#f59e0b; background:#27272a; border:1px solid #52525b; padding:3px 10px; border-radius:6px;">1 / 7</span>
+            <button id="btnTheaterNext" class="stone-amber" style="padding:4px 14px; font-size:11.5px; font-weight:700;">Bab Lanjut ❯</button>
           </div>
         </div>
 
@@ -2855,19 +3053,76 @@
 
       </div>
 
-      <!-- RIGHT TEACHER: Aqua-Pipimon (BFO Leader) -->
-      <div style="background:rgba(24, 24, 27, 0.85); border:1.5px solid rgba(56, 189, 248, 0.45); border-radius:18px; padding:16px; box-shadow:0 12px 32px rgba(0,0,0,0.5), 0 0 20px rgba(56,189,248,0.2); text-align:center;">
-        <div style="width:72px; height:72px; border-radius:50%; background:radial-gradient(circle, #38bdf8 0%, #0284c7 60%, #18181b 100%); margin:0 auto 10px; display:flex; align-items:center; justify-content:center; font-size:36px; border:2px solid #38bdf8; box-shadow:0 0 16px rgba(56,189,248,0.6);">
-          💧
+      <!-- RIGHT TEACHER: Aqua-Pipimon (BFO Leader) Game Mascot -->
+      <div id="theater-mascot-pipimon" class="theater-mascot-card mascot-pipimon" style="background:#18181b; border:2px solid #0284c7; border-bottom:5px solid #082f49; border-radius:18px; padding:14px; box-shadow:0 12px 30px rgba(0,0,0,0.8); text-align:center; position:relative;">
+        
+        <!-- Speech balloon -->
+        <div class="mascot-speech-bubble" style="position:relative; background:#0f172a; border:1.5px solid #0284c7; border-radius:12px; padding:10px 12px; margin-bottom:12px; font-size:11.5px; color:#bae6fd; text-align:left; line-height:1.45; box-shadow:0 4px 14px rgba(0,0,0,0.6);">
+          <div style="font-size:10px; font-weight:800; color:#38bdf8; text-transform:uppercase; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
+            <span>💧 Dosen BFO (Global)</span>
+            <div class="audio-equalizer" style="display:inline-flex; gap:2px; height:10px; align-items:flex-end;">
+              <span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span>
+            </div>
+          </div>
+          <div id="mascot-pipimon-speech" style="font-style:italic;">
+            "Pipi-pipi! Koloni tetesan air samudra berenang menyusuri gradien Makespan terendah!"
+          </div>
+          <div style="position:absolute; bottom:-8px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:7px solid transparent; border-right:7px solid transparent; border-top:8px solid #0284c7;"></div>
         </div>
-        <div style="font-size:14px; font-weight:800; color:#38bdf8;">DOSEN AQUA-PIPIMON</div>
+
+        <!-- Mascot Avatar Figure (SVG with mouth flap & blinking anime eyes) -->
+        <div class="mascot-figure-wrapper" style="width:130px; height:130px; margin:0 auto 10px; position:relative; display:flex; align-items:center; justify-content:center;">
+          <svg class="mascot-svg droplet-svg" viewBox="0 0 120 120" width="120" height="120">
+            <defs>
+              <linearGradient id="pipGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#7dd3fc"/>
+                <stop offset="60%" stop-color="#0284c7"/>
+                <stop offset="100%" stop-color="#0369a1"/>
+              </linearGradient>
+              <filter id="pipGlow">
+                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+            <!-- Aura/Ring -->
+            <circle cx="60" cy="65" r="50" fill="none" stroke="#38bdf8" stroke-width="2" opacity="0.3" class="mascot-pulse-ring"/>
+            <!-- Teardrop Water Droplet Body -->
+            <path d="M60,18 C60,18 25,60 25,82 C25,102 40,112 60,112 C80,112 95,102 95,82 C95,60 60,18 60,18 Z" fill="url(#pipGrad)" stroke="#38bdf8" stroke-width="2.5" filter="url(#pipGlow)"/>
+            <!-- Soft White Specular Highlight on forehead -->
+            <ellipse cx="48" cy="42" rx="8" ry="14" fill="#ffffff" opacity="0.6" transform="rotate(-25 48 42)"/>
+            <!-- Kawaii Pink Blush Cheeks -->
+            <ellipse cx="38" cy="85" rx="7" ry="4" fill="#fb7185" opacity="0.75"/>
+            <ellipse cx="82" cy="85" rx="7" ry="4" fill="#fb7185" opacity="0.75"/>
+            <!-- Sparkling Anime Eyes -->
+            <g class="mascot-eyes">
+              <ellipse cx="46" cy="74" rx="6" ry="8" fill="#0f172a"/>
+              <circle cx="44" cy="70" r="3" fill="#ffffff"/>
+              <circle cx="48" cy="76" r="1.5" fill="#ffffff"/>
+              <ellipse cx="74" cy="74" rx="6" ry="8" fill="#0f172a"/>
+              <circle cx="72" cy="70" r="3" fill="#ffffff"/>
+              <circle cx="76" cy="76" r="1.5" fill="#ffffff"/>
+            </g>
+            <!-- Mouth that flaps when speaking -->
+            <g class="mascot-mouth">
+              <path d="M52,86 Q60,94 68,86" fill="none" stroke="#0f172a" stroke-width="2.2" stroke-linecap="round"/>
+              <ellipse cx="60" cy="88" rx="4" ry="3" fill="#fb7185" opacity="0.8"/>
+            </g>
+            <!-- Cute Little Antenna Droplet Crown -->
+            <circle cx="60" cy="14" r="5" fill="#bae6fd" filter="url(#pipGlow)"/>
+            <circle cx="20" cy="45" r="4" fill="#38bdf8" opacity="0.6"/>
+            <circle cx="100" cy="50" r="3" fill="#38bdf8" opacity="0.5"/>
+          </svg>
+        </div>
+
+        <div style="font-size:13.5px; font-weight:800; color:#38bdf8; margin-bottom:2px;">DOSEN AQUA-PIPIMON</div>
         <div style="font-size:11px; font-weight:700; color:#cbd5e1; margin-bottom:8px;">Ratu BFO • Eksplorasi Global</div>
-        <div style="background:rgba(56, 189, 248, 0.12); border:1px solid rgba(56, 189, 248, 0.3); border-radius:10px; padding:8px; font-size:11px; text-align:left; color:#bae6fd; line-height:1.45; margin-bottom:10px;">
-          🌊 <b>Status Instruktur:</b> Koloni Bio-Swarm Siaga!<br>
-          🧪 <b>Kemotaksis (Tumble &amp; Swim):</b> Memindai ruang solusi ke arah gradien nutrisi Makespan terendah!
-        </div>
-        <div style="font-size:10.5px; color:#94a3b8; text-align:left; line-height:1.4;">
-          <i>"Bakteri terbaik membelah diri pada fase reproduksi, dan dispersi acak memastikan kita tidak tersesat!"</i>
+        
+        <div style="background:#0f172a; border:1px solid #1e293b; border-radius:10px; padding:8px; font-size:11px; text-align:left; color:#f8fafc; line-height:1.45;">
+          🧪 <b>Mekanisme Inti:</b> Kemotaksis (Tumble &amp; Swim) + Reproduksi.<br>
+          🌐 <b>Kekuatan:</b> Memindai ruang global tanpa terjebak optimum lokal!
         </div>
       </div>
 

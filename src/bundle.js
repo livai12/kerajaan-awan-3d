@@ -3374,6 +3374,20 @@
     // ==========================================
     // NPC INTERACTION & MOVEMENT TOWARD POV
     // ==========================================
+    animateKocokStaffStompInPlace() {
+      if (this.staff) {
+        this.staff.rotation.z = -0.7;
+        setTimeout(() => { if (this.staff) this.staff.rotation.z = 0.45; }, 160);
+        setTimeout(() => { if (this.staff) this.staff.rotation.z = 0; }, 320);
+      }
+      if (this.kocok) {
+        this.jumpCharacter(this.kocok, this.kocok.position.clone(), 0.8, 280);
+      }
+      if (this.meshyKocok) {
+        this.jumpCharacter(this.meshyKocok, this.meshyKocok.position.clone(), 0.8, 280);
+      }
+    }
+
     npcApproachPlayer(onComplete) {
       if (this.hasNpcApproached) {
         if (onComplete) onComplete();
@@ -3382,25 +3396,32 @@
       this.hasNpcApproached = true;
       const pip = this.leaderPip || (this.pips && this.pips[0]);
       const kocok = this.kocok;
-      if (!pip || !kocok) {
-        if (onComplete) onComplete();
-        return;
-      }
 
-      // Stage 1: Jump halfway down the hallway toward entrance
-      this.jumpCharacter(pip, new THREE.Vector3(2.0, 0.4, -10.0), 3.2, 520, () => {
-        // Stage 2: Leap right in front of player POV camera (at z = 10)
-        this.jumpCharacter(pip, new THREE.Vector3(0.9, 0.2, 5.8), 2.8, 480, () => {
-          pip.rotation.y = Math.PI; // Face the player
-          this.showBubble('pipimon', "Pipi-pipi! Halo penjelajah! Selamat datang di markas kami!", 4500);
+      const moveKocok = (pos, h, d, cb) => {
+        if (this.kocok) this.jumpCharacter(this.kocok, pos, h, d, cb);
+        if (this.meshyKocok) this.jumpCharacter(this.meshyKocok, pos, h, d);
+      };
+      const movePip = (pos, h, d, cb) => {
+        if (pip) this.jumpCharacter(pip, pos, h, d, cb);
+        if (this.meshyPip) this.jumpCharacter(this.meshyPip, pos, h, d);
+      };
+
+      // Stage 1: Jump halfway down the grand hall towards entrance
+      movePip(new THREE.Vector3(2.0, 0.4, -10.0), 3.2, 520, () => {
+        // Stage 2: Leap right in front of player POV camera (landing at z = 6.0)
+        movePip(new THREE.Vector3(1.2, 0.2, 6.0), 2.8, 480, () => {
+          if (pip) pip.rotation.y = Math.PI;
+          if (this.meshyPip) this.meshyPip.rotation.y = Math.PI;
+          this.showBubble('pipimon', "Pipi-pipi! Hai kamu yang ada di sana! Selamat datang di markas kami!", 4500);
           if (onComplete) onComplete();
         });
       });
 
-      this.jumpCharacter(kocok, new THREE.Vector3(-2.2, 0.3, -10.0), 3.0, 560, () => {
-        this.jumpCharacter(kocok, new THREE.Vector3(-1.6, 0.2, 5.2), 2.6, 520, () => {
-          kocok.rotation.y = Math.PI + 0.18; // Face the player
-          this.showBubble('kocorock', "Salam hangat dari Palung Abyssal! Mari kita pelajari Cloud Scheduling!", 4500);
+      moveKocok(new THREE.Vector3(-2.2, 0.3, -10.0), 3.0, 560, () => {
+        moveKocok(new THREE.Vector3(-1.6, 0.2, 5.5), 2.6, 520, () => {
+          if (kocok) kocok.rotation.y = Math.PI + 0.15;
+          if (this.meshyKocok) this.meshyKocok.rotation.y = Math.PI + 0.15;
+          this.showBubble('kocorock', "Salam hangat dari Palung Abyssal! Mari kita selesaikan krisis komputasi ini!", 4500);
         });
       });
     }
@@ -3409,15 +3430,28 @@
       this.hasNpcApproached = false;
       const pip = this.leaderPip || (this.pips && this.pips[0]);
       const kocok = this.kocok;
+      const thronePip = new THREE.Vector3(3.8, 2.0, -28.5);
+      const throneKocok = new THREE.Vector3(-3.8, 2.0, -28.5);
+
       if (pip) {
-        this.jumpCharacter(pip, new THREE.Vector3(3.8, 2.0, -28.5), 3.0, 600, () => {
+        this.jumpCharacter(pip, thronePip, 3.0, 600, () => {
           pip.rotation.y = -0.38;
           if (onComplete) onComplete();
         });
       }
+      if (this.meshyPip) {
+        this.jumpCharacter(this.meshyPip, thronePip, 3.0, 600, () => {
+          this.meshyPip.rotation.y = -0.38;
+        });
+      }
       if (kocok) {
-        this.jumpCharacter(kocok, new THREE.Vector3(-3.8, 2.0, -28.5), 3.2, 600, () => {
+        this.jumpCharacter(kocok, throneKocok, 3.2, 600, () => {
           kocok.rotation.y = 0.38;
+        });
+      }
+      if (this.meshyKocok) {
+        this.jumpCharacter(this.meshyKocok, throneKocok, 3.2, 600, () => {
+          this.meshyKocok.rotation.y = 0.38;
         });
       }
     }
@@ -5451,8 +5485,11 @@
           text: '"Akulah Magma Kocorock! Penjaga stabilitas infrastruktur data center di palung neraka ini. Di sini, jutaan paket komputasi heterogen mengalir tanpa henti."',
           onStart: () => {
             this.say("🌋 [Magma-Kocorock]: Akulah Magma Kocorock! Penjaga stabilitas infrastruktur data center di palung neraka ini!");
-            if (this.world && typeof this.world.pokemonHopKocorock === 'function') {
-              this.world.pokemonHopKocorock(1);
+            if (this.world) {
+              if (typeof this.world.animateKocokStaffStompInPlace === 'function') {
+                this.world.animateKocokStaffStompInPlace();
+              }
+              this.world.showBubble('kocorock', "Akulah Magma Kocorock! Penjaga stabilitas infrastruktur data center di palung ini!", 4200);
             }
           }
         },
@@ -5466,17 +5503,14 @@
           text: '"[tertawa kecil] Dan aku, Aqua Pipimon! Pemimpin koloni bio-swarm tetesan air samudra. Lihat, ada penjelajah baru yang tiba di hadapan kita!"',
           onStart: () => {
             this.say("💧 [Aqua-Pipimon]: Dan aku, Aqua Pipimon! Pemimpin koloni bio-swarm tetesan air samudra.");
-            // When Pipimon says "Lihat, ada penjelajah baru...", character starts leaping forward!
-            setTimeout(() => {
-              if (!isFinished && this.world && typeof this.world.npcApproachPlayer === 'function') {
-                this.world.npcApproachPlayer();
-              }
-            }, 5500);
+            if (this.world) {
+              this.world.showBubble('pipimon', "Dan aku, Aqua Pipimon! Pemimpin koloni bio-swarm tetesan air samudra!", 4200);
+            }
           }
         },
 
         // ==========================================
-        // SCENE 1: KARAKTER MENAWARKAN TUR EDUKATIF
+        // SCENE 1: KARAKTER MELOMPAT KE DEPAN PLAYER
         // ==========================================
         {
           badgeText: 'Scene 1 • 1/3 (Sapaan Pipimon)',
@@ -5488,6 +5522,11 @@
           text: '"Pipi-pipi! Hai kamu yang ada di sana! Selamat datang di markas kami! Jangan takut dengan lava pijar di sekelilingmu ya!"',
           onStart: () => {
             this.say("💧 [Aqua-Pipimon]: Pipi-pipi! Hai kamu yang ada di sana! Selamat datang di markas kami!");
+            if (this.world && typeof this.world.npcApproachPlayer === 'function') {
+              this.world.npcApproachPlayer(() => {
+                this.world.showBubble('pipimon', "Pipi-pipi! Hai kamu yang ada di sana! Selamat datang di markas kami!", 4500);
+              });
+            }
           }
         },
         {
@@ -5500,6 +5539,12 @@
           text: '"Kami berdua ditugaskan untuk memecahkan krisis komputasi terberat di abad ini. Bagaimana membagi ribuan tugas ke mesin virtual heterogen tanpa ada mesin yang meledak karena kelebihan beban!"',
           onStart: () => {
             this.say("🌋 [Magma-Kocorock]: Kami berdua ditugaskan untuk memecahkan krisis komputasi terberat di abad ini...");
+            if (this.world) {
+              if (typeof this.world.animateKocokStaffStompInPlace === 'function') {
+                this.world.animateKocokStaffStompInPlace();
+              }
+              this.world.showBubble('kocorock', "Krisis komputasi terberat! Kami harus membagi ribuan tugas ke mesin virtual heterogen!", 5000);
+            }
           }
         },
         {
@@ -5512,12 +5557,17 @@
           text: '"Maukah kamu ikut tur pembelajaran eksklusif bersama kami? [bisikan] Kami punya ruang teater holografik raksasa di dalam! Di sana, kami berdua akan menjadi gurumu, lengkap dengan layar bioskop interaktif dan mini game seru! Ayo, tekan tombol Ikuti Tur sekarang!"',
           onStart: () => {
             this.say("💧 [Aqua-Pipimon]: Maukah kamu ikut tur pembelajaran eksklusif bersama kami? Kami punya ruang teater holografik raksasa di dalam!");
-            // As Pipimon says "Ayo, tekan tombol Ikuti Tur sekarang!", pop up the modal ready to be clicked!
+            if (this.world) {
+              if (typeof this.world.pokemonCelebrateAll === 'function') {
+                this.world.pokemonCelebrateAll();
+              }
+              this.world.showBubble('pipimon', "Ayo ikut tur teater holografik kami! Tekan tombol Ikuti Tur sekarang! ✨", 6500);
+            }
             setTimeout(() => {
               if (!isFinished) {
                 this.showTourInvitation({ speakTTS: false });
               }
-            }, 13500);
+            }, 12500);
           }
         }
       ];
@@ -5750,21 +5800,33 @@
 
         this.say("🌋 [Dosen Magma-Kocorock]: Selamat datang di Ruang Teater Holografik Abyssal! Perhatikan layar raksasa di tengah panggung ini.");
 
+        const kMascot = document.getElementById('theater-mascot-kocorock');
+        const pMascot = document.getElementById('theater-mascot-pipimon');
+        const kSpeech = document.getElementById('mascot-kocorock-speech');
+        if (kMascot) kMascot.classList.add('is-speaking');
+        if (pMascot) pMascot.classList.remove('is-speaking');
+        if (kSpeech) kSpeech.textContent = '"Selamat datang di Ruang Teater Holografik Abyssal! Aku dan Pipimon akan memandu setiap konsep penting!"';
+
         try {
           const welcomeAud = new Audio('audio/scene2_02_theater_kocorock.mp3');
           this.currentTheaterAudio = welcomeAud;
           welcomeAud.onended = () => {
+            if (kMascot) kMascot.classList.remove('is-speaking');
             // When welcome greeting ends, automatically show Slide 1 narration
             this.showTheaterSlide(0);
           };
           welcomeAud.onerror = () => {
+            if (kMascot) kMascot.classList.remove('is-speaking');
             this.showTheaterSlide(0);
           };
           welcomeAud.play().catch(e => {
             console.warn("Could not autoplay welcome audio:", e);
+            if (kMascot) kMascot.classList.remove('is-speaking');
             this.showTheaterSlide(0);
           });
-        } catch (e) { }
+        } catch (e) {
+          if (kMascot) kMascot.classList.remove('is-speaking');
+        }
       } else {
         this.showTheaterSlide(this.theaterSlideIndex);
       }
@@ -5776,6 +5838,11 @@
         this.currentTheaterAudio.pause();
         this.currentTheaterAudio = null;
       }
+      const kMascot = document.getElementById('theater-mascot-kocorock');
+      const pMascot = document.getElementById('theater-mascot-pipimon');
+      if (kMascot) kMascot.classList.remove('is-speaking');
+      if (pMascot) pMascot.classList.remove('is-speaking');
+
       const overlay = document.getElementById('theater-overlay');
       if (overlay) {
         overlay.style.display = 'none';
@@ -5806,6 +5873,10 @@
         this.currentTheaterAudio.pause();
         this.currentTheaterAudio = null;
       }
+      const kMascot = document.getElementById('theater-mascot-kocorock');
+      const pMascot = document.getElementById('theater-mascot-pipimon');
+      if (kMascot) kMascot.classList.remove('is-speaking');
+      if (pMascot) pMascot.classList.remove('is-speaking');
 
       this.theaterSlideIndex = idx;
       const s = this.theaterSlides[idx];
@@ -5869,11 +5940,41 @@
 
       const speakerEl = document.getElementById('theater-speaker-pill');
       const subtitleEl = document.getElementById('theater-subtitle-box');
+      const kMascot = document.getElementById('theater-mascot-kocorock');
+      const pMascot = document.getElementById('theater-mascot-pipimon');
+      const kSpeech = document.getElementById('mascot-kocorock-speech');
+      const pSpeech = document.getElementById('mascot-pipimon-speech');
+
+      const setMascotsSpeaking = (speakerType, text) => {
+        if (!kMascot || !pMascot) return;
+        if (speakerType === 'kocorock') {
+          kMascot.classList.add('is-speaking');
+          pMascot.classList.remove('is-speaking');
+          if (kSpeech && text) kSpeech.textContent = `"${text}"`;
+        } else if (speakerType === 'pipimon') {
+          pMascot.classList.add('is-speaking');
+          kMascot.classList.remove('is-speaking');
+          if (pSpeech && text) pSpeech.textContent = `"${text}"`;
+        } else if (speakerType === 'both') {
+          kMascot.classList.add('is-speaking');
+          pMascot.classList.add('is-speaking');
+          if (kSpeech && text) kSpeech.textContent = `"${text}"`;
+          if (pSpeech && text) pSpeech.textContent = `"${text}"`;
+        } else {
+          kMascot.classList.remove('is-speaking');
+          pMascot.classList.remove('is-speaking');
+        }
+      };
+
+      setMascotsSpeaking('none');
 
       // Check if this slide has real ElevenLabs audio parts
       if (s.audioParts && s.audioParts.length > 0) {
         const playPart = (i) => {
-          if (!this.isTheaterOpen || !this.theaterVoiceEnabled || this.theaterSlideIndex !== currentSlideIdx || i >= s.audioParts.length) return;
+          if (!this.isTheaterOpen || !this.theaterVoiceEnabled || this.theaterSlideIndex !== currentSlideIdx || i >= s.audioParts.length) {
+            setMascotsSpeaking('none');
+            return;
+          }
           const p = s.audioParts[i];
 
           // Update Speaker badge
@@ -5896,6 +5997,9 @@
             subtitleEl.innerHTML = p.elevenlabsScript;
           }
 
+          // Trigger speaking animation on corresponding RPG mascot
+          setMascotsSpeaking(p.speakerType, p.spokenText || p.elevenlabsScript);
+
           this.say(`${p.speakerName}: ${p.spokenText || p.elevenlabsScript}`);
 
           try {
@@ -5903,35 +6007,29 @@
             this.currentTheaterAudio = aud;
 
             aud.onended = () => {
+              setMascotsSpeaking('none');
               if (this.isTheaterOpen && this.theaterVoiceEnabled && this.theaterSlideIndex === currentSlideIdx) {
                 setTimeout(() => playPart(i + 1), 350);
               }
             };
 
             aud.onerror = () => {
-              console.warn("Could not load slide audio:", p.audio, "falling back to speech synthesis");
-              if (this.theaterSlideIndex === currentSlideIdx) {
-                this.speakElevenlabsText(p.spokenText || p.elevenlabsScript, p.speakerType);
-              }
+              setMascotsSpeaking('none');
+              console.warn("Could not load slide audio:", p.audio);
             };
 
             aud.play().catch(e => {
               console.warn("Autoplay audio blocked or error:", e);
-              if (this.theaterSlideIndex === currentSlideIdx) {
-                this.speakElevenlabsText(p.spokenText || p.elevenlabsScript, p.speakerType);
-              }
+              setMascotsSpeaking('none');
             });
           } catch (e) {
-            if (this.theaterSlideIndex === currentSlideIdx) {
-              this.speakElevenlabsText(p.spokenText || p.elevenlabsScript, p.speakerType);
-            }
+            setMascotsSpeaking('none');
           }
         };
 
         playPart(0);
       } else {
-        // Fallback to speech synthesis if slide does not have audio files yet
-        this.speakElevenlabsText(s.spokenText || s.elevenlabsScript, s.speakerType);
+        setMascotsSpeaking('none');
       }
     }
 
@@ -5972,34 +6070,76 @@
           contentHtml: `
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:center;">
               <div>
-                <h3 style="margin-top:0; color:#38bdf8; font-size:17px;">🌐 Mengapa Cloud Task Scheduling Sangat Kritis?</h3>
+                <h3 style="margin-top:0; color:#38bdf8; font-size:16px; display:flex; align-items:center; gap:8px;">
+                  <span>🌐</span> Mengapa Cloud Scheduling Sangat Kritis?
+                </h3>
                 <p style="font-size:12.5px; line-height:1.6; color:#cbd5e1;">
-                  Dalam komputasi awan (Cloud Computing), tugas-tugas komputasi datang dengan ukuran panjang instruksi bervariasi (<i>Million Instructions / MI</i>). Tugas harus dipetakan ke <b>Virtual Machine (VM)</b> yang memiliki kapasitas komputasi berbeda (<i>MIPS</i>).
+                  Dalam sistem Cloud Heterogen, tugas komputasi masuk dengan ukuran panjang instruksi bervariasi (<i>Million Instructions / MI</i>). Tugas harus dialokasikan ke <b>Virtual Machine (VM)</b> dengan kecepatan komputasi (<i>MIPS</i>) yang tidak seragam.
                 </p>
-                <div style="background:rgba(2,132,199,0.15); border-left:3px solid #38bdf8; padding:10px 12px; border-radius:8px; margin:10px 0; font-size:12px;">
-                  <b>⚡ Waktu Eksekusi (Execution Time):</b><br>
-                  <code style="color:#7dd3fc; font-weight:700;">ET(i, j) = Length(Task i) / MIPS(VM j)</code><br>
-                  Semakin kecil MIPS mesin, semakin lama waktu yang dibutuhkan untuk menyelesaikan tugas yang sama.
+                <div style="background:rgba(2,132,199,0.15); border-left:4px solid #38bdf8; padding:10px 14px; border-radius:8px; margin:10px 0; font-size:12px;">
+                  <b style="color:#7dd3fc;">⚡ Rumus Waktu Eksekusi (Execution Time):</b><br>
+                  <code style="color:#fef08a; font-weight:800; font-size:13px;">ET(i, j) = Length(Task i) / MIPS(VM j)</code><br>
+                  <span style="font-size:11px; color:#94a3b8;">Jika tugas raksasa jatuh ke mesin lambat, waktu eksekusi meledak menjadi bottleneck!</span>
+                </div>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                  <div style="flex:1; background:#18181b; border:1px solid #3f3f46; border-radius:8px; padding:8px 10px; font-size:11px;">
+                    <span style="color:#fb923c; font-weight:700;">Task Ringan:</span><br>1.000 ~ 2.000 MI
+                  </div>
+                  <div style="flex:1; background:#18181b; border:1px solid #3f3f46; border-radius:8px; padding:8px 10px; font-size:11px;">
+                    <span style="color:#ef4444; font-weight:700;">Task Raksasa:</span><br>4.000 ~ 5.000 MI
+                  </div>
                 </div>
               </div>
-              <div style="background:rgba(24,24,27,0.8); border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:14px;">
-                <div style="font-size:11px; font-weight:800; color:#f59e0b; margin-bottom:8px; text-transform:uppercase;">Arsitektur Cloud Abyssal Grid (10 Tugas &rarr; 3 VM Heterogen)</div>
-                <div style="display:flex; flex-direction:column; gap:8px;">
-                  <div style="background:rgba(234,88,12,0.2); border:1px solid #ea580c; border-radius:8px; padding:8px; font-size:11.5px; display:flex; justify-content:space-between;">
-                    <span>🔥 <b>VM 1 (High-Performance Node):</b></span>
-                    <span style="color:#fbbf24; font-weight:700;">3.500 MIPS</span>
-                  </div>
-                  <div style="background:rgba(56,189,248,0.2); border:1px solid #38bdf8; border-radius:8px; padding:8px; font-size:11.5px; display:flex; justify-content:space-between;">
-                    <span>💧 <b>VM 2 (Mid-Range Node):</b></span>
-                    <span style="color:#38bdf8; font-weight:700;">2.000 MIPS</span>
-                  </div>
-                  <div style="background:rgba(16,185,129,0.2); border:1px solid #10b981; border-radius:8px; padding:8px; font-size:11.5px; display:flex; justify-content:space-between;">
-                    <span>🌿 <b>VM 3 (Eco-Green Node):</b></span>
-                    <span style="color:#34d399; font-weight:700;">1.000 MIPS</span>
+
+              <div style="background:#18181b; border:2px solid #3f3f46; border-radius:14px; padding:16px; position:relative; overflow:hidden;">
+                <div style="font-size:11px; font-weight:800; color:#fb923c; margin-bottom:12px; text-transform:uppercase; letter-spacing:1px; display:flex; justify-content:space-between; align-items:center;">
+                  <span>Arsitektur Antrean Abyssal Grid</span>
+                  <span style="background:rgba(239,68,68,0.2); color:#fca5a5; border:1px solid #ef4444; padding:2px 8px; border-radius:10px; font-size:10px; animation:sirenPulse 1.2s infinite;">⚠️ BOTTLENECK RISIK!</span>
+                </div>
+
+                <!-- Animated Task Conveyor Stream -->
+                <div style="position:relative; height:45px; background:#09090b; border:1px dashed #52525b; border-radius:8px; margin-bottom:14px; display:flex; align-items:center; overflow:hidden; padding:0 8px;">
+                  <span style="font-size:10px; font-weight:800; color:#a1a1aa; margin-right:8px; white-space:nowrap;">ALIRAN TUGAS:</span>
+                  <div style="display:flex; gap:16px; animation:taskStream 4s linear infinite;">
+                    <span style="background:#ea580c; color:#fff; font-size:10px; font-weight:800; padding:4px 8px; border-radius:6px; box-shadow:0 0 8px #ea580c;">Task 1 [5000 MI]</span>
+                    <span style="background:#0284c7; color:#fff; font-size:10px; font-weight:800; padding:4px 8px; border-radius:6px; box-shadow:0 0 8px #0284c7;">Task 2 [3500 MI]</span>
+                    <span style="background:#10b981; color:#fff; font-size:10px; font-weight:800; padding:4px 8px; border-radius:6px; box-shadow:0 0 8px #10b981;">Task 3 [1200 MI]</span>
+                    <span style="background:#f59e0b; color:#fff; font-size:10px; font-weight:800; padding:4px 8px; border-radius:6px; box-shadow:0 0 8px #f59e0b;">Task 4 [4800 MI]</span>
                   </div>
                 </div>
-                <div style="margin-top:10px; font-size:11px; color:#94a3b8; text-align:center;">
-                  Tugas kita adalah mencari pemetaan terbaik agar waktu penyelesaian total sekecil mungkin!
+
+                <!-- 3 Heterogeneous VM Nodes with Animated Load Fill -->
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                  <!-- VM 1 -->
+                  <div style="background:#27272a; border:1px solid #ea580c; border-radius:8px; padding:10px; position:relative; overflow:hidden;">
+                    <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:4px;">
+                      <span>🔥 <b>VM 1 (High-Performance Node):</b> <span style="color:#fbbf24; font-weight:700;">3.500 MIPS</span></span>
+                      <span style="color:#86efac; font-weight:700;">Load: 42.5s (Aman)</span>
+                    </div>
+                    <div style="height:8px; background:#09090b; border-radius:4px; overflow:hidden;">
+                      <div style="width:35%; height:100%; background:linear-gradient(90deg, #ea580c, #f59e0b); border-radius:4px;"></div>
+                    </div>
+                  </div>
+                  <!-- VM 2 -->
+                  <div style="background:#27272a; border:1px solid #0284c7; border-radius:8px; padding:10px; position:relative; overflow:hidden;">
+                    <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:4px;">
+                      <span>💧 <b>VM 2 (Mid-Range Node):</b> <span style="color:#38bdf8; font-weight:700;">2.000 MIPS</span></span>
+                      <span style="color:#86efac; font-weight:700;">Load: 68.0s (Sedang)</span>
+                    </div>
+                    <div style="height:8px; background:#09090b; border-radius:4px; overflow:hidden;">
+                      <div style="width:55%; height:100%; background:linear-gradient(90deg, #0284c7, #38bdf8); border-radius:4px;"></div>
+                    </div>
+                  </div>
+                  <!-- VM 3 Overload -->
+                  <div style="background:rgba(239,68,68,0.15); border:1.5px solid #ef4444; border-radius:8px; padding:10px; position:relative; overflow:hidden; animation:sirenPulse 1.4s infinite;">
+                    <div style="display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:4px;">
+                      <span>🚨 <b>VM 3 (Eco-Green Node):</b> <span style="color:#f87171; font-weight:700;">1.000 MIPS</span></span>
+                      <span style="color:#f87171; font-weight:800;">Load: 185.0s (BOTTLENECK!)</span>
+                    </div>
+                    <div style="height:8px; background:#09090b; border-radius:4px; overflow:hidden;">
+                      <div style="width:100%; height:100%; background:linear-gradient(90deg, #ef4444, #dc2626); border-radius:4px; box-shadow:0 0 10px #ef4444;"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -6029,31 +6169,72 @@
           spokenText: "Perhatikan rumus emas di layar! Makespan adalah waktu kerja VM paling lambat di seluruh data center. Garis laser biru adalah Batas Bawah Teoretis jika beban terdistribusi seratus persen sempurna!",
           contentHtml: `
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-              <div style="background:rgba(24,24,27,0.7); border:1px solid rgba(245,158,11,0.3); border-radius:12px; padding:14px;">
-                <h4 style="margin:0 0 8px; color:#f59e0b; font-size:14px;">1. Makespan (C_max) - Sasaran Utama Optimasi</h4>
-                <p style="font-size:12px; color:#cbd5e1; margin-bottom:8px;">
-                  Makespan didefinisikan sebagai waktu selesai dari mesin virtual yang bekerja paling lama:
+              <div style="background:#18181b; border:1.5px solid #ea580c; border-radius:14px; padding:14px;">
+                <h4 style="margin:0 0 8px; color:#fb923c; font-size:14px; display:flex; align-items:center; gap:6px;">
+                  <span>⏱️</span> 1. Makespan (C_max) - Waktu Terlama
+                </h4>
+                <p style="font-size:12px; color:#cbd5e1; margin-bottom:8px; line-height:1.5;">
+                  Makespan ditentukan oleh mesin virtual yang bekerja paling lama di seluruh klaster:
                 </p>
-                <div style="background:#09090b; padding:10px; border-radius:8px; text-align:center; font-family:monospace; font-size:14px; color:#fde047;">
+                <div style="background:#09090b; border:1px solid #3f3f46; padding:10px; border-radius:8px; text-align:center; font-family:monospace; font-size:14px; color:#fde047; box-shadow:inset 0 2px 6px rgba(0,0,0,0.8);">
                   Makespan = max(Load(VM_1), Load(VM_2), ..., Load(VM_m))
                 </div>
-                <p style="font-size:11.5px; color:#94a3b8; margin-top:8px;">
-                  Jika satu VM kelebihan beban hingga 200 detik meskipun dua VM lainnya selesai dalam 20 detik, Makespan keseluruhan tetap bernilai <b>200 detik</b>!
-                </p>
+                <div style="background:rgba(239,68,68,0.12); border-left:3px solid #ef4444; padding:8px 10px; border-radius:6px; margin-top:10px; font-size:11.5px; color:#fca5a5;">
+                  <b>Aturan Keras:</b> Meskipun VM 1 & 2 selesai dalam 30s, jika VM 3 selesai dalam 185s, Makespan sistem tetap <b>185s</b>!
+                </div>
               </div>
 
-              <div style="background:rgba(24,24,27,0.7); border:1px solid rgba(56,189,248,0.3); border-radius:12px; padding:14px;">
-                <h4 style="margin:0 0 8px; color:#38bdf8; font-size:14px;">2. Degree of Imbalance (DI) &amp; Batas Teoretis</h4>
-                <p style="font-size:12px; color:#cbd5e1; margin-bottom:8px;">
-                  Keseimbangan beban antar mesin diukur menggunakan derajat ketidakseimbangan:
+              <div style="background:#18181b; border:1.5px solid #0284c7; border-radius:14px; padding:14px;">
+                <h4 style="margin:0 0 8px; color:#38bdf8; font-size:14px; display:flex; align-items:center; gap:6px;">
+                  <span>📐</span> 2. Theoretical Lower Bound (Batas Bawah Ideal)
+                </h4>
+                <p style="font-size:12px; color:#cbd5e1; margin-bottom:8px; line-height:1.5;">
+                  Batas bawah mutlak jika seluruh kapasitas MIPS terpakai seratus persen tanpa menganggur:
                 </p>
-                <div style="background:#09090b; padding:10px; border-radius:8px; text-align:center; font-family:monospace; font-size:13px; color:#67e8f9;">
-                  DI = (Load_max - Load_min) / Load_avg
+                <div style="background:#09090b; border:1px solid #3f3f46; padding:10px; border-radius:8px; text-align:center; font-family:monospace; font-size:13px; color:#67e8f9; box-shadow:inset 0 2px 6px rgba(0,0,0,0.8);">
+                  LB = Total_MI / Total_MIPS = 574.6s / 6.5 = 88.4 detik
                 </div>
-                <div style="margin-top:10px; background:rgba(245,158,11,0.12); border-left:3px solid #f59e0b; padding:8px 10px; font-size:11.5px; color:#fef08a;">
-                  <b>Theoretical Lower Bound (LB):</b><br>
-                  <code>LB = Total_MI / Total_MIPS</code><br>
-                  Batas bawah absolut yang mustahil ditembus oleh algoritma apa pun.
+                <div style="background:rgba(2,132,199,0.15); border-left:3px solid #38bdf8; padding:8px 10px; border-radius:6px; margin-top:10px; font-size:11.5px; color:#bae6fd;">
+                  <b>Garis Laser Biru:</b> Tidak ada algoritma di dunia yang bisa menghasilkan Makespan di bawah <b>88.4s</b> pada instans ini!
+                </div>
+              </div>
+            </div>
+
+            <!-- Animated Gantt Chart Horizon with Theoretical Lower Bound Laser -->
+            <div style="margin-top:14px; background:#18181b; border:2px solid #52525b; border-radius:12px; padding:14px; position:relative; overflow:hidden;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:11px; font-weight:800; color:#e2e8f0;">
+                <span>SIMULASI HORIZON BEBAN VM &amp; GARIS LASER LOWER BOUND</span>
+                <span style="color:#38bdf8;">Target Teoretis: 88.4s</span>
+              </div>
+              
+              <div style="position:relative; height:100px; background:#09090b; border-radius:8px; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
+                <!-- Theoretical Lower Bound Laser Line -->
+                <div style="position:absolute; left:48%; top:0; bottom:0; width:2px; background:#38bdf8; animation:laserBeamPulse 1.5s infinite; z-index:10;">
+                  <div style="position:absolute; top:2px; left:-55px; background:#0284c7; color:#fff; font-size:9.5px; font-weight:800; padding:2px 6px; border-radius:4px; box-shadow:0 0 8px #38bdf8;">
+                    LB = 88.4s
+                  </div>
+                </div>
+
+                <!-- VM 1 Bar -->
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:10px; width:45px; color:#fbbf24; font-weight:700;">VM 1:</span>
+                  <div style="flex:1; height:18px; background:#27272a; border-radius:4px; overflow:hidden;">
+                    <div style="width:23%; height:100%; background:#ea580c; border-radius:4px; display:flex; align-items:center; padding-left:6px; font-size:9.5px; font-weight:700;">42.5s</div>
+                  </div>
+                </div>
+                <!-- VM 2 Bar -->
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:10px; width:45px; color:#38bdf8; font-weight:700;">VM 2:</span>
+                  <div style="flex:1; height:18px; background:#27272a; border-radius:4px; overflow:hidden;">
+                    <div style="width:37%; height:100%; background:#0284c7; border-radius:4px; display:flex; align-items:center; padding-left:6px; font-size:9.5px; font-weight:700;">68.0s</div>
+                  </div>
+                </div>
+                <!-- VM 3 Bar -->
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:10px; width:45px; color:#ef4444; font-weight:700;">VM 3:</span>
+                  <div style="flex:1; height:18px; background:#27272a; border-radius:4px; overflow:hidden;">
+                    <div style="width:100%; height:100%; background:#ef4444; border-radius:4px; display:flex; align-items:center; padding-left:6px; font-size:9.5px; font-weight:800; box-shadow:0 0 10px #ef4444;">185.0s (BOTTLENECK)</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -6082,29 +6263,63 @@
           elevenlabsScript: "[booming] [fierce] Sekarang giliranku unjuk gigi! Algoritmaku bernama VNS atau Variable Neighborhood Search. Saat antrean tugas macet di satu pulau, aku menggunakan jurus Shaking dengan radius k bertingkat!",
           spokenText: "Sekarang giliranku unjuk gigi! Algoritmaku bernama VNS atau Variable Neighborhood Search. Saat antrean tugas macet di satu pulau, aku menggunakan jurus Shaking dengan radius k bertingkat!",
           contentHtml: `
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:center;">
               <div>
-                <h3 style="margin-top:0; color:#ea580c; font-size:16px;">🔨 Mekanisme Shaking Bertingkat (k = 1..3)</h3>
+                <h3 style="margin-top:0; color:#ea580c; font-size:16px; display:flex; align-items:center; gap:8px;">
+                  <span>🔨</span> Mekanisme Shaking Bertingkat Kocorock
+                </h3>
                 <p style="font-size:12.5px; line-height:1.6; color:#cbd5e1;">
-                  VNS beroperasi dengan menjelajahi struktur lingkungan tetangga (<i>Neighborhood Structures</i>) secara teratur untuk melepaskan solusi dari jebakan lokal:
+                  Algoritma <b>Variable Neighborhood Search (VNS)</b> menggunakan jurus Shaking dengan radius k bertingkat untuk mengguncang struktur solusi saat terjebak di optimum lokal:
                 </p>
-                <div style="display:flex; flex-direction:column; gap:8px; margin:12px 0;">
-                  <div style="background:rgba(234,88,12,0.15); border-left:3px solid #ea580c; padding:8px 10px; border-radius:6px; font-size:11.5px;">
-                    <b>k = 1 (Single Task Migration):</b> Pindahkan 1 tugas dari VM dengan beban tertinggi ke VM lain secara acak.
+                <div style="display:flex; flex-direction:column; gap:8px; margin:10px 0;">
+                  <div style="background:#27272a; border-left:3px solid #ea580c; padding:8px 10px; border-radius:6px; font-size:11.5px;">
+                    <b style="color:#fb923c;">Radius k = 1 (Single Task Migration):</b> Pindahkan 1 tugas dari VM bottleneck ke VM lain secara acak.
                   </div>
-                  <div style="background:rgba(245,158,11,0.15); border-left:3px solid #f59e0b; padding:8px 10px; border-radius:6px; font-size:11.5px;">
-                    <b>k = 2 (Pairwise Task Swap):</b> Tukar dua tugas antara dua VM yang berbeda.
+                  <div style="background:#27272a; border-left:3px solid #f59e0b; padding:8px 10px; border-radius:6px; font-size:11.5px;">
+                    <b style="color:#fbbf24;">Radius k = 2 (Pairwise Swap):</b> Tukar 2 tugas antara 2 VM berbeda untuk mencari variasi konfigurasi.
                   </div>
-                  <div style="background:rgba(239,68,68,0.15); border-left:3px solid #ef4444; padding:8px 10px; border-radius:6px; font-size:11.5px;">
-                    <b>k = 3 (Multi-Task Reshuffle):</b> Kocok alokasi tiga tugas sekaligus untuk melompat lebih jauh.
+                  <div style="background:#27272a; border-left:3px solid #ef4444; padding:8px 10px; border-radius:6px; font-size:11.5px;">
+                    <b style="color:#f87171;">Radius k = 3 (Multi-Task Reshuffle):</b> Kocok alokasi 3 tugas sekaligus untuk lompatan eksplorasi lebih jauh.
                   </div>
                 </div>
+                <div style="font-size:11px; color:#a1a1aa;">
+                  Dipadukan dengan <i>First-Improvement Descent</i>: Begitu Makespan turun, solusi baru langsung diadopsi!
+                </div>
               </div>
-              <div style="background:rgba(24,24,27,0.8); border:1px solid rgba(245,158,11,0.3); border-radius:12px; padding:14px;">
-                <h4 style="margin:0 0 8px; color:#f59e0b; font-size:13.5px;">Karakteristik &amp; Kelemahan VNS Mandiri</h4>
-                <div style="font-size:12px; color:#e2e8f0; line-height:1.6;">
-                  <span style="color:#10b981; font-weight:700;">✅ Keunggulan:</span> Sangat cepat berkonvergensi karena menggunakan <i>First-Improvement Descent</i>.<br>
-                  <span style="color:#ef4444; font-weight:700;">❌ Kelemahan:</span> Memiliki probabilitas tinggi terjebak di <i>Local Optimum</i> jika inisiasi awalnya buruk (sering macet di Makespan ~115 detik).
+
+              <!-- Animated VNS Shaking Demonstration -->
+              <div style="background:#18181b; border:2px solid #ea580c; border-radius:14px; padding:16px; text-align:center; position:relative; overflow:hidden;">
+                <div style="font-size:11px; font-weight:800; color:#fb923c; margin-bottom:12px; text-transform:uppercase;">
+                  SIMULASI GUNCANGAN KAPAK SHAKING K=1
+                </div>
+
+                <!-- Hammer & Shockwaves SVG -->
+                <div style="position:relative; width:160px; height:120px; margin:0 auto 10px;">
+                  <div style="position:absolute; inset:20px; border:2px solid #ea580c; border-radius:50%; animation:shockwaveRing 1.8s ease-out infinite;"></div>
+                  <div style="position:absolute; inset:10px; border:2px solid #f59e0b; border-radius:50%; animation:shockwaveRing 1.8s ease-out infinite 0.6s;"></div>
+                  <div style="position:absolute; inset:0px; border:2px solid #ef4444; border-radius:50%; animation:shockwaveRing 1.8s ease-out infinite 1.2s;"></div>
+                  
+                  <svg viewBox="0 0 100 100" width="100" height="100" style="animation:hammerSlam 1.8s ease-in-out infinite; transform-origin:80px 20px;">
+                    <line x1="80" y1="20" x2="30" y2="70" stroke="#78716c" stroke-width="6" stroke-linecap="round"/>
+                    <polygon points="15,55 35,40 45,75 25,90" fill="#292524" stroke="#ea580c" stroke-width="2"/>
+                    <circle cx="30" cy="65" r="8" fill="#ea580c" opacity="0.8"/>
+                  </svg>
+                </div>
+
+                <!-- Dynamic Result Counter -->
+                <div style="background:#09090b; border:1px solid #3f3f46; border-radius:10px; padding:10px; display:flex; justify-content:space-around; align-items:center;">
+                  <div>
+                    <div style="font-size:10px; color:#a1a1aa;">Sebelum Shaking:</div>
+                    <div style="font-size:14px; font-weight:800; color:#ef4444;">185.0s</div>
+                  </div>
+                  <div style="font-size:18px; color:#fbbf24;">➔</div>
+                  <div>
+                    <div style="font-size:10px; color:#a1a1aa;">Setelah Shaking k=1:</div>
+                    <div style="font-size:14px; font-weight:800; color:#86efac;">115.5s</div>
+                  </div>
+                </div>
+                <div style="margin-top:8px; font-size:11px; color:#fca5a5;">
+                  ⚠️ Kelemahan: VNS mandiri rawan macet di optimum lokal (~115.5s)!
                 </div>
               </div>
             </div>
@@ -6133,29 +6348,62 @@
           elevenlabsScript: "[cheerful] [giggling] Tapi Kocorock sering buntu jika terjebak di optimum lokal! Nah, itulah kehebatan algoritmaku: Bacterial Foraging Optimization!",
           spokenText: "Tapi Kocorock sering buntu jika terjebak di optimum lokal! Nah, itulah kehebatan algoritmaku: Bacterial Foraging Optimization!",
           contentHtml: `
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:center;">
               <div>
-                <h3 style="margin-top:0; color:#38bdf8; font-size:16px;">🧪 4 Fase Siklus Hidup Bio-Swarm BFO</h3>
-                <div style="display:flex; flex-direction:column; gap:8px; font-size:11.5px;">
-                  <div style="background:rgba(2,132,199,0.18); border-left:3px solid #38bdf8; padding:8px 10px; border-radius:6px;">
-                    <b>1. Kemotaksis (Chemotaxis):</b> Bakteri bergantian antara <i>Tumble</i> (memilih arah acak) dan <i>Swim</i> (berenang maju jika Makespan membaik).
+                <h3 style="margin-top:0; color:#38bdf8; font-size:16px; display:flex; align-items:center; gap:8px;">
+                  <span>🧪</span> Dinamika Bio-Swarm BFO Pipimon
+                </h3>
+                <p style="font-size:12.5px; line-height:1.6; color:#cbd5e1;">
+                  <b>Bacterial Foraging Optimization (BFO)</b> terinspirasi dari pola makan bakteri yang menjelajahi lanskap multi-dimensi menggunakan 4 fase biologis:
+                </p>
+                <div style="display:flex; flex-direction:column; gap:8px; font-size:11.5px; margin:10px 0;">
+                  <div style="background:#0f172a; border-left:3px solid #38bdf8; padding:8px 10px; border-radius:6px;">
+                    <b style="color:#7dd3fc;">1. Kemotaksis (Tumble &amp; Swim):</b> Tumble berputar mencari arah acak, lalu Swim berenang maju jika nilai Makespan membaik.
                   </div>
-                  <div style="background:rgba(14,165,233,0.18); border-left:3px solid #0ea5e9; padding:8px 10px; border-radius:6px;">
-                    <b>2. Swarming:</b> Komunikasi antar-bakteri menggunakan fungsi atraktan agar koloni berkumpul di lembah nutrisi tinggi.
+                  <div style="background:#0f172a; border-left:3px solid #0ea5e9; padding:8px 10px; border-radius:6px;">
+                    <b style="color:#38bdf8;">2. Swarming:</b> Komunikasi sinyal atraktan antar-droplet agar koloni berkumpul di lembah Makespan rendah.
                   </div>
-                  <div style="background:rgba(56,189,248,0.18); border-left:3px solid #7dd3fc; padding:8px 10px; border-radius:6px;">
-                    <b>3. Reproduksi (Reproduction):</b> 50% bakteri tersehat membelah diri menjadi dua klon, 50% bakteri terlemah mati.
+                  <div style="background:#0f172a; border-left:3px solid #60a5fa; padding:8px 10px; border-radius:6px;">
+                    <b style="color:#93c5fd;">3. Reproduksi:</b> 50% bakteri terunggul membelah diri (mitosis), bakteri terlemah tereliminasi.
                   </div>
-                  <div style="background:rgba(99,102,241,0.18); border-left:3px solid #818cf8; padding:8px 10px; border-radius:6px;">
-                    <b>4. Eliminasi-Dispersi:</b> Eliminasi acak dengan probabilitas P_ed untuk menyebarkan bakteri ke titik baru dan mencegah konvergensi dini.
+                  <div style="background:#0f172a; border-left:3px solid #818cf8; padding:8px 10px; border-radius:6px;">
+                    <b style="color:#a5b4fc;">4. Eliminasi-Dispersi:</b> Mengacak koloni dengan probabilitas Ped agar tidak terjebak konvergensi dini.
                   </div>
                 </div>
               </div>
-              <div style="background:rgba(24,24,27,0.8); border:1px solid rgba(56,189,248,0.3); border-radius:12px; padding:14px;">
-                <h4 style="margin:0 0 8px; color:#38bdf8; font-size:13.5px;">Karakteristik &amp; Kelemahan BFO Mandiri</h4>
-                <div style="font-size:12px; color:#e2e8f0; line-height:1.6;">
-                  <span style="color:#10b981; font-weight:700;">✅ Keunggulan:</span> Diversitas eksplorasi global sangat tinggi dan tidak mudah terjebak di optimum lokal.<br>
-                  <span style="color:#ef4444; font-weight:700;">❌ Kelemahan:</span> Lambat mencapai titik presisi tinggi di akhir iterasi karena langkah kemotaksis acak (Makespan ~118 detik).
+
+              <!-- Animated 2D Solution Landscape with Bacteria Swarm -->
+              <div style="background:#0f172a; border:2px solid #0284c7; border-radius:14px; padding:16px; text-align:center; position:relative; overflow:hidden;">
+                <div style="font-size:11px; font-weight:800; color:#38bdf8; margin-bottom:10px; text-transform:uppercase;">
+                  LANSKAP GRADIEN NUTRISI KEMOTAKSIS
+                </div>
+
+                <!-- 2D Landscape Grid & Swimming Bacteria -->
+                <div style="position:relative; height:150px; background:radial-gradient(circle at 65% 55%, #0369a1 0%, #082f49 45%, #020617 100%); border-radius:10px; border:1px solid #1e293b; overflow:hidden;">
+                  <div style="position:absolute; left:60%; top:50%; transform:translate(-50%, -50%); width:50px; height:50px; border:2px dashed #38bdf8; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 0 20px #0284c7;">
+                    <span style="font-size:10px; font-weight:800; color:#bae6fd;">LEMBAH OPTIMAL</span>
+                  </div>
+
+                  <!-- Bacteria Droplet 1 -->
+                  <div style="position:absolute; left:25%; top:30%; animation:bacteriaFloat 4s infinite ease-in-out;">
+                    <div style="width:14px; height:14px; border-radius:50%; background:#38bdf8; box-shadow:0 0 10px #38bdf8; display:flex; align-items:center; justify-content:center; font-size:8px;">💧</div>
+                  </div>
+                  <!-- Bacteria Droplet 2 -->
+                  <div style="position:absolute; left:40%; top:70%; animation:bacteriaFloat 3.5s infinite ease-in-out 0.8s;">
+                    <div style="width:14px; height:14px; border-radius:50%; background:#38bdf8; box-shadow:0 0 10px #38bdf8; display:flex; align-items:center; justify-content:center; font-size:8px;">💧</div>
+                  </div>
+                  <!-- Bacteria Droplet 3 -->
+                  <div style="position:absolute; left:75%; top:25%; animation:bacteriaFloat 4.2s infinite ease-in-out 1.5s;">
+                    <div style="width:14px; height:14px; border-radius:50%; background:#7dd3fc; box-shadow:0 0 10px #7dd3fc; display:flex; align-items:center; justify-content:center; font-size:8px;">💧</div>
+                  </div>
+                  <!-- Bacteria Droplet 4 (Leader) -->
+                  <div style="position:absolute; left:58%; top:48%; animation:bacteriaFloat 3s infinite ease-in-out 0.4s;">
+                    <div style="width:18px; height:18px; border-radius:50%; background:#fde047; box-shadow:0 0 14px #facc15; display:flex; align-items:center; justify-content:center; font-size:10px;">👑</div>
+                  </div>
+                </div>
+
+                <div style="margin-top:10px; font-size:11px; color:#bae6fd; font-weight:700;">
+                  ✨ Keunggulan: Eksplorasi global luas, pantang terjebak di lembah semu!
                 </div>
               </div>
             </div>
@@ -6186,37 +6434,54 @@
           contentHtml: `
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:center;">
               <div>
-                <h3 style="margin-top:0; color:#fbbf24; font-size:16px;">⚛️ Mengapa Algoritma Hibrida Memetik Unggul?</h3>
+                <h3 style="margin-top:0; color:#fbbf24; font-size:17px; display:flex; align-items:center; gap:8px;">
+                  <span>⚛️</span> Sinergi Sempurna: 1 + 1 &gt; 2!
+                </h3>
                 <p style="font-size:12.5px; line-height:1.6; color:#cbd5e1;">
-                  Dalam literatur metaheuristik, <b>Algoritma Memetik (Memetic Algorithm)</b> menyatukan kekuatan pencarian global berbasis populasi (BFO) dengan teknik penyempurnaan lokal individual (VNS).
+                  Dalam metaheuristik modern, penggabungan algoritma global berbasis populasi dengan teknik pencarian lokal individual disebut <b>Algoritma Memetik (Memetic Algorithm)</b>.
                 </p>
-                <div style="background:linear-gradient(135deg, rgba(234,88,12,0.2) 0%, rgba(2,132,199,0.2) 100%); border:1px solid rgba(251,191,36,0.4); border-radius:10px; padding:12px; font-size:12px;">
-                  <b>🚀 Sinergi Sempurna:</b><br>
-                  1. <b>BFO</b> bertindak sebagai pemindai global yang mendeteksi cekungan solusi potensial di seluruh ruang pencarian.<br>
-                  2. <b>VNS</b> melakukan intervensi lokal (Shaking k=1..3) pada individu bakteri terunggul untuk mengasah nilai Makespan hingga mendekati batas bawah teoretis!
+                <div style="background:#18181b; border:1px solid #44403c; border-radius:10px; padding:12px; font-size:12px; line-height:1.6;">
+                  <b style="color:#fbbf24;">🔄 Skema Relay Sintesis:</b><br>
+                  1. <b>Fase 1 (Global BFO):</b> Pipimon memindai ruang solusi luas dan menemukan cekungan global paling menjanjikan.<br>
+                  2. <b>Fase 2 (Lokal VNS):</b> Kocorock menerima solusi terbaik dari koloni dan melakukan Shaking presisi untuk mengikis Makespan hingga batas bawah!
                 </div>
               </div>
-              <div style="background:rgba(24,24,27,0.85); border:1px solid rgba(251,191,36,0.3); border-radius:14px; padding:14px; text-align:center;">
-                <div style="font-size:12px; font-weight:800; color:#fbbf24; margin-bottom:8px;">HASIL KOMPARASI KINERJA (600 NFE)</div>
-                <div style="display:flex; justify-content:space-around; align-items:flex-end; height:130px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.15);">
-                  <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
-                    <span style="font-size:11px; color:#ea580c; font-weight:700;">115.5s</span>
-                    <div style="width:40px; height:85px; background:#ea580c; border-radius:6px 6px 0 0;"></div>
-                    <span style="font-size:10px; color:#cbd5e1;">VNS Murni</span>
-                  </div>
-                  <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
-                    <span style="font-size:11px; color:#38bdf8; font-weight:700;">118.7s</span>
-                    <div style="width:40px; height:88px; background:#38bdf8; border-radius:6px 6px 0 0;"></div>
-                    <span style="font-size:10px; color:#cbd5e1;">BFO Murni</span>
-                  </div>
-                  <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
-                    <span style="font-size:11px; color:#fbbf24; font-weight:800;">88.4s</span>
-                    <div style="width:48px; height:58px; background:linear-gradient(to top, #ea580c, #38bdf8); border-radius:6px 6px 0 0; box-shadow:0 0 16px rgba(251,191,36,0.6);"></div>
-                    <span style="font-size:10px; color:#fef08a; font-weight:700;">Hybrid Memetic</span>
+
+              <!-- Animated Fusion Reactor Visual -->
+              <div style="background:#18181b; border:2px solid #fbbf24; border-radius:14px; padding:16px; text-align:center; position:relative; overflow:hidden;">
+                <div style="font-size:11px; font-weight:800; color:#fbbf24; margin-bottom:10px; text-transform:uppercase;">
+                  REAKTOR SINTESIS HIBRIDA MEMETIK BFO-VNS
+                </div>
+
+                <!-- Dual Vortex Reactor -->
+                <div style="position:relative; width:150px; height:150px; margin:0 auto 10px; display:flex; align-items:center; justify-content:center;">
+                  <div style="position:absolute; inset:0; border:4px dashed #ea580c; border-radius:50%; animation:reactorSpinCW 8s linear infinite;"></div>
+                  <div style="position:absolute; inset:16px; border:4px dashed #0284c7; border-radius:50%; animation:reactorSpinCCW 6s linear infinite;"></div>
+                  <div style="width:65px; height:65px; border-radius:50%; background:radial-gradient(circle, #fef08a 0%, #ea580c 50%, #0284c7 100%); animation:fusionFlash 2s ease-in-out infinite; display:flex; align-items:center; justify-content:center; font-size:26px; box-shadow:0 0 25px #f59e0b;">
+                    ⚡
                   </div>
                 </div>
-                <div style="margin-top:8px; font-size:11px; color:#86efac; font-weight:700;">
-                  ✨ Peningkatan Efisiensi: -34.8% Waktu Makespan!
+
+                <!-- Comparative Bar Chart -->
+                <div style="display:flex; justify-content:space-around; align-items:flex-end; height:90px; padding:6px 0; border-bottom:1px solid #3f3f46;">
+                  <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+                    <span style="font-size:10px; color:#ea580c; font-weight:700;">115.5s</span>
+                    <div style="width:36px; height:60px; background:#ea580c; border-radius:4px 4px 0 0;"></div>
+                    <span style="font-size:9.5px; color:#cbd5e1;">VNS</span>
+                  </div>
+                  <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+                    <span style="font-size:10px; color:#38bdf8; font-weight:700;">118.7s</span>
+                    <div style="width:36px; height:63px; background:#0284c7; border-radius:4px 4px 0 0;"></div>
+                    <span style="font-size:9.5px; color:#cbd5e1;">BFO</span>
+                  </div>
+                  <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+                    <span style="font-size:11px; color:#fbbf24; font-weight:800;">88.4s 👑</span>
+                    <div style="width:44px; height:42px; background:linear-gradient(to top, #ea580c, #38bdf8); border-radius:4px 4px 0 0; box-shadow:0 0 14px #fbbf24;"></div>
+                    <span style="font-size:9.5px; color:#fef08a; font-weight:800;">HYBRID</span>
+                  </div>
+                </div>
+                <div style="margin-top:6px; font-size:11px; color:#86efac; font-weight:800;">
+                  🚀 Efisiensi Maksimal: -34.8% Waktu Makespan!
                 </div>
               </div>
             </div>
@@ -6333,34 +6598,36 @@
           spokenText: "Sebagai kesimpulan akademik: pengujian ketat tiga puluh kali run independen membuktikan keunggulan mutlak Algoritma Hibrida Memetic BFO-VNS! Terima kasih sudah mengikuti tur edukasi di markas Abyssal Grid Three-D!",
           contentHtml: `
             <div>
-              <h3 style="margin-top:0; color:#10b981; font-size:16px;">📊 Tabel Komparasi Statistik (30 Independent Runs @ 600 NFE)</h3>
+              <h3 style="margin-top:0; color:#10b981; font-size:16px; display:flex; align-items:center; gap:8px;">
+                <span>📊</span> Hasil Benchmark 30 Independent Runs (@ 600 NFE)
+              </h3>
               <div style="overflow-x:auto;">
                 <table style="width:100%; border-collapse:collapse; font-size:12px; text-align:left; color:#cbd5e1; margin-bottom:14px;">
                   <thead>
-                    <tr style="background:rgba(255,255,255,0.08); border-bottom:1px solid rgba(255,255,255,0.15);">
-                      <th style="padding:8px 10px; color:#ffffff;">Algoritma Pengujian</th>
-                      <th style="padding:8px 10px; color:#ffffff;">Makespan Rata-rata (s)</th>
+                    <tr style="background:#27272a; border-bottom:2px solid #52525b;">
+                      <th style="padding:8px 10px; color:#ffffff;">Metode Algoritma</th>
+                      <th style="padding:8px 10px; color:#ffffff;">Makespan Mean (s)</th>
                       <th style="padding:8px 10px; color:#ffffff;">Standar Deviasi (Std)</th>
                       <th style="padding:8px 10px; color:#ffffff;">Degree of Imbalance (DI)</th>
                       <th style="padding:8px 10px; color:#ffffff;">CPU Utilization (%)</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                    <tr style="border-bottom:1px solid #3f3f46;">
                       <td style="padding:8px 10px; font-weight:700; color:#ea580c;">VNS Murni (Kocorock)</td>
                       <td style="padding:8px 10px;">115.52 ± 4.2</td>
                       <td style="padding:8px 10px;">4.21</td>
                       <td style="padding:8px 10px;">0.28</td>
                       <td style="padding:8px 10px;">78.4%</td>
                     </tr>
-                    <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                    <tr style="border-bottom:1px solid #3f3f46;">
                       <td style="padding:8px 10px; font-weight:700; color:#38bdf8;">BFO Murni (Pipimon)</td>
                       <td style="padding:8px 10px;">118.74 ± 5.8</td>
                       <td style="padding:8px 10px;">5.84</td>
                       <td style="padding:8px 10px;">0.32</td>
                       <td style="padding:8px 10px;">74.2%</td>
                     </tr>
-                    <tr style="border-bottom:1px solid rgba(255,255,255,0.06); background:rgba(245,158,11,0.08);">
+                    <tr style="border-bottom:1px solid #3f3f46; background:rgba(245,158,11,0.08);">
                       <td style="padding:8px 10px; font-weight:700; color:#f59e0b;">Heuristic Seeded-BFO</td>
                       <td style="padding:8px 10px;">96.80 ± 2.1</td>
                       <td style="padding:8px 10px;">2.15</td>
@@ -6377,8 +6644,18 @@
                   </tbody>
                 </table>
               </div>
-              <div style="background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.3); border-radius:10px; padding:12px; font-size:12px; color:#a7f3d0; line-height:1.5;">
-                🎓 <b>Kesimpulan Utama:</b> Hibridisasi metaheuristik memetik terbukti statistically significant (p &lt; 0.001) dalam memecahkan masalah NP-Hard Cloud Task Scheduling. Selamat! Kamu kini memahami seluk-beluk optimasi cloud scheduling dari dasar matematis hingga implementasi hibrida tingkat lanjut!
+
+              <!-- Statistical Significance Certification Seal -->
+              <div style="background:#18181b; border:2px solid #10b981; border-radius:12px; padding:12px 18px; display:flex; align-items:center; gap:16px;">
+                <div style="font-size:32px;">🎖️</div>
+                <div style="flex:1;">
+                  <div style="font-size:12px; font-weight:800; color:#86efac; text-transform:uppercase;">
+                    UJI SIGNIFIKANSI STATISTIK: ANOVA &amp; FRIEDMAN TEST (p &lt; 0.001)
+                  </div>
+                  <div style="font-size:11.5px; color:#cbd5e1; line-height:1.45;">
+                    Hasil uji statistik membuktikan hipotesis nol (H0) ditolak secara meyakinkan. Peningkatan kinerja Sintesis Hibrida bukan karena kebetulan acak, melainkan keunggulan sinergi metaheuristik!
+                  </div>
+                </div>
               </div>
             </div>
           `
